@@ -1,0 +1,3 @@
+[console_scripts]
+goal_pub = robot_goal_pub.RobotGoalPublisher:main
+

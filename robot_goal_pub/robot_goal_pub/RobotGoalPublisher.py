@@ -14,11 +14,13 @@ from gazebo_msgs.msg import ModelStates
 from sensor_msgs.msg import Imu
 from robot_goal.msg import Goal
 
-from GoalProcessor import is_equal
-from GoalProcessor import arrive_at_goal
-from GoalProcessor import get_distance
+from robot_goal_pub.GoalProcessor import is_equal
+from robot_goal_pub.GoalProcessor import arrive_at_goal
+from robot_goal_pub.GoalProcessor import get_distance
 
-from PidController import PidController
+from robot_goal_pub.PidController import PidController
+
+import time
 
 MAX_LINEAR_VEL = 0.2
 MAX_ANGLE_VEL = 1.5
@@ -28,16 +30,6 @@ ANG_VEL_STEP_SIZE = 0.1
 
 POSITION_TOLERANCE = 1e-2
 HEADING_TOLERANCE = 1e-2
-
-def make_simple_profile(output, input, slop):
-    if input > output:
-        output = min(input, output + slop)
-    elif input < output:
-        output = max(input, output - slop)
-    else:
-        output = input
-
-    return output
 
 class RobotGoalPublisher(Node):
     def __init__(self):
@@ -73,7 +65,7 @@ class RobotGoalPublisher(Node):
 
         self.imu_subscription = self.create_subscription(
             Imu,
-            '/imu',
+            'turtlebot0/imu',
             self.imu_callback,
             10)
 
@@ -92,18 +84,18 @@ class RobotGoalPublisher(Node):
         self.goal_y = float("{:.3f}".format(msg.goal_y))
         self.received_goal = True
         # TODO: set PID for each robot
-        self.PID_position = PidController(Kp=,Ki=,Kd=)
-        self.PID_heading = PidController(Kp=,Ki=,Kd=)
+        self.PID_position = PidController(Kp=0.5,Ki=0.05,Kd=0.06)
+        self.PID_heading = PidController(Kp=0.6,Ki=0.05,Kd=0.06)
         #self.get_logger().info(f"I heard {self.goal_x}, {self.goal_y}")
 
     def position_listener_callback(self, msg):
         for i, name in enumerate(msg.name):
-            if name == "turtlebot0" and self.received_goal:
+            if name == 'turtlebot0':
                 position = msg.pose[i].position
                 self.current_x = float("{:.3f}".format(position.x))
                 self.current_y = float("{:.3f}".format(position.y))
-
                 self.received_position_updated = True
+                #self.get_logger().info("Received Position Update")
                 #self.get_logger().info(f"The robot position is x= '{position.x:.3f}', y='{position.y:.3f}'")
 
                 # target heading is at the momement relative to the x axis
@@ -118,6 +110,7 @@ class RobotGoalPublisher(Node):
         yaw = euler[2]  # radians
         self.current_yaw = float("{:.3f}".format(yaw))
         self.computed_current_yaw = True
+        #self.get_logger().info("Received IMU Update")
         #self.get_logger().info(f"Current yaw is {yaw}")
         #self.get_logger().info(f"Current yaw is {self.current_yaw}. Goal yaw is {self.goal_yaw}")
     
@@ -150,20 +143,31 @@ class RobotGoalPublisher(Node):
         return target_yaw
 
     def move_to_goal(self, linear_x_change, angular_z_change):
+        ## change
+        '''
+        target_angular_velocity = self.angular_z_velocity + angular_z_change
+        target_linear_velocity = self.linear_x_velocity + linear_x_change
+
+        if target_linear_velocity > MAX_LINEAR_VEL:
+            target_linear_velocity = MAX_LINEAR_VEL
         
-        if (linear_x_change > LIN_VEL_STEP_SIZE):
-            target_linear_velocity = self.linear_x_velocity + LIN_VEL_STEP_SIZE
+        if abs(target_angular_velocity) > MAX_ANGLE_VEL:
+            target_angular_velocity = target_angular_velocity / abs(target_angular_velocity) * MAX_ANGLE_VEL
+        '''
+        if abs(angular_z_change) > MAX_ANGLE_VEL:
+            target_angular_velocity = angular_z_change / abs(angular_z_change) * MAX_ANGLE_VEL
         else:
-            target_linear_velocity = self.linear_x_velocity + linear_x_change
+            target_angular_velocity = angular_z_change
 
-        if (abs(angular_z_change) > ANG_VEL_STEP_SIZE and angular_z_change > 0):
-            target_angular_velocity = self.angular_z_velocity + ANG_VEL_STEP_SIZE
-
-        elif (abs(angular_z_change) > ANG_VEL_STEP_SIZE and angular_z_change < 0):
-            target_angular_velocity = self.angular_z_velocity - ANG_VEL_STEP_SIZE
-
+        if abs(linear_x_change) > MAX_LINEAR_VEL:
+            target_linear_velocity = linear_x_change / abs(linear_x_change) * MAX_LINEAR_VEL
         else:
-            target_angular_velocity = self.angular_z_velocity + angular_z_change
+            target_linear_velocity = linear_x_change
+
+        #print(angular_z_change)
+        #print(target_angular_velocity)
+        #print(" ")
+        
 
         self.linear_x_velocity = target_linear_velocity
         self.angular_z_velocity = target_angular_velocity
@@ -178,32 +182,49 @@ class RobotGoalPublisher(Node):
         twist.angular.z = target_angular_velocity
 
         self.publisher_.publish(twist)
-        #rclpy.spin_once(self)
+        #self.get_logger().info("Turtlebot Moving")
 
         return
+    def stop_bot(self):
+        twist = Twist()
+        twist.linear.x = 0.0
+        twist.linear.y = 0.0
+        twist.linear.z = 0.0
+
+        twist.angular.x = 0.0
+        twist.angular.y = 0.0
+        twist.angular.z = 0.0
+
+        self.publisher_.publish(twist)
+        self.get_logger().info("Robot Arrived")
+
         
     def execute(self):
         rclpy.spin_once(self)
-        time.sleep(1)
         
         # Have not received goal
         while not self.received_goal:
             return
-        
         # Moving to goal
         while not arrive_at_goal(self.current_x, self.current_y, self.goal_x, self.goal_y):
             while not (self.computed_current_yaw and self.received_position_updated):
-                self.get_logger().info("Waiting for position and heading update")
+                #self.get_logger().info("Stuck here")
+                #self.get_logger().info("Waiting for position and heading update")
+                rclpy.spin_once(self)
 
             position_error = get_distance(self.current_x, self.current_y, self.goal_x, self.goal_y)
 
             target_yaw = self.calculate_target_yaw()
             yaw_error = target_yaw - self.current_yaw
 
+            #print(position_error)
+            print(yaw_error)
+
             ## get time
-            current_time = 1
+            current_time = time.time()
             linear_x_change = self.PID_position.compute(position_error, current_time)
             angular_z_change = self.PID_heading.compute(yaw_error, current_time)
+            #print(angular_z_change)
 
             # Move to goal
             self.move_to_goal(linear_x_change, angular_z_change)
@@ -211,6 +232,9 @@ class RobotGoalPublisher(Node):
             self.computed_current_yaw = False
             self.received_position_updated = False
             rclpy.spin_once(self)
+        
+        self.stop_bot()
+
         
 
             
