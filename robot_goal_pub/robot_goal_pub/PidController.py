@@ -14,10 +14,6 @@ class PidController():
 
 
     def compute(self, error, current_time):
-        #self.previous_error = 0 if self.previous_error is None else self.previous_error
-        #self.integral = 0 if self.integral is None else self.integral
-        #self.last_time = 0 if self.integral is None else self.last_time
-
         # PID terms
         P = self.Kp * error
 
