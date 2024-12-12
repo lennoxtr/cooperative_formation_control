@@ -6,7 +6,6 @@ from rclpy.node import Node
 from gazebo_msgs.msg import ModelStates
 from robot_goal.msg import Goal
 
-from robot_goal_pub.GoalProcessor import arrive_at_goal
 from robot_goal_pub.GoalProcessor import get_distance
 from robot_goal_pub.PidController import PidController
 
@@ -35,13 +34,17 @@ class RobotGoalPublisher(Node):
             self.position_listener_callback,
             10)
 
-        self.robot_controller_list = {}
+        self.robot_controller_map = {}
         for i in range(5):
             namespace = 'turtlebot' + str(i)
             if namespace == self.leader_namespace:
-                self.robot_controller_list[namespace] = RobotController(namespace, is_leader=True)
+                robot_controller = RobotController(namespace, is_leader=True)
+                rclpy.spin_once(robot_controller)
+                self.robot_controller_map[namespace] = robot_controller
             else:
-                self.robot_controller_list[namespace] = RobotController(namespace)
+                robot_controller = RobotController(namespace)
+                rclpy.spin_once(robot_controller)
+                self.robot_controller_map[namespace] = robot_controller
 
     def goal_listener_callback(self, msg):
         self.goal_x = float("{:.3f}".format(msg.goal_x))
@@ -57,17 +60,18 @@ class RobotGoalPublisher(Node):
             position = msg.pose[i].position
             current_x = float("{:.3f}".format(position.x))
             current_y = float("{:.3f}".format(position.y))
-            self.robot_controller_list[namespace].update_position(current_x, current_y)
+            self.robot_controller_map[namespace].update_position(current_x, current_y)
         self.received_position_updated = True
         
     def execute(self):
         rclpy.spin_once(self)
-        
         # Have not received goal
         while not self.received_goal:
             return
-        # Moving to goal
-        while not arrive_at_goal(self.current_x, self.current_y, self.goal_x, self.goal_y):
+        
+        # Robot formation moving to goal
+        leader_robot = self.robot_controller_map[self.leader_namespace]
+        while not leader_robot.arrived_at_goal():
             while not (self.computed_current_yaw and self.received_position_updated):
                 rclpy.spin_once(self)
 
@@ -91,7 +95,8 @@ class RobotGoalPublisher(Node):
             self.received_position_updated = False
             rclpy.spin_once(self)
         
-        self.stop_bot()
+        for robot_controller in self.robot_controller_map:
+            self.robot_controller_map[robot_controller].stop_bot()
 
 def main(args=None):
     rclpy.init(args=args)

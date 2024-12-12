@@ -10,6 +10,8 @@ from nav_msgs.msg import Odometry
 
 from robot_goal_pub.ControlProtocol import ControlProtocol
 
+from robot_goal_pub.GoalProcessor import arrived_at_goal
+
 MAX_LINEAR_VEL = 0.2
 MAX_ANGLE_VEL = 1.5
 
@@ -35,6 +37,8 @@ class RobotController(Node):
 
         self.linear_x_velocity = 0
         self.angular_z_velocity = 0
+
+        #TODO: create subscription for goal for leader bot
 
         self.imu_subscription = self.create_subscription(
             Imu,
@@ -66,6 +70,9 @@ class RobotController(Node):
             Twist,
             f'/{self.namespace}/cmd_vel',
             10)
+        
+        #TODO: create publisher to publish linear velocity to central controller
+        #TODO: create publisher to publish heading (yaw) to central controller
     
     def update_position(self, current_x, current_y):
         self.current_x = current_x
@@ -105,6 +112,14 @@ class RobotController(Node):
         linear_velocity = msg.twist.twist.linear
         self.linear_x = linear_velocity.x
         self.linear_y = linear_velocity.y
+
+    #TODO: Implement velocity matrix callback
+    def velocity_matrix_callback(self, msg):
+        return
+    
+    #TODO: Implement heading matrix callback
+    def heading_matrix_subscription(self, msg):
+        return
     
     def calculate_target_yaw(self):
         delta_x = self.goal_x - self.current_x
@@ -153,3 +168,6 @@ class RobotController(Node):
 
         self.velocity_publisher.publish(twist)
         self.get_logger().info(self.namespace + " stopped")
+    
+    def arrived_at_goal(self):
+        return arrived_at_goal(self.current_x, self.current_y, self.goal_x, self.goal_y)
