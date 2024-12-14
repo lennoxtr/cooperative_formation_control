@@ -8,8 +8,6 @@ from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Imu
 from nav_msgs.msg import Odometry
 
-from robot_goal_pub.ControlProtocol import ControlProtocol
-
 from robot_goal_pub.GoalProcessor import arrived_at_goal
 
 MAX_LINEAR_VEL = 0.2
@@ -23,7 +21,6 @@ class RobotController(Node):
         super().__init__('RobotController_' + namespace)
         self.namespace = namespace
         self.is_leader = is_leader
-        self.control_protocol = ControlProtocol()
 
         # change
         self.goal_x = 0.0
@@ -72,7 +69,17 @@ class RobotController(Node):
             10)
         
         #TODO: create publisher to publish linear velocity to central controller
+        #TODO: create new topic linear_vel
+        self.velocity_publisher = self.create_publisher(
+            Twist,
+            f'/{self.namespace}/linear_vel',
+            10)
         #TODO: create publisher to publish heading (yaw) to central controller
+        #TODO: create new topic heading
+        self.heading_publisher = self.create_publisher(
+            Twist,
+            f'/{self.namespace}/heading',
+            10)
     
     def update_position(self, current_x, current_y):
         self.current_x = current_x
@@ -107,11 +114,15 @@ class RobotController(Node):
         yaw = euler[2]  # radians
         self.current_yaw = float("{:.3f}".format(yaw))
         self.computed_current_yaw = True
+        # Publish yaw to central controller node
+        
     
     def odom_callback(self, msg):
         linear_velocity = msg.twist.twist.linear
         self.linear_x = linear_velocity.x
         self.linear_y = linear_velocity.y
+        # Publish linear velocity to central controller node
+
 
     #TODO: Implement velocity matrix callback
     def velocity_matrix_callback(self, msg):

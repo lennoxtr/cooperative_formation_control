@@ -10,29 +10,17 @@ from robot_goal_pub.GoalProcessor import get_distance
 from robot_goal_pub.PidController import PidController
 
 from robot_goal_pub.RobotController import RobotController
+from robot_goal_pub.ControlProtocol import ControlProtocol
 
 class RobotGoalPublisher(Node):
     def __init__(self):
         super().__init__('robot_goal_publisher')
+        self.num_of_robot  = 5
         self.received_goal = False
         self.computed_current_yaw = False
         self.received_position_updated = False
         self.leader_namespace = 'turtlebot0'
-
-        self.goal_x = 0
-        self.goal_y = 0
-
-        self.goal_subscription = self.create_subscription(
-            Goal,
-            '/robot_goal',
-            self.goal_listener_callback,
-            10)
-
-        self.position_subscription = self.create_subscription(
-            ModelStates,
-            '/gazebo/model_states',
-            self.position_listener_callback,
-            10)
+        self.control_protocol = ControlProtocol()
 
         self.robot_controller_map = {}
         for i in range(5):
@@ -45,6 +33,47 @@ class RobotGoalPublisher(Node):
                 robot_controller = RobotController(namespace)
                 rclpy.spin_once(robot_controller)
                 self.robot_controller_map[namespace] = robot_controller
+
+        #Goal
+        self.goal_x = 0
+        self.goal_y = 0
+
+        #Velocity mapping
+        self.velocity_mapping = []
+        for i in range(self.num_of_robot):
+            self.velocity_mapping.append(0.0)
+
+        #Heading mapping
+        self.heading_mapping = []
+        for i in range(self.num_of_robot):
+            self.velocity_mapping.append(0.0)
+
+        #Subscription
+        self.goal_subscription = self.create_subscription(
+            Goal,
+            '/robot_goal',
+            self.goal_listener_callback,
+            10)
+
+        self.position_subscription = self.create_subscription(
+            ModelStates,
+            '/gazebo/model_states',
+            self.position_listener_callback,
+            10)
+        
+        #TODO: implement velocity subscription
+        self.velocity_subscription = self.create_subscription(
+            ModelStates,
+            '/gazebo/model_states',
+            self.velocity_listener_callback,
+            10)
+
+        #TODO: implement heading subscription
+        self.heading_subscription = self.create_subscription(
+            ModelStates,
+            '/gazebo/model_states',
+            self.heading_listener_callback,
+            10)
 
     def goal_listener_callback(self, msg):
         self.goal_x = float("{:.3f}".format(msg.goal_x))
@@ -62,6 +91,18 @@ class RobotGoalPublisher(Node):
             current_y = float("{:.3f}".format(position.y))
             self.robot_controller_map[namespace].update_position(current_x, current_y)
         self.received_position_updated = True
+    
+    def velocity_listener_callback(self, msg):
+        namespace = msg.namespace
+        index = int(namespace[-1])
+        self.velocity_mapping[index] = msg.linear_vel
+        return
+    
+    def heading_listener_callback(self, msg):
+        namespace = msg.namespace
+        index = int(namespace[-1])
+        self.heading_mapping[index] = msg.yaw
+        return
         
     def execute(self):
         rclpy.spin_once(self)
