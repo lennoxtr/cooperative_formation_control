@@ -5,6 +5,8 @@ from rclpy.node import Node
 
 from gazebo_msgs.msg import ModelStates
 from robot_goal.msg import Goal
+from velocity_msg.msg import Velocity
+from heading_msg.msg import Heading
 
 from robot_goal_pub.GoalProcessor import get_distance
 from robot_goal_pub.PidController import PidController
@@ -23,14 +25,14 @@ class RobotGoalPublisher(Node):
         self.control_protocol = ControlProtocol()
 
         self.robot_controller_map = {}
-        for i in range(5):
-            namespace = 'turtlebot' + str(i)
+        for robot_id in range(5):
+            namespace = 'turtlebot' + str(robot_id)
             if namespace == self.leader_namespace:
-                robot_controller = RobotController(namespace, is_leader=True)
+                robot_controller = RobotController(robot_id, is_leader=True)
                 rclpy.spin_once(robot_controller)
                 self.robot_controller_map[namespace] = robot_controller
             else:
-                robot_controller = RobotController(namespace)
+                robot_controller = RobotController(robot_id)
                 rclpy.spin_once(robot_controller)
                 self.robot_controller_map[namespace] = robot_controller
 
@@ -61,17 +63,15 @@ class RobotGoalPublisher(Node):
             self.position_listener_callback,
             10)
         
-        #TODO: implement velocity subscription
         self.velocity_subscription = self.create_subscription(
-            ModelStates,
-            '/gazebo/model_states',
+            Velocity,
+            '/robot_linear_vel',
             self.velocity_listener_callback,
             10)
 
-        #TODO: implement heading subscription
         self.heading_subscription = self.create_subscription(
-            ModelStates,
-            '/gazebo/model_states',
+            Heading,
+            '/robot_heading',
             self.heading_listener_callback,
             10)
 
@@ -92,12 +92,14 @@ class RobotGoalPublisher(Node):
             self.robot_controller_map[namespace].update_position(current_x, current_y)
         self.received_position_updated = True
     
+    #TODO: check
     def velocity_listener_callback(self, msg):
         namespace = msg.namespace
         index = int(namespace[-1])
         self.velocity_mapping[index] = msg.linear_vel
         return
     
+    #TODO: check
     def heading_listener_callback(self, msg):
         namespace = msg.namespace
         index = int(namespace[-1])

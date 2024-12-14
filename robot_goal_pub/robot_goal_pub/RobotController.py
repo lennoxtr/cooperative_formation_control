@@ -7,6 +7,8 @@ import numpy as np
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Imu
 from nav_msgs.msg import Odometry
+from heading_msg.msg import Heading
+from velocity_msg.msg import Velocity
 
 from robot_goal_pub.GoalProcessor import arrived_at_goal
 
@@ -17,9 +19,10 @@ LIN_VEL_STEP_SIZE = 0.01
 ANG_VEL_STEP_SIZE = 0.1
 
 class RobotController(Node):
-    def __init__(self, namespace, is_leader=False):
+    def __init__(self, robot_id, is_leader=False):
         super().__init__('RobotController_' + namespace)
-        self.namespace = namespace
+        self.robot_id = robot_id
+        self.namespace = "turtlebot" + str(robot_id)
         self.is_leader = is_leader
 
         # change
@@ -48,37 +51,20 @@ class RobotController(Node):
             f'/{self.namespace}/odom',
             self.odom_callback,
             10)
-        
-        #TODO: create custom message for velocity matrix
-        self.velocity_matrix_subscription = self.create_subscription(
-            Odometry,
-            f'/{self.namespace}/odom',
-            self.velocity_matrix_callback,
-            10)
-        
-        #TODO: create custom message for yaw matrix
-        self.heading_matrix_subscription = self.create_subscription(
-            Odometry,
-            f'/{self.namespace}/odom',
-            self.heading_matrix_callback,
-            10)
 
         self.velocity_publisher = self.create_publisher(
             Twist,
             f'/{self.namespace}/cmd_vel',
             10)
         
-        #TODO: create publisher to publish linear velocity to central controller
-        #TODO: create new topic linear_vel
         self.velocity_publisher = self.create_publisher(
-            Twist,
-            f'/{self.namespace}/linear_vel',
+            Velocity,
+            '/robot_linear_vel',
             10)
-        #TODO: create publisher to publish heading (yaw) to central controller
-        #TODO: create new topic heading
+        
         self.heading_publisher = self.create_publisher(
-            Twist,
-            f'/{self.namespace}/heading',
+            Heading,
+            '/robot_heading',
             10)
     
     def update_position(self, current_x, current_y):
@@ -115,6 +101,10 @@ class RobotController(Node):
         self.current_yaw = float("{:.3f}".format(yaw))
         self.computed_current_yaw = True
         # Publish yaw to central controller node
+        msg = Heading()
+        msg.robot_id = self.robot_id
+        msg.heading = self.current_yaw
+        self.heading_publisher.publish(msg)
         
     
     def odom_callback(self, msg):
@@ -122,15 +112,11 @@ class RobotController(Node):
         self.linear_x = linear_velocity.x
         self.linear_y = linear_velocity.y
         # Publish linear velocity to central controller node
-
-
-    #TODO: Implement velocity matrix callback
-    def velocity_matrix_callback(self, msg):
-        return
-    
-    #TODO: Implement heading matrix callback
-    def heading_matrix_subscription(self, msg):
-        return
+        msg = Velocity()
+        msg.robot_id = self.robot_id
+        msg.linear_x = self.linear_x
+        msg.linear_y = self.linear_y
+        self.velocity_publisher.publish(msg)
     
     def calculate_target_yaw(self):
         delta_x = self.goal_x - self.current_x
