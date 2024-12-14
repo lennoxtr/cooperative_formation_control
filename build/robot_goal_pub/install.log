@@ -1,9 +1,13 @@
 /home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/python3.10/site-packages/robot_goal_pub/GoalProcessor.py
 /home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/python3.10/site-packages/robot_goal_pub/__init__.py
+/home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/python3.10/site-packages/robot_goal_pub/ControlProtocol.py
+/home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/python3.10/site-packages/robot_goal_pub/RobotController.py
 /home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/python3.10/site-packages/robot_goal_pub/PidController.py
 /home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/python3.10/site-packages/robot_goal_pub/RobotGoalPublisher.py
 /home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/python3.10/site-packages/robot_goal_pub/__pycache__/GoalProcessor.cpython-310.pyc
 /home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/python3.10/site-packages/robot_goal_pub/__pycache__/__init__.cpython-310.pyc
+/home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/python3.10/site-packages/robot_goal_pub/__pycache__/ControlProtocol.cpython-310.pyc
+/home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/python3.10/site-packages/robot_goal_pub/__pycache__/RobotController.cpython-310.pyc
 /home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/python3.10/site-packages/robot_goal_pub/__pycache__/PidController.cpython-310.pyc
 /home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/python3.10/site-packages/robot_goal_pub/__pycache__/RobotGoalPublisher.cpython-310.pyc
 /home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/share/ament_index/resource_index/packages/robot_goal_pub

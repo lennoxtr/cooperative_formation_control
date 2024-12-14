@@ -1,0 +1,39 @@
+[0.579s] Invoking command in '/home/lennoxtr/turtlebot3_ws/src/robot_goal_pub': PYTHONPATH=/home/lennoxtr/turtlebot3_ws/src/build/robot_goal_pub/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../build/robot_goal_pub build --build-base /home/lennoxtr/turtlebot3_ws/src/build/robot_goal_pub/build install --record /home/lennoxtr/turtlebot3_ws/src/build/robot_goal_pub/install.log --single-version-externally-managed install_data
+[0.749s] running egg_info
+[0.749s] writing ../build/robot_goal_pub/robot_goal_pub.egg-info/PKG-INFO
+[0.749s] writing dependency_links to ../build/robot_goal_pub/robot_goal_pub.egg-info/dependency_links.txt
+[0.749s] writing entry points to ../build/robot_goal_pub/robot_goal_pub.egg-info/entry_points.txt
+[0.749s] writing requirements to ../build/robot_goal_pub/robot_goal_pub.egg-info/requires.txt
+[0.749s] writing top-level names to ../build/robot_goal_pub/robot_goal_pub.egg-info/top_level.txt
+[0.751s] reading manifest file '../build/robot_goal_pub/robot_goal_pub.egg-info/SOURCES.txt'
+[0.751s] adding license file 'LICENSE'
+[0.751s] writing manifest file '../build/robot_goal_pub/robot_goal_pub.egg-info/SOURCES.txt'
+[0.752s] running build
+[0.752s] running build_py
+[0.752s] copying robot_goal_pub/GoalProcessor.py -> /home/lennoxtr/turtlebot3_ws/src/build/robot_goal_pub/build/lib/robot_goal_pub
+[0.752s] copying robot_goal_pub/ControlProtocol.py -> /home/lennoxtr/turtlebot3_ws/src/build/robot_goal_pub/build/lib/robot_goal_pub
+[0.752s] copying robot_goal_pub/RobotController.py -> /home/lennoxtr/turtlebot3_ws/src/build/robot_goal_pub/build/lib/robot_goal_pub
+[0.752s] copying robot_goal_pub/PidController.py -> /home/lennoxtr/turtlebot3_ws/src/build/robot_goal_pub/build/lib/robot_goal_pub
+[0.752s] copying robot_goal_pub/RobotGoalPublisher.py -> /home/lennoxtr/turtlebot3_ws/src/build/robot_goal_pub/build/lib/robot_goal_pub
+[0.752s] running install
+[0.753s] running install_lib
+[0.753s] copying /home/lennoxtr/turtlebot3_ws/src/build/robot_goal_pub/build/lib/robot_goal_pub/GoalProcessor.py -> /home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/python3.10/site-packages/robot_goal_pub
+[0.753s] copying /home/lennoxtr/turtlebot3_ws/src/build/robot_goal_pub/build/lib/robot_goal_pub/ControlProtocol.py -> /home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/python3.10/site-packages/robot_goal_pub
+[0.753s] copying /home/lennoxtr/turtlebot3_ws/src/build/robot_goal_pub/build/lib/robot_goal_pub/RobotController.py -> /home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/python3.10/site-packages/robot_goal_pub
+[0.753s] copying /home/lennoxtr/turtlebot3_ws/src/build/robot_goal_pub/build/lib/robot_goal_pub/PidController.py -> /home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/python3.10/site-packages/robot_goal_pub
+[0.753s] copying /home/lennoxtr/turtlebot3_ws/src/build/robot_goal_pub/build/lib/robot_goal_pub/RobotGoalPublisher.py -> /home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/python3.10/site-packages/robot_goal_pub
+[0.754s] byte-compiling /home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/python3.10/site-packages/robot_goal_pub/GoalProcessor.py to GoalProcessor.cpython-310.pyc
+[0.754s] byte-compiling /home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/python3.10/site-packages/robot_goal_pub/ControlProtocol.py to ControlProtocol.cpython-310.pyc
+[0.754s] byte-compiling /home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/python3.10/site-packages/robot_goal_pub/RobotController.py to RobotController.cpython-310.pyc
+[0.754s] Sorry: IndentationError: expected an indented block after 'if' statement on line 29 (ControlProtocol.py, line 31)
+[0.755s] byte-compiling /home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/python3.10/site-packages/robot_goal_pub/PidController.py to PidController.cpython-310.pyc
+[0.755s] byte-compiling /home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/python3.10/site-packages/robot_goal_pub/RobotGoalPublisher.py to RobotGoalPublisher.cpython-310.pyc
+[0.756s] running install_data
+[0.756s] copying package.xml -> /home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/share/robot_goal_pub
+[0.756s] running install_egg_info
+[0.758s] removing '/home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/python3.10/site-packages/robot_goal_pub-0.0.0-py3.10.egg-info' (and everything under it)
+[0.758s] Copying ../build/robot_goal_pub/robot_goal_pub.egg-info to /home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/python3.10/site-packages/robot_goal_pub-0.0.0-py3.10.egg-info
+[0.759s] running install_scripts
+[0.773s] Installing goal_pub script to /home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/robot_goal_pub
+[0.773s] writing list of installed files to '/home/lennoxtr/turtlebot3_ws/src/build/robot_goal_pub/install.log'
+[0.793s] Invoked command in '/home/lennoxtr/turtlebot3_ws/src/robot_goal_pub' returned '0': PYTHONPATH=/home/lennoxtr/turtlebot3_ws/src/build/robot_goal_pub/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../build/robot_goal_pub build --build-base /home/lennoxtr/turtlebot3_ws/src/build/robot_goal_pub/build install --record /home/lennoxtr/turtlebot3_ws/src/build/robot_goal_pub/install.log --single-version-externally-managed install_data

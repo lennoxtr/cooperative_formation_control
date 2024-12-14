@@ -1,0 +1,6 @@
+Invoking command in '/home/lennoxtr/turtlebot3_ws/src/build/heading_msg': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake /home/lennoxtr/turtlebot3_ws/src/heading_msg -DCMAKE_INSTALL_PREFIX=/home/lennoxtr/turtlebot3_ws/src/install/heading_msg
+Invoked command in '/home/lennoxtr/turtlebot3_ws/src/build/heading_msg' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake /home/lennoxtr/turtlebot3_ws/src/heading_msg -DCMAKE_INSTALL_PREFIX=/home/lennoxtr/turtlebot3_ws/src/install/heading_msg
+Invoking command in '/home/lennoxtr/turtlebot3_ws/src/build/heading_msg': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/lennoxtr/turtlebot3_ws/src/build/heading_msg -- -j12 -l12
+Invoked command in '/home/lennoxtr/turtlebot3_ws/src/build/heading_msg' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/lennoxtr/turtlebot3_ws/src/build/heading_msg -- -j12 -l12
+Invoking command in '/home/lennoxtr/turtlebot3_ws/src/build/heading_msg': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/lennoxtr/turtlebot3_ws/src/build/heading_msg
+Invoked command in '/home/lennoxtr/turtlebot3_ws/src/build/heading_msg' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/lennoxtr/turtlebot3_ws/src/build/heading_msg

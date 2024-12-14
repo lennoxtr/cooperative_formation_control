@@ -1,3 +1,5 @@
+import time
+
 class PidController():
     def __init__(self, Kp, Ki, Kd):
         #PID params
@@ -6,17 +8,12 @@ class PidController():
         self.Kd = Kd
         
         #PID values
-        self.previous_error = None
-        self.integral = None
-        self.last_time = None
+        self.previous_error = 0
+        self.integral = 0
+        self.last_time = time.time()
 
 
     def compute(self, error, current_time):
-        # check for None
-        self.previous_error = 0 if self.previous_error is None else self.previous_error
-        self.integral = 0 if self.integral is None else self.integral
-        self.last_time = 0 if self.integral is None else self.last_time
-
         # PID terms
         P = self.Kp * error
 

@@ -1,0 +1,14 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from heading_msg/msg/Heading.msg
+// generated code does not contain a copyright notice
+
+
+module heading_msg {
+  module msg {
+    struct Heading {
+      int32 robot_id;
+
+      float heading;
+    };
+  };
+};

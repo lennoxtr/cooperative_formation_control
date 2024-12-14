@@ -10,8 +10,10 @@ setup.py
 ../build/robot_goal_pub/robot_goal_pub.egg-info/top_level.txt
 ../build/robot_goal_pub/robot_goal_pub.egg-info/zip-safe
 resource/robot_goal_pub
+robot_goal_pub/ControlProtocol.py
 robot_goal_pub/GoalProcessor.py
 robot_goal_pub/PidController.py
+robot_goal_pub/RobotController.py
 robot_goal_pub/RobotGoalPublisher.py
 robot_goal_pub/__init__.py
 test/test_copyright.py

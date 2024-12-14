@@ -1,0 +1,6 @@
+{
+  "package_name": "velocity_msg",
+  "non_idl_tuples": [
+    "/home/lennoxtr/turtlebot3_ws/src/velocity_msg:msg/Velocity.msg"
+  ]
+}

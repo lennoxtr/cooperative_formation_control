@@ -1,0 +1,142 @@
+[0.019s] Invoking command in '/home/lennoxtr/turtlebot3_ws/src/build/robot_goal': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub:/home/lennoxtr/turtlebot3_ws/src/install/goal_input:/opt/ros/humble /usr/bin/cmake --build /home/lennoxtr/turtlebot3_ws/src/build/robot_goal -- -j12 -l12
+[0.065s] [  3%] Built target robot_goal__cpp
+[0.065s] [ 12%] Built target robot_goal__rosidl_generator_c
+[0.077s] [ 12%] Built target ament_cmake_python_copy_robot_goal
+[0.095s] [ 22%] Built target robot_goal__rosidl_typesupport_cpp
+[0.101s] [ 32%] Built target robot_goal__rosidl_typesupport_fastrtps_cpp
+[0.113s] [ 41%] Built target robot_goal__rosidl_typesupport_introspection_cpp
+[0.126s] [ 61%] Built target robot_goal__rosidl_typesupport_introspection_c
+[0.126s] [ 61%] Built target robot_goal__rosidl_typesupport_fastrtps_c
+[0.131s] [ 70%] Built target robot_goal__rosidl_typesupport_c
+[0.153s] [ 70%] Built target robot_goal
+[0.170s] [ 74%] Built target robot_goal__py
+[0.193s] [ 80%] Built target robot_goal__rosidl_generator_py
+[0.222s] [ 87%] Built target robot_goal__rosidl_typesupport_fastrtps_c__pyext
+[0.225s] [ 93%] Built target robot_goal__rosidl_typesupport_introspection_c__pyext
+[0.231s] [100%] Built target robot_goal__rosidl_typesupport_c__pyext
+[0.369s] running egg_info
+[0.370s] writing robot_goal.egg-info/PKG-INFO
+[0.370s] writing dependency_links to robot_goal.egg-info/dependency_links.txt
+[0.370s] writing top-level names to robot_goal.egg-info/top_level.txt
+[0.371s] reading manifest file 'robot_goal.egg-info/SOURCES.txt'
+[0.372s] writing manifest file 'robot_goal.egg-info/SOURCES.txt'
+[0.395s] [100%] Built target ament_cmake_python_build_robot_goal_egg
+[0.405s] Invoked command in '/home/lennoxtr/turtlebot3_ws/src/build/robot_goal' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub:/home/lennoxtr/turtlebot3_ws/src/install/goal_input:/opt/ros/humble /usr/bin/cmake --build /home/lennoxtr/turtlebot3_ws/src/build/robot_goal -- -j12 -l12
+[0.456s] Invoking command in '/home/lennoxtr/turtlebot3_ws/src/build/robot_goal': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub:/home/lennoxtr/turtlebot3_ws/src/install/goal_input:/opt/ros/humble /usr/bin/cmake --install /home/lennoxtr/turtlebot3_ws/src/build/robot_goal
+[0.462s] -- Install configuration: ""
+[0.462s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/ament_index/resource_index/rosidl_interfaces/robot_goal
+[0.462s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal
+[0.462s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg
+[0.463s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg/goal.h
+[0.463s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg/detail
+[0.463s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg/detail/goal__type_support.h
+[0.463s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg/detail/goal__functions.c
+[0.463s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg/detail/goal__functions.h
+[0.463s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg/detail/goal__struct.h
+[0.463s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg/rosidl_generator_c__visibility_control.h
+[0.463s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/environment/library_path.sh
+[0.463s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/environment/library_path.dsv
+[0.463s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/lib/librobot_goal__rosidl_generator_c.so
+[0.463s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal
+[0.464s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg
+[0.464s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg/rosidl_typesupport_fastrtps_c__visibility_control.h
+[0.464s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg/detail
+[0.464s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg/detail/goal__rosidl_typesupport_fastrtps_c.h
+[0.464s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/lib/librobot_goal__rosidl_typesupport_fastrtps_c.so
+[0.464s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal
+[0.464s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg
+[0.464s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg/rosidl_typesupport_introspection_c__visibility_control.h
+[0.464s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg/detail
+[0.465s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg/detail/goal__type_support.c
+[0.465s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg/detail/goal__rosidl_typesupport_introspection_c.h
+[0.465s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/lib/librobot_goal__rosidl_typesupport_introspection_c.so
+[0.466s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/lib/librobot_goal__rosidl_typesupport_c.so
+[0.466s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal
+[0.466s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg
+[0.466s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg/goal.hpp
+[0.466s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg/detail
+[0.466s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg/detail/goal__struct.hpp
+[0.466s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg/detail/goal__traits.hpp
+[0.466s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg/detail/goal__builder.hpp
+[0.466s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal
+[0.466s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg
+[0.466s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg/rosidl_typesupport_fastrtps_cpp__visibility_control.h
+[0.467s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg/detail
+[0.467s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg/detail/goal__rosidl_typesupport_fastrtps_cpp.hpp
+[0.467s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg/detail/dds_fastrtps
+[0.467s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/lib/librobot_goal__rosidl_typesupport_fastrtps_cpp.so
+[0.467s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal
+[0.467s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg
+[0.467s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg/detail
+[0.467s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg/detail/goal__rosidl_typesupport_introspection_cpp.hpp
+[0.467s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/include/robot_goal/robot_goal/msg/detail/goal__type_support.cpp
+[0.467s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/lib/librobot_goal__rosidl_typesupport_introspection_cpp.so
+[0.467s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/lib/librobot_goal__rosidl_typesupport_cpp.so
+[0.467s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/environment/pythonpath.sh
+[0.467s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/environment/pythonpath.dsv
+[0.467s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/local/lib/python3.10/dist-packages/robot_goal-0.0.0-py3.10.egg-info
+[0.467s] -- Installing: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/local/lib/python3.10/dist-packages/robot_goal-0.0.0-py3.10.egg-info/dependency_links.txt
+[0.467s] -- Installing: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/local/lib/python3.10/dist-packages/robot_goal-0.0.0-py3.10.egg-info/SOURCES.txt
+[0.467s] -- Installing: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/local/lib/python3.10/dist-packages/robot_goal-0.0.0-py3.10.egg-info/PKG-INFO
+[0.468s] -- Installing: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/local/lib/python3.10/dist-packages/robot_goal-0.0.0-py3.10.egg-info/top_level.txt
+[0.468s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/local/lib/python3.10/dist-packages/robot_goal
+[0.468s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/local/lib/python3.10/dist-packages/robot_goal/robot_goal_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so
+[0.468s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/local/lib/python3.10/dist-packages/robot_goal/_robot_goal_s.ep.rosidl_typesupport_introspection_c.c
+[0.468s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/local/lib/python3.10/dist-packages/robot_goal/__init__.py
+[0.468s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/local/lib/python3.10/dist-packages/robot_goal/robot_goal_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so
+[0.468s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/local/lib/python3.10/dist-packages/robot_goal/librobot_goal__rosidl_generator_py.so
+[0.468s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/local/lib/python3.10/dist-packages/robot_goal/msg
+[0.468s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/local/lib/python3.10/dist-packages/robot_goal/msg/_goal_s.c
+[0.468s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/local/lib/python3.10/dist-packages/robot_goal/msg/__init__.py
+[0.468s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/local/lib/python3.10/dist-packages/robot_goal/msg/_goal.py
+[0.468s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/local/lib/python3.10/dist-packages/robot_goal/_robot_goal_s.ep.rosidl_typesupport_fastrtps_c.c
+[0.468s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/local/lib/python3.10/dist-packages/robot_goal/_robot_goal_s.ep.rosidl_typesupport_c.c
+[0.468s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/local/lib/python3.10/dist-packages/robot_goal/robot_goal_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so
+[0.491s] Listing '/home/lennoxtr/turtlebot3_ws/src/install/robot_goal/local/lib/python3.10/dist-packages/robot_goal'...
+[0.492s] Listing '/home/lennoxtr/turtlebot3_ws/src/install/robot_goal/local/lib/python3.10/dist-packages/robot_goal/msg'...
+[0.495s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/local/lib/python3.10/dist-packages/robot_goal/robot_goal_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so
+[0.495s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/local/lib/python3.10/dist-packages/robot_goal/robot_goal_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so
+[0.496s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/local/lib/python3.10/dist-packages/robot_goal/robot_goal_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so
+[0.496s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/lib/librobot_goal__rosidl_generator_py.so
+[0.496s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/msg/Goal.idl
+[0.496s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/msg/Goal.msg
+[0.496s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/ament_index/resource_index/package_run_dependencies/robot_goal
+[0.496s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/ament_index/resource_index/parent_prefix_path/robot_goal
+[0.496s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/environment/ament_prefix_path.sh
+[0.496s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/environment/ament_prefix_path.dsv
+[0.496s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/environment/path.sh
+[0.496s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/environment/path.dsv
+[0.497s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/local_setup.bash
+[0.497s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/local_setup.sh
+[0.497s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/local_setup.zsh
+[0.497s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/local_setup.dsv
+[0.497s] -- Installing: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/package.dsv
+[0.497s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/ament_index/resource_index/packages/robot_goal
+[0.497s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/cmake/export_robot_goal__rosidl_generator_cExport.cmake
+[0.497s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/cmake/export_robot_goal__rosidl_generator_cExport-noconfig.cmake
+[0.497s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/cmake/export_robot_goal__rosidl_typesupport_fastrtps_cExport.cmake
+[0.497s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/cmake/export_robot_goal__rosidl_typesupport_fastrtps_cExport-noconfig.cmake
+[0.498s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/cmake/robot_goal__rosidl_typesupport_introspection_cExport.cmake
+[0.498s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/cmake/robot_goal__rosidl_typesupport_introspection_cExport-noconfig.cmake
+[0.498s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/cmake/robot_goal__rosidl_typesupport_cExport.cmake
+[0.498s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/cmake/robot_goal__rosidl_typesupport_cExport-noconfig.cmake
+[0.498s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/cmake/export_robot_goal__rosidl_generator_cppExport.cmake
+[0.498s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/cmake/export_robot_goal__rosidl_typesupport_fastrtps_cppExport.cmake
+[0.498s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/cmake/export_robot_goal__rosidl_typesupport_fastrtps_cppExport-noconfig.cmake
+[0.498s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/cmake/robot_goal__rosidl_typesupport_introspection_cppExport.cmake
+[0.498s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/cmake/robot_goal__rosidl_typesupport_introspection_cppExport-noconfig.cmake
+[0.498s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/cmake/robot_goal__rosidl_typesupport_cppExport.cmake
+[0.498s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/cmake/robot_goal__rosidl_typesupport_cppExport-noconfig.cmake
+[0.498s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/cmake/export_robot_goal__rosidl_generator_pyExport.cmake
+[0.498s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/cmake/export_robot_goal__rosidl_generator_pyExport-noconfig.cmake
+[0.499s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/cmake/rosidl_cmake-extras.cmake
+[0.499s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/cmake/ament_cmake_export_include_directories-extras.cmake
+[0.499s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/cmake/ament_cmake_export_libraries-extras.cmake
+[0.499s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/cmake/ament_cmake_export_targets-extras.cmake
+[0.499s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/cmake/rosidl_cmake_export_typesupport_targets-extras.cmake
+[0.499s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/cmake/ament_cmake_export_dependencies-extras.cmake
+[0.499s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/cmake/rosidl_cmake_export_typesupport_libraries-extras.cmake
+[0.499s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/cmake/robot_goalConfig.cmake
+[0.499s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/cmake/robot_goalConfig-version.cmake
+[0.499s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/robot_goal/share/robot_goal/package.xml
+[0.501s] Invoked command in '/home/lennoxtr/turtlebot3_ws/src/build/robot_goal' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub:/home/lennoxtr/turtlebot3_ws/src/install/goal_input:/opt/ros/humble /usr/bin/cmake --install /home/lennoxtr/turtlebot3_ws/src/build/robot_goal

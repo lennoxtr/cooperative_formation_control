@@ -1,0 +1,142 @@
+[0.016s] Invoking command in '/home/lennoxtr/turtlebot3_ws/src/build/heading_msg': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub:/home/lennoxtr/turtlebot3_ws/src/install/goal_input:/opt/ros/humble /usr/bin/cmake --build /home/lennoxtr/turtlebot3_ws/src/build/heading_msg -- -j12 -l12
+[0.058s] [  3%] Built target heading_msg__cpp
+[0.062s] [ 12%] Built target heading_msg__rosidl_generator_c
+[0.070s] [ 12%] Built target ament_cmake_python_copy_heading_msg
+[0.110s] [ 22%] Built target heading_msg__rosidl_typesupport_fastrtps_cpp
+[0.110s] [ 32%] Built target heading_msg__rosidl_typesupport_introspection_cpp
+[0.114s] [ 41%] Built target heading_msg__rosidl_typesupport_fastrtps_c
+[0.115s] [ 58%] Built target heading_msg__rosidl_typesupport_introspection_c
+[0.115s] [ 61%] Built target heading_msg__rosidl_typesupport_cpp
+[0.129s] [ 70%] Built target heading_msg__rosidl_typesupport_c
+[0.149s] [ 70%] Built target heading_msg
+[0.166s] [ 74%] Built target heading_msg__py
+[0.189s] [ 80%] Built target heading_msg__rosidl_generator_py
+[0.213s] [ 87%] Built target heading_msg__rosidl_typesupport_fastrtps_c__pyext
+[0.215s] [100%] Built target heading_msg__rosidl_typesupport_c__pyext
+[0.215s] [100%] Built target heading_msg__rosidl_typesupport_introspection_c__pyext
+[0.322s] running egg_info
+[0.323s] writing heading_msg.egg-info/PKG-INFO
+[0.323s] writing dependency_links to heading_msg.egg-info/dependency_links.txt
+[0.323s] writing top-level names to heading_msg.egg-info/top_level.txt
+[0.325s] reading manifest file 'heading_msg.egg-info/SOURCES.txt'
+[0.326s] writing manifest file 'heading_msg.egg-info/SOURCES.txt'
+[0.348s] [100%] Built target ament_cmake_python_build_heading_msg_egg
+[0.355s] Invoked command in '/home/lennoxtr/turtlebot3_ws/src/build/heading_msg' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub:/home/lennoxtr/turtlebot3_ws/src/install/goal_input:/opt/ros/humble /usr/bin/cmake --build /home/lennoxtr/turtlebot3_ws/src/build/heading_msg -- -j12 -l12
+[0.396s] Invoking command in '/home/lennoxtr/turtlebot3_ws/src/build/heading_msg': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub:/home/lennoxtr/turtlebot3_ws/src/install/goal_input:/opt/ros/humble /usr/bin/cmake --install /home/lennoxtr/turtlebot3_ws/src/build/heading_msg
+[0.402s] -- Install configuration: ""
+[0.402s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/ament_index/resource_index/rosidl_interfaces/heading_msg
+[0.402s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg
+[0.402s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg
+[0.402s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg/heading.h
+[0.402s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg/detail
+[0.402s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg/detail/heading__functions.c
+[0.402s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg/detail/heading__type_support.h
+[0.402s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg/detail/heading__struct.h
+[0.402s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg/detail/heading__functions.h
+[0.403s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg/rosidl_generator_c__visibility_control.h
+[0.403s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/environment/library_path.sh
+[0.403s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/environment/library_path.dsv
+[0.403s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/lib/libheading_msg__rosidl_generator_c.so
+[0.403s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg
+[0.403s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg
+[0.403s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg/rosidl_typesupport_fastrtps_c__visibility_control.h
+[0.403s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg/detail
+[0.403s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg/detail/heading__rosidl_typesupport_fastrtps_c.h
+[0.403s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/lib/libheading_msg__rosidl_typesupport_fastrtps_c.so
+[0.403s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg
+[0.403s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg
+[0.403s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg/rosidl_typesupport_introspection_c__visibility_control.h
+[0.403s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg/detail
+[0.403s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg/detail/heading__type_support.c
+[0.403s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg/detail/heading__rosidl_typesupport_introspection_c.h
+[0.404s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/lib/libheading_msg__rosidl_typesupport_introspection_c.so
+[0.404s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/lib/libheading_msg__rosidl_typesupport_c.so
+[0.404s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg
+[0.404s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg
+[0.404s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg/detail
+[0.404s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg/detail/heading__builder.hpp
+[0.404s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg/detail/heading__struct.hpp
+[0.404s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg/detail/heading__traits.hpp
+[0.404s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg/heading.hpp
+[0.404s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg
+[0.404s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg
+[0.404s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg/rosidl_typesupport_fastrtps_cpp__visibility_control.h
+[0.405s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg/detail
+[0.405s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg/detail/dds_fastrtps
+[0.405s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg/detail/heading__rosidl_typesupport_fastrtps_cpp.hpp
+[0.405s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/lib/libheading_msg__rosidl_typesupport_fastrtps_cpp.so
+[0.405s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg
+[0.405s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg
+[0.405s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg/detail
+[0.405s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg/detail/heading__type_support.cpp
+[0.405s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/include/heading_msg/heading_msg/msg/detail/heading__rosidl_typesupport_introspection_cpp.hpp
+[0.406s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/lib/libheading_msg__rosidl_typesupport_introspection_cpp.so
+[0.406s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/lib/libheading_msg__rosidl_typesupport_cpp.so
+[0.407s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/environment/pythonpath.sh
+[0.407s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/environment/pythonpath.dsv
+[0.407s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/local/lib/python3.10/dist-packages/heading_msg-0.0.0-py3.10.egg-info
+[0.407s] -- Installing: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/local/lib/python3.10/dist-packages/heading_msg-0.0.0-py3.10.egg-info/dependency_links.txt
+[0.407s] -- Installing: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/local/lib/python3.10/dist-packages/heading_msg-0.0.0-py3.10.egg-info/SOURCES.txt
+[0.407s] -- Installing: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/local/lib/python3.10/dist-packages/heading_msg-0.0.0-py3.10.egg-info/PKG-INFO
+[0.407s] -- Installing: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/local/lib/python3.10/dist-packages/heading_msg-0.0.0-py3.10.egg-info/top_level.txt
+[0.407s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/local/lib/python3.10/dist-packages/heading_msg
+[0.407s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/local/lib/python3.10/dist-packages/heading_msg/__init__.py
+[0.407s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/local/lib/python3.10/dist-packages/heading_msg/heading_msg_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so
+[0.407s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/local/lib/python3.10/dist-packages/heading_msg/_heading_msg_s.ep.rosidl_typesupport_fastrtps_c.c
+[0.407s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/local/lib/python3.10/dist-packages/heading_msg/msg
+[0.407s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/local/lib/python3.10/dist-packages/heading_msg/msg/__init__.py
+[0.407s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/local/lib/python3.10/dist-packages/heading_msg/msg/_heading.py
+[0.407s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/local/lib/python3.10/dist-packages/heading_msg/msg/_heading_s.c
+[0.407s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/local/lib/python3.10/dist-packages/heading_msg/heading_msg_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so
+[0.407s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/local/lib/python3.10/dist-packages/heading_msg/_heading_msg_s.ep.rosidl_typesupport_c.c
+[0.407s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/local/lib/python3.10/dist-packages/heading_msg/_heading_msg_s.ep.rosidl_typesupport_introspection_c.c
+[0.408s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/local/lib/python3.10/dist-packages/heading_msg/libheading_msg__rosidl_generator_py.so
+[0.408s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/local/lib/python3.10/dist-packages/heading_msg/heading_msg_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so
+[0.435s] Listing '/home/lennoxtr/turtlebot3_ws/src/install/heading_msg/local/lib/python3.10/dist-packages/heading_msg'...
+[0.435s] Listing '/home/lennoxtr/turtlebot3_ws/src/install/heading_msg/local/lib/python3.10/dist-packages/heading_msg/msg'...
+[0.439s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/local/lib/python3.10/dist-packages/heading_msg/heading_msg_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so
+[0.439s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/local/lib/python3.10/dist-packages/heading_msg/heading_msg_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so
+[0.439s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/local/lib/python3.10/dist-packages/heading_msg/heading_msg_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so
+[0.439s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/lib/libheading_msg__rosidl_generator_py.so
+[0.440s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/msg/Heading.idl
+[0.440s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/msg/Heading.msg
+[0.440s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/ament_index/resource_index/package_run_dependencies/heading_msg
+[0.440s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/ament_index/resource_index/parent_prefix_path/heading_msg
+[0.440s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/environment/ament_prefix_path.sh
+[0.440s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/environment/ament_prefix_path.dsv
+[0.440s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/environment/path.sh
+[0.440s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/environment/path.dsv
+[0.440s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/local_setup.bash
+[0.440s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/local_setup.sh
+[0.440s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/local_setup.zsh
+[0.441s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/local_setup.dsv
+[0.441s] -- Installing: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/package.dsv
+[0.441s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/ament_index/resource_index/packages/heading_msg
+[0.441s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/cmake/export_heading_msg__rosidl_generator_cExport.cmake
+[0.441s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/cmake/export_heading_msg__rosidl_generator_cExport-noconfig.cmake
+[0.441s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/cmake/export_heading_msg__rosidl_typesupport_fastrtps_cExport.cmake
+[0.441s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/cmake/export_heading_msg__rosidl_typesupport_fastrtps_cExport-noconfig.cmake
+[0.441s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/cmake/heading_msg__rosidl_typesupport_introspection_cExport.cmake
+[0.441s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/cmake/heading_msg__rosidl_typesupport_introspection_cExport-noconfig.cmake
+[0.441s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/cmake/heading_msg__rosidl_typesupport_cExport.cmake
+[0.441s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/cmake/heading_msg__rosidl_typesupport_cExport-noconfig.cmake
+[0.441s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/cmake/export_heading_msg__rosidl_generator_cppExport.cmake
+[0.441s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/cmake/export_heading_msg__rosidl_typesupport_fastrtps_cppExport.cmake
+[0.441s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/cmake/export_heading_msg__rosidl_typesupport_fastrtps_cppExport-noconfig.cmake
+[0.441s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/cmake/heading_msg__rosidl_typesupport_introspection_cppExport.cmake
+[0.442s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/cmake/heading_msg__rosidl_typesupport_introspection_cppExport-noconfig.cmake
+[0.442s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/cmake/heading_msg__rosidl_typesupport_cppExport.cmake
+[0.442s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/cmake/heading_msg__rosidl_typesupport_cppExport-noconfig.cmake
+[0.442s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/cmake/export_heading_msg__rosidl_generator_pyExport.cmake
+[0.442s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/cmake/export_heading_msg__rosidl_generator_pyExport-noconfig.cmake
+[0.442s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/cmake/rosidl_cmake-extras.cmake
+[0.442s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/cmake/ament_cmake_export_include_directories-extras.cmake
+[0.442s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/cmake/ament_cmake_export_libraries-extras.cmake
+[0.442s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/cmake/ament_cmake_export_targets-extras.cmake
+[0.442s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/cmake/rosidl_cmake_export_typesupport_targets-extras.cmake
+[0.442s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/cmake/ament_cmake_export_dependencies-extras.cmake
+[0.442s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/cmake/rosidl_cmake_export_typesupport_libraries-extras.cmake
+[0.442s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/cmake/heading_msgConfig.cmake
+[0.443s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/cmake/heading_msgConfig-version.cmake
+[0.443s] -- Up-to-date: /home/lennoxtr/turtlebot3_ws/src/install/heading_msg/share/heading_msg/package.xml
+[0.444s] Invoked command in '/home/lennoxtr/turtlebot3_ws/src/build/heading_msg' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/lennoxtr/turtlebot3_ws/src/install/robot_goal_pub:/home/lennoxtr/turtlebot3_ws/src/install/goal_input:/opt/ros/humble /usr/bin/cmake --install /home/lennoxtr/turtlebot3_ws/src/build/heading_msg

@@ -8,7 +8,7 @@ def get_distance(current_x, current_y, goal_x, goal_y):
     distance = distance_squared**0.5
     return distance
 
-def arrive_at_goal(current_x, current_y, goal_x, goal_y):
+def arrived_at_goal(current_x, current_y, goal_x, goal_y):
     dist_tol = 1e-1
     distance = get_distance(current_x, current_y, goal_x, goal_y)
     return is_equal(distance, 0, dist_tol)

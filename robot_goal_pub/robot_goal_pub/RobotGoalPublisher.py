@@ -9,10 +9,10 @@ from velocity_msg.msg import Velocity
 from heading_msg.msg import Heading
 
 from robot_goal_pub.GoalProcessor import get_distance
-from robot_goal_pub.PidController import PidController
 
 from robot_goal_pub.RobotController import RobotController
 from robot_goal_pub.ControlProtocol import ControlProtocol
+
 
 class RobotGoalPublisher(Node):
     def __init__(self):
@@ -22,11 +22,12 @@ class RobotGoalPublisher(Node):
         self.computed_current_yaw = False
         self.received_position_updated = False
         self.leader_namespace = 'turtlebot0'
-        self.control_protocol = ControlProtocol()
+        #self.control_protocol = ControlProtocol()
 
         self.robot_controller_map = {}
-        for robot_id in range(5):
+        for robot_id in range(self.num_of_robot):
             namespace = 'turtlebot' + str(robot_id)
+            print(namespace + " initialized")
             if namespace == self.leader_namespace:
                 robot_controller = RobotController(robot_id, is_leader=True)
                 rclpy.spin_once(robot_controller)
@@ -40,6 +41,10 @@ class RobotGoalPublisher(Node):
         self.goal_x = 0
         self.goal_y = 0
 
+        #Leader
+        self.leader_x = 0
+        self.leader_y = 0
+
         #Velocity mapping
         self.velocity_mapping = []
         for i in range(self.num_of_robot):
@@ -48,7 +53,7 @@ class RobotGoalPublisher(Node):
         #Heading mapping
         self.heading_mapping = []
         for i in range(self.num_of_robot):
-            self.velocity_mapping.append(0.0)
+            self.heading_mapping.append(0.0)
 
         #Subscription
         self.goal_subscription = self.create_subscription(
@@ -61,49 +66,52 @@ class RobotGoalPublisher(Node):
             ModelStates,
             '/gazebo/model_states',
             self.position_listener_callback,
-            10)
+            15)
         
         self.velocity_subscription = self.create_subscription(
             Velocity,
             '/robot_linear_vel',
             self.velocity_listener_callback,
-            10)
+            15)
 
         self.heading_subscription = self.create_subscription(
             Heading,
             '/robot_heading',
             self.heading_listener_callback,
-            10)
+            15)
 
     def goal_listener_callback(self, msg):
         self.goal_x = float("{:.3f}".format(msg.goal_x))
         self.goal_y = float("{:.3f}".format(msg.goal_y))
         self.received_goal = True
-        # TODO: set PID for each robot
-        self.PID_position = PidController(Kp=0.5,Ki=0.05,Kd=0.06)
-        self.PID_heading = PidController(Kp=0.6,Ki=0.05,Kd=0.06)
+        self.robot_controller_map[self.leader_namespace].update_goal(self.goal_x, self.goal_y)
         self.get_logger().info(f"Goal set to {self.goal_x}, {self.goal_y}")
 
     def position_listener_callback(self, msg):
         for i, namespace in enumerate(msg.name):
+            if (namespace == "ground_plane"):
+                continue
             position = msg.pose[i].position
             current_x = float("{:.3f}".format(position.x))
             current_y = float("{:.3f}".format(position.y))
             self.robot_controller_map[namespace].update_position(current_x, current_y)
+            if (namespace == self.leader_namespace):
+                self.leader_x = current_x
+                self.leader_y = current_y
+            else:
+                self.robot_controller_map[namespace].update_goal(self.leader_x, self.leader_y)
+        #print("Leader position is ", self.leader_x, " ", self.leader_y)
         self.received_position_updated = True
     
-    #TODO: check
     def velocity_listener_callback(self, msg):
-        namespace = msg.namespace
-        index = int(namespace[-1])
-        self.velocity_mapping[index] = msg.linear_vel
+        index = msg.robot_id
+        self.velocity_mapping[index] = msg.linear_x
         return
     
-    #TODO: check
+    
     def heading_listener_callback(self, msg):
-        namespace = msg.namespace
-        index = int(namespace[-1])
-        self.heading_mapping[index] = msg.yaw
+        index = msg.robot_id
+        self.heading_mapping[index] = msg.heading
         return
         
     def execute(self):
@@ -115,26 +123,32 @@ class RobotGoalPublisher(Node):
         # Robot formation moving to goal
         leader_robot = self.robot_controller_map[self.leader_namespace]
         while not leader_robot.arrived_at_goal():
-            while not (self.computed_current_yaw and self.received_position_updated):
+            while not self.received_position_updated:
                 rclpy.spin_once(self)
 
-            position_error = get_distance(self.current_x, self.current_y, self.goal_x, self.goal_y)
+            for robot_controller_name in self.robot_controller_map:
+                #print(robot_controller_name)
+                robot_controller = self.robot_controller_map[robot_controller_name]
+                rclpy.spin_once(robot_controller)
+                position_error = get_distance(robot_controller.current_x, 
+                                                robot_controller.current_y,
+                                                robot_controller.goal_x,
+                                                robot_controller.goal_y)
+    
+                target_yaw = robot_controller.calculate_target_yaw()
+                yaw_error = target_yaw - robot_controller.current_yaw
+                #print(target_yaw)
+                #print(robot_controller.current_yaw)
+                #print(yaw_error)
+                ## get time
+                current_time = time.time()
+                linear_x_change = robot_controller.PID_position.compute(position_error, current_time)
+                angular_z_change = robot_controller.PID_heading.compute(yaw_error, current_time)
 
-            target_yaw = self.calculate_target_yaw()
-            yaw_error = target_yaw - self.current_yaw
+                # Move to goal
+                robot_controller.move_bot(linear_x_change, angular_z_change)
+                rclpy.spin_once(robot_controller)
 
-            #print(position_error)
-
-            ## get time
-            current_time = time.time()
-            linear_x_change = self.PID_position.compute(position_error, current_time)
-            angular_z_change = self.PID_heading.compute(yaw_error, current_time)
-            #print(angular_z_change)
-
-            # Move to goal
-            self.move_to_goal(linear_x_change, angular_z_change)
-
-            self.computed_current_yaw = False
             self.received_position_updated = False
             rclpy.spin_once(self)
         
@@ -144,6 +158,8 @@ class RobotGoalPublisher(Node):
 def main(args=None):
     rclpy.init(args=args)
     robot_goal_publisher = RobotGoalPublisher()
+    rclpy.spin_once(robot_goal_publisher)
+    time.sleep(1)
 
     while True:
         robot_goal_publisher.execute()

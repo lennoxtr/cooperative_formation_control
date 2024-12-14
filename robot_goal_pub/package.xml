@@ -12,6 +12,9 @@
   <exec_depend>gazebo_msgs</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>numpy</exec_depend>
+  <exec_depend>velocity_msg</exec_depend>
+  <exec_depend>heading_msg</exec_depend>
+  <exec_depend>robot_goal</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
