@@ -1,8 +1,0 @@
-setup.py
-velocity_msg/__init__.py
-velocity_msg.egg-info/PKG-INFO
-velocity_msg.egg-info/SOURCES.txt
-velocity_msg.egg-info/dependency_links.txt
-velocity_msg.egg-info/top_level.txt
-velocity_msg/msg/__init__.py
-velocity_msg/msg/_velocity.py

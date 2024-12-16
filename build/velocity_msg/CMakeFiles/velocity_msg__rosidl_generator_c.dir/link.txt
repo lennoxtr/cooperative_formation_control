@@ -1,1 +1,0 @@
-/usr/bin/cc -fPIC -shared -Wl,-soname,libvelocity_msg__rosidl_generator_c.so -o libvelocity_msg__rosidl_generator_c.so CMakeFiles/velocity_msg__rosidl_generator_c.dir/rosidl_generator_c/velocity_msg/msg/detail/velocity__functions.c.o  -Wl,-rpath,/opt/ros/humble/lib: /opt/ros/humble/lib/librosidl_runtime_c.so /opt/ros/humble/lib/librcutils.so -ldl 
