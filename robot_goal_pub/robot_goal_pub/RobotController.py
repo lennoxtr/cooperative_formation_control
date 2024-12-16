@@ -11,7 +11,6 @@ from heading_msg.msg import Heading
 from velocity_msg.msg import Velocity
 
 from robot_goal_pub.PidController import PidController
-
 from robot_goal_pub.GoalProcessor import arrived_at_goal
 
 MAX_LINEAR_VEL = 0.2

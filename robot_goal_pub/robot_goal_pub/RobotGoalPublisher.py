@@ -8,8 +8,6 @@ from robot_goal.msg import Goal
 from velocity_msg.msg import Velocity
 from heading_msg.msg import Heading
 
-from robot_goal_pub.GoalProcessor import get_distance
-
 from robot_goal_pub.RobotController import RobotController
 from robot_goal_pub.ControlProtocol import ControlProtocol
 
@@ -22,12 +20,12 @@ class RobotGoalPublisher(Node):
         self.computed_current_yaw = False
         self.received_position_updated = False
         self.leader_namespace = 'turtlebot0'
-        #self.control_protocol = ControlProtocol()
+        self.control_protocol = ControlProtocol(self.num_of_robot)
 
         self.robot_controller_map = {}
         for robot_id in range(self.num_of_robot):
             namespace = 'turtlebot' + str(robot_id)
-            print(namespace + " initialized")
+            self.get_logger().info(namespace + " initialized")
             if namespace == self.leader_namespace:
                 robot_controller = RobotController(robot_id, is_leader=True)
                 rclpy.spin_once(robot_controller)
@@ -127,23 +125,9 @@ class RobotGoalPublisher(Node):
                 rclpy.spin_once(self)
 
             for robot_controller_name in self.robot_controller_map:
-                #print(robot_controller_name)
                 robot_controller = self.robot_controller_map[robot_controller_name]
                 rclpy.spin_once(robot_controller)
-                position_error = get_distance(robot_controller.current_x, 
-                                                robot_controller.current_y,
-                                                robot_controller.goal_x,
-                                                robot_controller.goal_y)
-    
-                target_yaw = robot_controller.calculate_target_yaw()
-                yaw_error = target_yaw - robot_controller.current_yaw
-                #print(target_yaw)
-                #print(robot_controller.current_yaw)
-                #print(yaw_error)
-                ## get time
-                current_time = time.time()
-                linear_x_change = robot_controller.PID_position.compute(position_error, current_time)
-                angular_z_change = robot_controller.PID_heading.compute(yaw_error, current_time)
+                linear_x_change, angular_z_change = self.control_protocol.execute_control(robot_controller)
 
                 # Move to goal
                 robot_controller.move_bot(linear_x_change, angular_z_change)
