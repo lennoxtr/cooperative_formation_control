@@ -1,14 +1,12 @@
-import rclpy
-import time
 from rclpy.node import Node
-
-import numpy as np
 
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Imu
 from nav_msgs.msg import Odometry
 from heading_msg.msg import Heading
 from velocity_msg.msg import Velocity
+
+import numpy as np
 
 from robot_goal_pub.PidController import PidController
 from robot_goal_pub.GoalProcessor import arrived_at_goal
@@ -27,21 +25,20 @@ class RobotController(Node):
         self.namespace = namespace
         self.is_leader = is_leader
 
-        # change
+        # Position variables
         self.goal_x = 0.0
         self.goal_y = 0.0
         self.current_x = 0.0
         self.current_y = 0.0
 
         # Yaw is +- pi from north
-        self.current_yaw = 0
-        self.computed_current_yaw = False
+        self.current_imu_heading = 0
 
         self.linear_x_velocity = 0
         self.angular_z_velocity = 0
         
-        self.PID_position = PidController(Kp=0.5,Ki=0.0,Kd=0.0)
-        self.PID_heading = PidController(Kp=0.6,Ki=0.0,Kd=0.0)
+        self.PID_position = PidController(Kp=0.5, Ki=0.0, Kd=0.0)
+        self.PID_heading = PidController(Kp=0.6, Ki=0.0, Kd=0.0)
 
         #TODO: create subscription for goal for leader bot
 
@@ -57,7 +54,7 @@ class RobotController(Node):
             self.odom_callback,
             10)
 
-        self.self_velocity_publisher = self.create_publisher(
+        self.self_twist_publisher = self.create_publisher(
             Twist,
             f'/{self.namespace}/cmd_vel',
             10)
@@ -75,6 +72,10 @@ class RobotController(Node):
     def update_position(self, current_x, current_y):
         self.current_x = current_x
         self.current_y = current_y
+    
+    def update_goal(self, goal_x, goal_y):
+        self.goal_x = goal_x
+        self.goal_y = goal_y
     
     def quaternion_to_euler(self, q):
         """Convert a quaternion into euler angles (roll, pitch, yaw)."""
@@ -98,20 +99,22 @@ class RobotController(Node):
     
     def imu_callback(self, msg):
         orientation_q = msg.orientation
-        quaternion = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
+        quaternion = [orientation_q.x,
+                      orientation_q.y,
+                      orientation_q.z,
+                      orientation_q.w]
+        
         euler = self.quaternion_to_euler(quaternion)
         roll = euler[0]  # radians
         pitch = euler[1]  # radians
         yaw = euler[2]  # radians
-        self.current_yaw = float("{:.3f}".format(yaw))
-        self.computed_current_yaw = True
+        self.current_imu_heading = float("{:.3f}".format(yaw))
+
         # Publish yaw to central controller node
         msg = Heading()
         msg.robot_id = self.robot_id
-        msg.heading = self.current_yaw
+        msg.heading = self.current_imu_heading
         self.heading_publisher.publish(msg)
-        print(self.namespace)
-        
     
     def odom_callback(self, msg):
         linear_velocity = msg.twist.twist.linear
@@ -123,17 +126,6 @@ class RobotController(Node):
         msg.linear_x = self.linear_x
         msg.linear_y = self.linear_y
         self.controller_velocity_publisher.publish(msg)
-    
-    def calculate_target_yaw(self):
-        delta_x = self.goal_x - self.current_x
-        delta_y = self.goal_y - self.current_y
-        target_heading = np.arctan2(delta_y, delta_x)
-        target_yaw = float("{:.3f}".format(target_heading))
-        return target_yaw
-    
-    def update_goal(self, goal_x, goal_y):
-        self.goal_x = goal_x
-        self.goal_y = goal_y
     
     def move_bot(self, linear_x_change, angular_z_change):
         ## change
@@ -159,8 +151,7 @@ class RobotController(Node):
         twist.angular.y = 0.0
         twist.angular.z = target_angular_velocity
 
-        self.self_velocity_publisher.publish(twist)
-        return
+        self.self_twist_publisher.publish(twist)
     
     def stop_bot(self):
         twist = Twist()
@@ -172,7 +163,7 @@ class RobotController(Node):
         twist.angular.y = 0.0
         twist.angular.z = 0.0
 
-        self.self_velocity_publisher.publish(twist)
+        self.self_twist_publisher.publish(twist)
         self.get_logger().info(self.namespace + " stopped")
     
     def arrived_at_goal(self):

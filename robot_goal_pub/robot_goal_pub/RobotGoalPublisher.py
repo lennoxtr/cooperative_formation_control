@@ -2,7 +2,6 @@ import rclpy
 import time
 from rclpy.node import Node
 
-
 from gazebo_msgs.msg import ModelStates
 from robot_goal.msg import Goal
 from velocity_msg.msg import Velocity
@@ -11,13 +10,11 @@ from heading_msg.msg import Heading
 from robot_goal_pub.RobotController import RobotController
 from robot_goal_pub.ControlProtocol import ControlProtocol
 
-
 class RobotGoalPublisher(Node):
     def __init__(self):
         super().__init__('robot_goal_publisher')
         self.num_of_robot  = 5
         self.received_goal = False
-        self.computed_current_yaw = False
         self.received_position_updated = False
         self.leader_namespace = 'turtlebot0'
         self.control_protocol = ControlProtocol(self.num_of_robot)
@@ -42,6 +39,11 @@ class RobotGoalPublisher(Node):
         #Leader
         self.leader_x = 0
         self.leader_y = 0
+
+        #Position mapping
+        self.position_mapping = []
+        for i in range(self.num_of_robot):
+            self.position_mapping.append((0.0, 0.0))
 
         #Velocity mapping
         self.velocity_mapping = []
@@ -89,23 +91,23 @@ class RobotGoalPublisher(Node):
         for i, namespace in enumerate(msg.name):
             if (namespace == "ground_plane"):
                 continue
+            index = int(namespace[-1])
             position = msg.pose[i].position
             current_x = float("{:.3f}".format(position.x))
             current_y = float("{:.3f}".format(position.y))
+            self.position_mapping[index] = (current_x, current_y)
             self.robot_controller_map[namespace].update_position(current_x, current_y)
             if (namespace == self.leader_namespace):
                 self.leader_x = current_x
                 self.leader_y = current_y
             else:
                 self.robot_controller_map[namespace].update_goal(self.leader_x, self.leader_y)
-        #print("Leader position is ", self.leader_x, " ", self.leader_y)
         self.received_position_updated = True
     
     def velocity_listener_callback(self, msg):
         index = msg.robot_id
         self.velocity_mapping[index] = msg.linear_x
         return
-    
     
     def heading_listener_callback(self, msg):
         index = msg.robot_id
@@ -127,10 +129,15 @@ class RobotGoalPublisher(Node):
             for robot_controller_name in self.robot_controller_map:
                 robot_controller = self.robot_controller_map[robot_controller_name]
                 rclpy.spin_once(robot_controller)
-                linear_x_change, angular_z_change = self.control_protocol.execute_control(robot_controller)
+
+                # Control Protocol output linear and angular speed change
+                linear_x_change, angular_z_change = self.control_protocol.execute_control(robot_controller,
+                                                                                        self.velocity_mapping,
+                                                                                        self.heading_mapping)
 
                 # Move to goal
-                robot_controller.move_bot(linear_x_change, angular_z_change)
+                robot_controller.move_bot(linear_x_change,
+                                        angular_z_change)
                 rclpy.spin_once(robot_controller)
 
             self.received_position_updated = False
