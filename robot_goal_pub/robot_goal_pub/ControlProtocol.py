@@ -5,10 +5,10 @@ from robot_goal_pub.GoalProcessor import get_yaw_error
 
 class ControlProtocol():
     def __init__(self, num_of_robot):
-        self.position_gain = 0.7
+        self.position_gain = 0.2
         self.velocity_gain = 0
         self.heading_gain = 0
-        self.leader_follower_gain = 0.3
+        self.leader_follower_gain = 0.8
         self.num_of_robot = num_of_robot
 
         #TODO: implement adjacency matrix for imperfect information between robots
@@ -23,8 +23,11 @@ class ControlProtocol():
         avg_position_y = 0
 
         for coord in position_mapping:
-            avg_position_x += coord(0)
-            avg_position_y += coord(1)
+            avg_position_x += coord[0]
+            avg_position_y += coord[1]
+
+        avg_position_x = avg_position_x / self.num_of_robot
+        avg_position_y = avg_position_y / self.num_of_robot
 
         position_error = get_position_error(robot_controller.current_x, 
                                         robot_controller.current_y,
