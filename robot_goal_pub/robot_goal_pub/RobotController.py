@@ -2,6 +2,7 @@ from rclpy.node import Node
 
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Imu
+from sensor_msgs.msg import LaserScan
 from nav_msgs.msg import Odometry
 from heading_msg.msg import Heading
 from velocity_msg.msg import Velocity
@@ -24,6 +25,9 @@ class RobotController(Node):
         self.robot_id = robot_id
         self.namespace = namespace
         self.is_leader = is_leader
+
+        # Lidar
+        self.laser_range = np.array([])
 
         # Position variables
         self.goal_x = 0.0
@@ -52,6 +56,12 @@ class RobotController(Node):
             Odometry,
             f'/{self.namespace}/odom',
             self.odom_callback,
+            10)
+        
+        self.lidar_subscription = self.create_subscription(
+            LaserScan,
+            f'/{self.namespace}/laserscan',
+            self.lidar_callback,
             10)
 
         self.self_twist_publisher = self.create_publisher(
@@ -126,6 +136,10 @@ class RobotController(Node):
         msg.linear_x = self.linear_x
         msg.linear_y = self.linear_y
         self.controller_velocity_publisher.publish(msg)
+
+    def lidar_callback(self, msg):
+        self.laser_range = np.array(msg.ranges)
+        self.laser_range[self.laser_range==0] = np.nan
     
     def move_bot(self, linear_x_change, angular_z_change):
         ## change

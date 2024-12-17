@@ -7,8 +7,8 @@ import launch_ros.actions
 def generate_launch_description():
     return LaunchDescription([
         launch_ros.actions.Node(
-            package='turtlebot3_gazebo', #change
-            executable='spawn_turtlebot_launch.py', #change
+            package='turtlebot3_gazebo', 
+            executable='spawn_turtlebot_launch.py',
             output='screen',
             arguments=[
                 '--robot_urdf', launch.substitutions.LaunchConfiguration('robot_urdf'),
