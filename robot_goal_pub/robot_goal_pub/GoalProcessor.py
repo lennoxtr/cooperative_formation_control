@@ -18,18 +18,9 @@ def get_target_yaw(current_x, current_y, goal_x, goal_y):
     target_yaw = float("{:.3f}".format(target_heading))
     return target_yaw
 
-def convert_target_yaw_to_imu_yaw(target_yaw):
-    imu_yaw = target_yaw - np.pi / 2
-    # Normalize to [-π, π] 
-    imu_yaw = (imu_yaw + np.pi) % (2 * np.pi) - np.pi
-    return
-
 def get_yaw_error(current_x, current_y, goal_x, goal_y, current_imu_heading):
     target_yaw = get_target_yaw(current_x, current_y, goal_x, goal_y)
-
-    # Normalize to imu yaw for consistency
-    converted_target_yaw = convert_target_yaw_to_imu_yaw(target_yaw)
-    yaw_error = converted_target_yaw - current_imu_heading
+    yaw_error = target_yaw - current_imu_heading
 
     # Normalize yaw_error to [-π, π]
     if yaw_error > np.pi:

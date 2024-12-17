@@ -132,6 +132,7 @@ class RobotGoalPublisher(Node):
 
                 # Control Protocol output linear and angular speed change
                 linear_x_change, angular_z_change = self.control_protocol.execute_control(robot_controller,
+                                                                                        self.position_mapping,
                                                                                         self.velocity_mapping,
                                                                                         self.heading_mapping)
 

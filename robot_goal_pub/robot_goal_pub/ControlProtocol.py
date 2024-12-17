@@ -14,22 +14,22 @@ class ControlProtocol():
         #TODO: implement adjacency matrix for imperfect information between robots
         #self.adjacency_matrix = adjacency_matrix
 
-    def position_matching(self, current_robot_pos, all_robot_pos_list):
+    def position_matching(self, robot_controller, position_mapping):
         # position matching is mainly for leader as 
         a_ij_val = 1
         #position_error = 4 * a_ij_val * current_robot_pos - 
         return 1
     
-    def velocity_matching(self, current_robot_vel, all_robot_vel_list):
+    def velocity_matching(self, robot_controller, velocity_mapping):
         a_ij_val = 1
-        velocity_error = self.num_of_robot * a_ij_val * current_robot_vel - \
-                            a_ij_val * sum(all_robot_vel_list)
+        velocity_error = self.num_of_robot * a_ij_val * robot_controller.linear_x_velocity - \
+                            a_ij_val * sum(velocity_mapping)
         return velocity_error
     
-    def heading_matching(self, current_robot_heading, all_robot_heading_list):
+    def heading_matching(self, robot_controller, heading_mapping):
         a_ij_val = 1
-        heading_error = self.num_of_robot * a_ij_val * current_robot_heading - \
-                            a_ij_val * sum(all_robot_heading_list)
+        heading_error = self.num_of_robot * a_ij_val * robot_controller.current_imu_heading - \
+                            a_ij_val * sum(heading_mapping)
         return heading_error
     
     def leader_follower(self, robot_controller):
