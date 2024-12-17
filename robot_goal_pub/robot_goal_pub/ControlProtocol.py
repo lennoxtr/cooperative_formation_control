@@ -5,26 +5,50 @@ from robot_goal_pub.GoalProcessor import get_yaw_error
 
 class ControlProtocol():
     def __init__(self, num_of_robot):
-        self.position_gain = 0
+        self.position_gain = 0.7
         self.velocity_gain = 0
         self.heading_gain = 0
-        self.leader_follower_gain = 1
+        self.leader_follower_gain = 0.3
         self.num_of_robot = num_of_robot
 
         #TODO: implement adjacency matrix for imperfect information between robots
         #self.adjacency_matrix = adjacency_matrix
 
     def position_matching(self, robot_controller, position_mapping):
-        # position matching is mainly for leader as 
+        # Position matching may have higher weight for leader
+        # to ensure rendezvous before mmoving to goal
         a_ij_val = 1
-        #position_error = 4 * a_ij_val * current_robot_pos - 
-        return 1
+
+        avg_position_x = 0
+        avg_position_y = 0
+
+        for coord in position_mapping:
+            avg_position_x += coord(0)
+            avg_position_y += coord(1)
+
+        position_error = get_position_error(robot_controller.current_x, 
+                                        robot_controller.current_y,
+                                        avg_position_x,
+                                        avg_position_y)
+        
+        yaw_error = get_yaw_error(robot_controller.current_x, 
+                                        robot_controller.current_y,
+                                        avg_position_x,
+                                        avg_position_y,
+                                        robot_controller.current_imu_heading)
+        
+
+        return position_error, yaw_error
     
     def velocity_matching(self, robot_controller, velocity_mapping):
         a_ij_val = 1
         velocity_error = self.num_of_robot * a_ij_val * robot_controller.linear_x_velocity - \
                             a_ij_val * sum(velocity_mapping)
         return velocity_error
+    
+    def collision_prevention(self, robot_controller, position_mapping):
+        # Needs to be implemented in all control algo
+        return
     
     def heading_matching(self, robot_controller, heading_mapping):
         a_ij_val = 1
@@ -44,21 +68,38 @@ class ControlProtocol():
                                         robot_controller.goal_y,
                                         robot_controller.current_imu_heading)
 
-        current_time = time.time()
-        linear_x_change = robot_controller.PID_position.compute(position_error, current_time)
-        angular_z_change = robot_controller.PID_heading.compute(yaw_error, current_time)
 
-        return linear_x_change, angular_z_change
+        return position_error, yaw_error
         
     def execute_control(self, robot_controller, position_mapping, velocity_mapping, heading_mapping):
         ### Sum of all control policies
-        position_control_output = self.position_matching(robot_controller, position_mapping)
+
+        # Method 1: have 1 PID (currently only P) for all
+        # Method 2: have individual PID for each control policy
+
+        # Position Matching 
+        pc_position_error, pc_yaw_error = self.position_matching(robot_controller,
+                                                                position_mapping)
+        
+        # Velocity Matching
         velocity_control_output = self.velocity_matching(robot_controller, velocity_mapping)
-        lf_linear_x_output, lf_angular_z_output = self.leader_follower(robot_controller)
+
+        # Heading Matching
         heading_control_output = self.heading_matching(robot_controller, heading_mapping)
 
-        control_linear_x_input = self.leader_follower_gain * lf_linear_x_output
-        control_angular_z_input = self.leader_follower_gain * lf_angular_z_output
+        # Leader Follower
+        lf_position_error, lf_yaw_error = self.leader_follower(robot_controller)
+
+        # Calculate total error with weightage
+        total_position_error = self.leader_follower_gain * lf_position_error + \
+                                self.position_gain * pc_position_error
+
+        total_yaw_error = self.leader_follower_gain * lf_yaw_error + \
+                            self.position_gain * pc_yaw_error
+
+        current_time = time.time()
+        linear_x_change = robot_controller.PID_position.compute(total_position_error, current_time)
+        angular_z_change = robot_controller.PID_heading.compute(total_yaw_error, current_time)
 
         '''
         control_input = self.position_gain * position_control_output + \
@@ -67,4 +108,4 @@ class ControlProtocol():
                         self.leader_follower_gain * leader_follower_output
         '''
 
-        return control_linear_x_input, control_angular_z_input
+        return linear_x_change, angular_z_change
