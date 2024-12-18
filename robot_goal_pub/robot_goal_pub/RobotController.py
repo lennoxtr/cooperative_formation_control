@@ -18,6 +18,8 @@ MAX_ANGLE_VEL = 1.5
 LIN_VEL_STEP_SIZE = 0.01
 ANG_VEL_STEP_SIZE = 0.1
 
+MAX_LIDAR_RANGE = 3500
+
 class RobotController(Node):
     def __init__(self, robot_id, is_leader=False, safety_radius=0.7, danger_radius=0.4):
         namespace = "turtlebot" + str(robot_id)
@@ -49,8 +51,16 @@ class RobotController(Node):
         self.angular_z_velocity = 0
         
         # Kinematic PID Controller (may add more for different control policies)
+        # TODO: Implement another set of PID controllers for collision avoidance
+        # TODO: Tune PID for collision avoidance
+
+        # PID for goal seeking and flocking
         self.PID_position = PidController(Kp=0.5, Ki=0.0, Kd=0.0)
         self.PID_heading = PidController(Kp=0.6, Ki=0.0, Kd=0.0)
+
+        # PID for collision prevention
+        self.PID_position_cp = PidController(Kp=0.5, Ki=0.0, Kd=0.0)
+        self.PID_heading_cp = PidController(Kp=0.6, Ki=0.0, Kd=0.0)
 
         # Subscription and Publisher
         self.imu_subscription = self.create_subscription(
@@ -147,6 +157,7 @@ class RobotController(Node):
     def lidar_callback(self, msg):
         self.lidar_data = np.array(msg.ranges)
         self.lidar_data[self.lidar_data==0] = np.nan
+        self.lidar_data[self.lidar_data==np.inf] = MAX_LIDAR_RANGE
     
     def move_bot(self, linear_x_change, angular_z_change):
         ## change
@@ -188,4 +199,7 @@ class RobotController(Node):
         self.get_logger().info(self.namespace + " stopped")
     
     def arrived_at_goal(self):
-        return arrived_at_goal(self.current_x, self.current_y, self.goal_x, self.goal_y)
+        return arrived_at_goal(self.current_x,
+                               self.current_y,
+                               self.goal_x,
+                               self.goal_y)
