@@ -14,6 +14,8 @@ class RobotGoalPublisher(Node):
     def __init__(self):
         super().__init__('robot_goal_publisher')
         self.num_of_robot  = 5
+        self.safety_radius = 0.7
+        self.danger_radius = 0.4
         self.received_goal = False
         self.received_position_updated = False
         self.leader_namespace = 'turtlebot0'
@@ -24,38 +26,43 @@ class RobotGoalPublisher(Node):
             namespace = 'turtlebot' + str(robot_id)
             self.get_logger().info(namespace + " initialized")
             if namespace == self.leader_namespace:
-                robot_controller = RobotController(robot_id, is_leader=True)
+                robot_controller = RobotController(robot_id,
+                                                    is_leader=True,
+                                                    safety_radius=self.safety_radius,
+                                                    danger_radius=self.danger_radius)
                 rclpy.spin_once(robot_controller)
                 self.robot_controller_map[namespace] = robot_controller
             else:
-                robot_controller = RobotController(robot_id)
+                robot_controller = RobotController(robot_id,
+                                                    safety_radius=self.safety_radius,
+                                                    danger_radius=self.danger_radius)
                 rclpy.spin_once(robot_controller)
                 self.robot_controller_map[namespace] = robot_controller
 
-        #Goal
+        # Goal
         self.goal_x = 0
         self.goal_y = 0
 
-        #Leader
+        # Leader
         self.leader_x = 0
         self.leader_y = 0
 
-        #Position mapping
+        # Position mapping
         self.position_mapping = []
         for i in range(self.num_of_robot):
             self.position_mapping.append((0.0, 0.0))
 
-        #Velocity mapping
+        # Velocity mapping
         self.velocity_mapping = []
         for i in range(self.num_of_robot):
             self.velocity_mapping.append(0.0)
 
-        #Heading mapping
+        # Heading mapping
         self.heading_mapping = []
         for i in range(self.num_of_robot):
             self.heading_mapping.append(0.0)
 
-        #Subscription
+        # Subscription
         self.goal_subscription = self.create_subscription(
             Goal,
             '/robot_goal',

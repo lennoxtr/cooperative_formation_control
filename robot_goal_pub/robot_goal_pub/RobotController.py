@@ -19,15 +19,22 @@ LIN_VEL_STEP_SIZE = 0.01
 ANG_VEL_STEP_SIZE = 0.1
 
 class RobotController(Node):
-    def __init__(self, robot_id, is_leader=False):
+    def __init__(self, robot_id, is_leader=False, safety_radius=0.7, danger_radius=0.4):
         namespace = "turtlebot" + str(robot_id)
         super().__init__('RobotController_' + namespace)
         self.robot_id = robot_id
         self.namespace = namespace
         self.is_leader = is_leader
 
-        # Lidar
-        self.laser_range = np.array([])
+        # Collision avoidance threshold
+        self.safety_radius = safety_radius
+        self.danger_radius = danger_radius
+
+        # Lidar data for collision avoidance
+        self.lidar_data = np.array([])
+
+        # Rendezvous
+        self.is_in_formation = False
 
         # Position variables
         self.goal_x = 0.0
@@ -35,17 +42,17 @@ class RobotController(Node):
         self.current_x = 0.0
         self.current_y = 0.0
 
+        # Kinematic variables
         # Yaw is +- pi from north
         self.current_imu_heading = 0
-
         self.linear_x_velocity = 0
         self.angular_z_velocity = 0
         
+        # Kinematic PID Controller (may add more for different control policies)
         self.PID_position = PidController(Kp=0.5, Ki=0.0, Kd=0.0)
         self.PID_heading = PidController(Kp=0.6, Ki=0.0, Kd=0.0)
 
-        #TODO: create subscription for goal for leader bot
-
+        # Subscription and Publisher
         self.imu_subscription = self.create_subscription(
             Imu,
             f'/{self.namespace}/imu',
@@ -60,7 +67,7 @@ class RobotController(Node):
         
         self.lidar_subscription = self.create_subscription(
             LaserScan,
-            f'/{self.namespace}/laserscan',
+            f'/{self.namespace}/scan',
             self.lidar_callback,
             10)
 
@@ -138,8 +145,8 @@ class RobotController(Node):
         self.controller_velocity_publisher.publish(msg)
 
     def lidar_callback(self, msg):
-        self.laser_range = np.array(msg.ranges)
-        self.laser_range[self.laser_range==0] = np.nan
+        self.lidar_data = np.array(msg.ranges)
+        self.lidar_data[self.lidar_data==0] = np.nan
     
     def move_bot(self, linear_x_change, angular_z_change):
         ## change

@@ -1,4 +1,5 @@
 import time
+import numpy as np
 
 from robot_goal_pub.GoalProcessor import get_position_error
 from robot_goal_pub.GoalProcessor import get_yaw_error
@@ -39,8 +40,6 @@ class ControlProtocol():
                                         avg_position_x,
                                         avg_position_y,
                                         robot_controller.current_imu_heading)
-        
-
         return position_error, yaw_error
     
     def velocity_matching(self, robot_controller, velocity_mapping):
@@ -48,9 +47,17 @@ class ControlProtocol():
         velocity_error = self.num_of_robot * a_ij_val * robot_controller.linear_x_velocity - \
                             a_ij_val * sum(velocity_mapping)
         return velocity_error
+
+    def get_collision_prevention_gain(self, robot_controller):
+        lidar_data = robot_controller.laser_range
+        if np.min(lidar_data) >= robot_controller.safety_radius:
+            return 0
+        else:
+            return 1
     
     def collision_prevention(self, robot_controller, position_mapping):
         # Needs to be implemented in all control algo
+        cp_gain = self.get_collision_prevention_gain(robot_controller)
         return
     
     def heading_matching(self, robot_controller, heading_mapping):
@@ -60,18 +67,16 @@ class ControlProtocol():
         return heading_error
     
     def leader_follower(self, robot_controller):
-        position_error = get_position_error(robot_controller.current_x, 
+        position_error = get_position_error(robot_controller.current_x,
                                         robot_controller.current_y,
                                         robot_controller.goal_x,
                                         robot_controller.goal_y)
         
-        yaw_error = get_yaw_error(robot_controller.current_x, 
+        yaw_error = get_yaw_error(robot_controller.current_x,
                                         robot_controller.current_y,
                                         robot_controller.goal_x,
                                         robot_controller.goal_y,
                                         robot_controller.current_imu_heading)
-
-
         return position_error, yaw_error
         
     def execute_control(self, robot_controller, position_mapping, velocity_mapping, heading_mapping):
@@ -110,5 +115,4 @@ class ControlProtocol():
                         self.heading_gain * heading_control_output + \
                         self.leader_follower_gain * leader_follower_output
         '''
-
         return linear_x_change, angular_z_change
