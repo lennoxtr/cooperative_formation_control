@@ -10,6 +10,7 @@ class ControlProtocol():
         self.position_gain = 0.2
         self.velocity_gain = 0
         self.heading_gain = 0
+        self.collision_prevention_gain = 0.8
         self.leader_follower_gain = 0.8
         self.num_of_robot = num_of_robot
 
@@ -48,15 +49,6 @@ class ControlProtocol():
         velocity_error = self.num_of_robot * a_ij_val * robot_controller.linear_x_velocity - \
                             a_ij_val * sum(velocity_mapping)
         return velocity_error
-
-    def get_collision_prevention_gain(self, robot_controller):
-        lidar_data = robot_controller.laser_range
-        if np.min(lidar_data) >= robot_controller.safety_radius:
-            return 0
-        elif robot_controller.safety_radius > np.min(lidar_data) >= robot_controller.danger_radius:
-            return 1
-        else:
-            return 2
     
     def get_sensitivity_bubble_gain(self, angle_in_degree):
         ''' Map [-pi, +pi] to minimum and maximum gain for sensitivity bubble'''
@@ -85,8 +77,6 @@ class ControlProtocol():
         # Calculating Sensitivity Bubble
         sensitivity_bubble = np.array([i * self.get_sensitivity_bubble_gain(i) for i in range(360)]) * \
                                 current_vel * delta_t
-
-        cp_gain = self.get_collision_prevention_gain(robot_controller)
 
         possible_collision_angle = np.where((lidar_data != np.isnan) and lidar_data < sensitivity_bubble)[0]
 
@@ -146,13 +136,20 @@ class ControlProtocol():
         # Leader Follower
         lf_position_error, lf_yaw_error = self.leader_follower(robot_controller)
 
-        # Calculate total error with weightage
-        total_position_error = self.leader_follower_gain * lf_position_error + \
+        # Collision Prevention
+        ca_yaw_error = self.collision_prevention(robot_controller)
+
+        # Calculate total error with weightage of flocking and goal seeking
+        fl_gs_position_error = self.leader_follower_gain * lf_position_error + \
                                 self.position_gain * pc_position_error
 
-        total_yaw_error = self.leader_follower_gain * lf_yaw_error + \
+        fl_gs_yaw_error = self.leader_follower_gain * lf_yaw_error + \
                             self.position_gain * pc_yaw_error
-
+        
+        total_position_error = fl_gs_position_error
+        total_yaw_error = fl_gs_yaw_error * (1 - self.collision_prevention_gain) + \
+                            ca_yaw_error * self.collision_prevention_gain
+        #Implementing method 1
         current_time = time.time()
         linear_x_change = robot_controller.PID_position.compute(total_position_error, current_time)
         angular_z_change = robot_controller.PID_heading.compute(total_yaw_error, current_time)
