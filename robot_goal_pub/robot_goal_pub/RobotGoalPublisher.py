@@ -96,6 +96,12 @@ class RobotGoalPublisher(Node):
             self.heading_listener_callback,
             15)
 
+        self.heading_subscription = self.create_subscription(
+            Heading,
+            '/robot_heading',
+            self.heading_listener_callback,
+            15)
+
     def goal_listener_callback(self, msg):
         self.goal_x = float("{:.3f}".format(msg.goal_x))
         self.goal_y = float("{:.3f}".format(msg.goal_y))
