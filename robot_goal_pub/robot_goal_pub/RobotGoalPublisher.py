@@ -1,6 +1,9 @@
 import rclpy
 import time
+import threading
+
 from rclpy.node import Node
+from rclpy.executors import MultiThreadedExecutor
 
 from gazebo_msgs.msg import ModelStates
 from robot_goal.msg import Goal
@@ -22,22 +25,28 @@ class RobotGoalPublisher(Node):
         self.control_protocol = ControlProtocol(self.num_of_robot)
 
         self.robot_controller_map = {}
+        executor = MultiThreadedExecutor()
         for robot_id in range(self.num_of_robot):
             namespace = 'turtlebot' + str(robot_id)
             self.get_logger().info(namespace + " initialized")
             if namespace == self.leader_namespace:
                 robot_controller = RobotController(robot_id,
-                                                    is_leader=True,
-                                                    safety_radius=self.safety_radius,
-                                                    danger_radius=self.danger_radius)
+                                                is_leader=True,
+                                                safety_radius=self.safety_radius,
+                                                danger_radius=self.danger_radius)
+                executor.add_node(robot_controller)
                 rclpy.spin_once(robot_controller)
                 self.robot_controller_map[namespace] = robot_controller
             else:
                 robot_controller = RobotController(robot_id,
-                                                    safety_radius=self.safety_radius,
-                                                    danger_radius=self.danger_radius)
+                                                safety_radius=self.safety_radius,
+                                                danger_radius=self.danger_radius)
+                executor.add_node(robot_controller)
                 rclpy.spin_once(robot_controller)
                 self.robot_controller_map[namespace] = robot_controller
+        
+        executor_thread = threading.Thread(target=executor.spin, daemon=True)
+        executor_thread.start()
 
         # Goal
         self.goal_x = 0
