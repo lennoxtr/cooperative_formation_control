@@ -1,17 +1,18 @@
 import time
 import math
 import numpy as np
+import rclpy
 
 from robot_goal_pub.GoalProcessor import get_position_error
 from robot_goal_pub.GoalProcessor import get_yaw_error
 
 class ControlProtocol():
     def __init__(self, num_of_robot):
-        self.position_gain = 0.2
+        self.position_gain = 0.3
         self.velocity_gain = 0
         self.heading_gain = 0
         self.collision_prevention_gain = 0.8
-        self.leader_follower_gain = 0.8
+        self.leader_follower_gain = 0.7
         self.num_of_robot = num_of_robot
 
         #TODO: implement adjacency matrix for imperfect information between robots
@@ -29,8 +30,11 @@ class ControlProtocol():
             avg_position_x += coord[0]
             avg_position_y += coord[1]
 
-        avg_position_x = avg_position_x / self.num_of_robot
-        avg_position_y = avg_position_y / self.num_of_robot
+        avg_position_x -= robot_controller.current_x
+        avg_position_y -= robot_controller.current_y
+        avg_position_x = avg_position_x / (self.num_of_robot - 1)
+        avg_position_y = avg_position_y / (self.num_of_robot - 1)
+        print(robot_controller.namespace, " tracking position (", avg_position_x, ", ", avg_position_y, ")")
 
         position_error = get_position_error(robot_controller.current_x, 
                                         robot_controller.current_y,
@@ -52,8 +56,8 @@ class ControlProtocol():
     
     def get_sensitivity_bubble_gain(self, angle_in_degree):
         ''' Map [-pi, +pi] to minimum and maximum gain for sensitivity bubble'''
-        min_gain = 0.2
-        max_gain = 3
+        min_gain = 1
+        max_gain = 4
 
         angle_in_rad = angle_in_degree * math.pi / 180
 
@@ -75,15 +79,19 @@ class ControlProtocol():
         delta_t = 1 # may tune to get actual delta t
 
         # Calculating Sensitivity Bubble
-        sensitivity_bubble = np.array([i * self.get_sensitivity_bubble_gain(i) for i in range(360)]) * \
+        sensitivity_bubble = np.array([self.get_sensitivity_bubble_gain(i) for i in range(360)]) * \
                                 current_vel * delta_t
 
-        possible_collision_angle = np.where((lidar_data != np.isnan) and lidar_data < sensitivity_bubble)[0]
+        possible_collision_angle = np.where((lidar_data != np.isnan) & (lidar_data < sensitivity_bubble))[0]
 
         if possible_collision_angle.size == 0:
             yaw_error = 0
             return yaw_error
-
+        if robot_controller.namespace == "turtlebot2":
+            print("Lidar Data")
+            print(possible_collision_angle)
+            print(lidar_data[possible_collision_angle])
+            print(" ")
         # Calculate rebound angle
         weighted_sum_of_distance = 0
         sum_of_distance = 0
@@ -91,10 +99,14 @@ class ControlProtocol():
             distance_measured = lidar_data[angle]
             sum_of_distance += distance_measured
             weighted_sum_of_distance += angle * distance_measured
+
+        # bug when angle = 0
+        # TODO: fix this bug
         
         rebound_angle = weighted_sum_of_distance / sum_of_distance
-        
         # TODO: Normalize rebound_angle to +- pi
+
+
         yaw_error = rebound_angle - robot_controller.current_imu_heading
         return yaw_error
     
@@ -118,6 +130,7 @@ class ControlProtocol():
         return position_error, yaw_error
         
     def execute_control(self, robot_controller, position_mapping, velocity_mapping, heading_mapping):
+        rclpy.spin_once(robot_controller)
         ### Sum of all control policies
 
         # Method 1: have 1 PID (currently only P) for all
