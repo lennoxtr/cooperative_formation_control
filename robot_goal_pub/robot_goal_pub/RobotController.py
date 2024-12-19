@@ -13,7 +13,7 @@ from robot_goal_pub.PidController import PidController
 from robot_goal_pub.GoalProcessor import arrived_at_goal
 
 MAX_LINEAR_VEL = 0.2
-MAX_ANGLE_VEL = 1.5
+MAX_ANGLE_VEL = 1.5 #1.5
 
 LIN_VEL_STEP_SIZE = 0.01
 ANG_VEL_STEP_SIZE = 0.1

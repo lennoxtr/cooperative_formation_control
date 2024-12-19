@@ -17,12 +17,11 @@ class RobotGoalPublisher(Node):
     def __init__(self):
         super().__init__('robot_goal_publisher')
         self.num_of_robot  = 5
-        self.safety_radius = 0.7
-        self.danger_radius = 0.4
         self.received_goal = False
         self.received_position_updated = False
         self.leader_namespace = 'turtlebot0'
-        self.control_protocol = ControlProtocol(self.num_of_robot)
+        self.rendezvous_distance = 0.8
+        self.control_protocol = ControlProtocol(self.num_of_robot, self.rendezvous_distance)
 
         self.robot_controller_map = {}
         executor = MultiThreadedExecutor()
@@ -31,16 +30,12 @@ class RobotGoalPublisher(Node):
             self.get_logger().info(namespace + " initialized")
             if namespace == self.leader_namespace:
                 robot_controller = RobotController(robot_id,
-                                                is_leader=True,
-                                                safety_radius=self.safety_radius,
-                                                danger_radius=self.danger_radius)
+                                                is_leader=True)
                 executor.add_node(robot_controller)
                 rclpy.spin_once(robot_controller)
                 self.robot_controller_map[namespace] = robot_controller
             else:
-                robot_controller = RobotController(robot_id,
-                                                safety_radius=self.safety_radius,
-                                                danger_radius=self.danger_radius)
+                robot_controller = RobotController(robot_id)
                 executor.add_node(robot_controller)
                 rclpy.spin_once(robot_controller)
                 self.robot_controller_map[namespace] = robot_controller
@@ -176,7 +171,10 @@ def main(args=None):
     time.sleep(1)
 
     while True:
-        robot_goal_publisher.execute()
+        try:
+            robot_goal_publisher.execute()
+        except KeyboardInterrupt:
+            break
     
     robot_goal_publisher.destroy_node()
     rclpy.shutdown()

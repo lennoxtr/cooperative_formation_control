@@ -12,11 +12,12 @@ from launch.substitutions import LaunchConfiguration, TextSubstitution
 def gen_robot_list(number_of_robots):
 
     robots = []
-
+    current_x_pos = 0.0
     for i in range(number_of_robots):
         robot_name = "turtlebot"+str(i)
-        x_pos = float(i) + 2
+        x_pos = current_x_pos
         robots.append({'name': robot_name, 'x_pose': x_pos, 'y_pose': 0.0, 'z_pose': 0.01})
+        current_x_pos += 2.0
 
     return robots 
 
@@ -32,7 +33,7 @@ def generate_launch_description():
         model_folder,
         'model.sdf'
     )
-    assert os.path.exists(urdf_path), "Thebox_bot.urdf doesnt exist in "+str(urdf_path)
+    assert os.path.exists(urdf_path), "Thebox_bot.urdf doesnt exist in " + str(urdf_path)
 
     #change
     pkg_box_bot_description = get_package_share_directory('turtlebot3_gazebo')

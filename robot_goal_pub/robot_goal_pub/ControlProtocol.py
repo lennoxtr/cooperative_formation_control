@@ -7,13 +7,14 @@ from robot_goal_pub.GoalProcessor import get_position_error
 from robot_goal_pub.GoalProcessor import get_yaw_error
 
 class ControlProtocol():
-    def __init__(self, num_of_robot):
-        self.position_gain = 0.3
+    def __init__(self, num_of_robot, rendezvous_distance):
+        self.position_gain = 0.2
         self.velocity_gain = 0
         self.heading_gain = 0
         self.collision_prevention_gain = 0.8
-        self.leader_follower_gain = 0.7
+        self.leader_follower_gain = 0.8
         self.num_of_robot = num_of_robot
+        self.rendezvous_distance = rendezvous_distance
 
         #TODO: implement adjacency matrix for imperfect information between robots
         #self.adjacency_matrix = adjacency_matrix
@@ -56,7 +57,7 @@ class ControlProtocol():
     
     def get_sensitivity_bubble_gain(self, angle_in_degree):
         ''' Map [-pi, +pi] to minimum and maximum gain for sensitivity bubble'''
-        min_gain = 1
+        min_gain = 2
         max_gain = 4
 
         angle_in_rad = angle_in_degree * math.pi / 180
@@ -73,7 +74,7 @@ class ControlProtocol():
     def collision_prevention(self, robot_controller):
         # Needs to be implemented in all control algo
         # Using bubble rebound algo
-
+        rclpy.spin_once(robot_controller)
         lidar_data = robot_controller.lidar_data
         current_vel = robot_controller.linear_x_velocity
         delta_t = 1 # may tune to get actual delta t
@@ -87,11 +88,6 @@ class ControlProtocol():
         if possible_collision_angle.size == 0:
             yaw_error = 0
             return yaw_error
-        if robot_controller.namespace == "turtlebot2":
-            print("Lidar Data")
-            print(possible_collision_angle)
-            print(lidar_data[possible_collision_angle])
-            print(" ")
         # Calculate rebound angle
         weighted_sum_of_distance = 0
         sum_of_distance = 0
@@ -104,6 +100,7 @@ class ControlProtocol():
         # TODO: fix this bug
         
         rebound_angle = weighted_sum_of_distance / sum_of_distance
+        print("Rebound angle for ", robot_controller.namespace, " is: ", rebound_angle)
         # TODO: Normalize rebound_angle to +- pi
 
 
@@ -128,9 +125,14 @@ class ControlProtocol():
                                         robot_controller.goal_y,
                                         robot_controller.current_imu_heading)
         return position_error, yaw_error
+
+    def get_flocking_goalseeking_gain(self, robot_controller):
+        # Implement as logistic function
+
+
+        return
         
     def execute_control(self, robot_controller, position_mapping, velocity_mapping, heading_mapping):
-        rclpy.spin_once(robot_controller)
         ### Sum of all control policies
 
         # Method 1: have 1 PID (currently only P) for all
