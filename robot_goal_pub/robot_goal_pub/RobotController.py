@@ -60,7 +60,7 @@ class RobotController(Node):
 
         # PID for collision prevention
         self.PID_position_cp = PidController(Kp=0.5, Ki=0.0, Kd=0.0)
-        self.PID_heading_cp = PidController(Kp=0.6, Ki=0.0, Kd=0.0)
+        self.PID_heading_cp = PidController(Kp=0.7, Ki=0.0, Kd=0.0)
 
         # Subscription and Publisher
         self.imu_subscription = self.create_subscription(

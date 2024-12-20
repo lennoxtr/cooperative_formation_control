@@ -23,8 +23,11 @@ def get_yaw_error(current_x, current_y, goal_x, goal_y, current_imu_heading):
     yaw_error = target_yaw - current_imu_heading
 
     # Normalize yaw_error to [-π, π]
+    # TODO: Check whether this is - pi or -2 pi
     if yaw_error > np.pi:
-        yaw_error -= np.pi
+        yaw_error -= 2 * np.pi
+    elif yaw_error < -np.pi:
+        yaw_error += 2 * np.pi
         
     return yaw_error
 

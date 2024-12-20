@@ -8,44 +8,42 @@ from robot_goal_pub.GoalProcessor import get_yaw_error
 
 class ControlProtocol():
     def __init__(self, num_of_robot, rendezvous_distance):
-        self.position_gain = 0.2
         self.velocity_gain = 0
         self.heading_gain = 0
         self.collision_prevention_gain = 0.8
-        self.leader_follower_gain = 0.8
         self.num_of_robot = num_of_robot
         self.rendezvous_distance = rendezvous_distance
+        self.avg_position_x = 0
+        self.avg_position_y = 0
+        self.rendezvoused = False
 
         #TODO: implement adjacency matrix for imperfect information between robots
         #self.adjacency_matrix = adjacency_matrix
 
     def position_matching(self, robot_controller, position_mapping):
         # Position matching may have higher weight for leader
-        # to ensure rendezvous before mmoving to goal
-        a_ij_val = 1
+        # to ensure rendezvous before moving to goal
 
-        avg_position_x = 0
-        avg_position_y = 0
+        sum_position_x = 0
+        sum_position_y = 0
 
-        for coord in position_mapping:
-            avg_position_x += coord[0]
-            avg_position_y += coord[1]
+        for (x_coord, y_coord) in position_mapping:
+            sum_position_x += x_coord
+            sum_position_y += y_coord
 
-        avg_position_x -= robot_controller.current_x
-        avg_position_y -= robot_controller.current_y
-        avg_position_x = avg_position_x / (self.num_of_robot - 1)
-        avg_position_y = avg_position_y / (self.num_of_robot - 1)
-        print(robot_controller.namespace, " tracking position (", avg_position_x, ", ", avg_position_y, ")")
+        self.avg_position_x = sum_position_x / (self.num_of_robot)
+        self.avg_position_y = sum_position_y / (self.num_of_robot)
+        print(robot_controller.namespace, " tracking position (", self.avg_position_x, ", ", self.avg_position_y, ")")
 
         position_error = get_position_error(robot_controller.current_x, 
                                         robot_controller.current_y,
-                                        avg_position_x,
-                                        avg_position_y)
+                                        self.avg_position_x,
+                                        self.avg_position_y)
         
         yaw_error = get_yaw_error(robot_controller.current_x, 
                                         robot_controller.current_y,
-                                        avg_position_x,
-                                        avg_position_y,
+                                        self.avg_position_x,
+                                        self.avg_position_y,
                                         robot_controller.current_imu_heading)
         return position_error, yaw_error
     
@@ -91,18 +89,24 @@ class ControlProtocol():
         # Calculate rebound angle
         weighted_sum_of_distance = 0
         sum_of_distance = 0
-        for angle in possible_collision_angle:
-            distance_measured = lidar_data[angle]
+        for angle_in_degree in possible_collision_angle:
+            # TODO: Normalize this angle to +- pi instead of the rebound angle
+            angle_in_rad =  angle_in_degree / 180 * np.pi
+            if angle_in_rad > np.pi:
+                angle_in_rad -= 2 * np.pi
+
+            distance_measured = lidar_data[angle_in_degree]
             sum_of_distance += distance_measured
-            weighted_sum_of_distance += angle * distance_measured
+            weighted_sum_of_distance += angle_in_rad * distance_measured
 
         # bug when angle = 0
         # TODO: fix this bug
         
         rebound_angle = weighted_sum_of_distance / sum_of_distance
-        print("Rebound angle for ", robot_controller.namespace, " is: ", rebound_angle)
-        # TODO: Normalize rebound_angle to +- pi
 
+        if rebound_angle == 0:
+            yaw_error = np.pi/2
+        print("Rebound angle for ", robot_controller.namespace, " is: ", rebound_angle)
 
         yaw_error = rebound_angle - robot_controller.current_imu_heading
         return yaw_error
@@ -120,17 +124,32 @@ class ControlProtocol():
                                         robot_controller.goal_y)
         
         yaw_error = get_yaw_error(robot_controller.current_x,
-                                        robot_controller.current_y,
-                                        robot_controller.goal_x,
-                                        robot_controller.goal_y,
-                                        robot_controller.current_imu_heading)
+                                    robot_controller.current_y,
+                                    robot_controller.goal_x,
+                                    robot_controller.goal_y,
+                                    robot_controller.current_imu_heading)
         return position_error, yaw_error
 
-    def get_flocking_goalseeking_gain(self, robot_controller):
+    def get_flocking_gain(self, position_mapping):
+        # Must be called after position matching
+
+        sum_distance_to_formation_center = 0
+        for (x_coord, y_coord) in position_mapping:
+            sum_distance_to_formation_center += get_position_error(x_coord,
+                                                               y_coord,
+                                                               self.avg_position_x,
+                                                               self.avg_position_y)
+        
+        avg_distance = sum_distance_to_formation_center / self.num_of_robot
+        if avg_distance < self.rendezvous_distance:
+            self.rendezvoused = True
+        
         # Implement as logistic function
+        k = 1 # k is the flocking function steepness
 
-
-        return
+        # TODO: check whether -self.rendezvous_distance is needed
+        flocking_gain = 1 / (1 + math.e ** (-k * (avg_distance - self.rendezvous_distance)))
+        return flocking_gain
         
     def execute_control(self, robot_controller, position_mapping, velocity_mapping, heading_mapping):
         ### Sum of all control policies
@@ -139,7 +158,7 @@ class ControlProtocol():
         # Method 2: have individual PID for each control policy
 
         # Position Matching 
-        pc_position_error, pc_yaw_error = self.position_matching(robot_controller,
+        pm_position_error, pm_yaw_error = self.position_matching(robot_controller,
                                                                 position_mapping)
         
         # Velocity Matching
@@ -155,11 +174,13 @@ class ControlProtocol():
         ca_yaw_error = self.collision_prevention(robot_controller)
 
         # Calculate total error with weightage of flocking and goal seeking
-        fl_gs_position_error = self.leader_follower_gain * lf_position_error + \
-                                self.position_gain * pc_position_error
+        flocking_gain = self.get_flocking_gain(position_mapping)
 
-        fl_gs_yaw_error = self.leader_follower_gain * lf_yaw_error + \
-                            self.position_gain * pc_yaw_error
+        fl_gs_position_error = (1 - flocking_gain) * lf_position_error + \
+                                flocking_gain * pm_position_error
+
+        fl_gs_yaw_error = (1 - flocking_gain) * lf_yaw_error + \
+                            flocking_gain * pm_yaw_error
         
         total_position_error = fl_gs_position_error
         total_yaw_error = fl_gs_yaw_error * (1 - self.collision_prevention_gain) + \
@@ -169,11 +190,5 @@ class ControlProtocol():
         linear_x_change = robot_controller.PID_position.compute(total_position_error, current_time)
         angular_z_change = robot_controller.PID_heading.compute(total_yaw_error, current_time)
 
-        '''
-        control_input = self.position_gain * position_control_output + \
-                        self.velocity_gain * velocity_control_output + \
-                        self.heading_gain * heading_control_output + \
-                        self.leader_follower_gain * leader_follower_output
-        '''
         return linear_x_change, angular_z_change
     

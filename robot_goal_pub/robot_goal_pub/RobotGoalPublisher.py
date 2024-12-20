@@ -20,6 +20,7 @@ class RobotGoalPublisher(Node):
         self.received_goal = False
         self.received_position_updated = False
         self.leader_namespace = 'turtlebot0'
+        # TODO: tune rendezvous_distance
         self.rendezvous_distance = 0.8
         self.control_protocol = ControlProtocol(self.num_of_robot, self.rendezvous_distance)
 
@@ -172,6 +173,7 @@ def main(args=None):
 
     while True:
         try:
+            rclpy.spin_once(robot_goal_publisher)
             robot_goal_publisher.execute()
         except KeyboardInterrupt:
             break
