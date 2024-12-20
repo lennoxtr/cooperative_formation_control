@@ -56,7 +56,7 @@ class RobotController(Node):
 
         # PID for goal seeking and flocking
         self.PID_position = PidController(Kp=0.5, Ki=0.0, Kd=0.0)
-        self.PID_heading = PidController(Kp=0.6, Ki=0.0, Kd=0.0)
+        self.PID_heading = PidController(Kp=3.5, Ki=0.0, Kd=0.0)
 
         # PID for collision prevention
         self.PID_position_cp = PidController(Kp=0.5, Ki=0.0, Kd=0.0)
@@ -158,8 +158,6 @@ class RobotController(Node):
         self.lidar_data = np.array(msg.ranges)
         self.lidar_data[self.lidar_data==0.0] = np.nan
         self.lidar_data[self.lidar_data==np.inf] = MAX_LIDAR_RANGE
-        #if self.namespace == "turtlebot0":
-        #    print(self.lidar_data)
     
     def move_bot(self, linear_x_change, angular_z_change):
         ## change
