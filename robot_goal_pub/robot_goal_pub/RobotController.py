@@ -18,7 +18,7 @@ MAX_ANGLE_VEL = 1.5 #1.5
 LIN_VEL_STEP_SIZE = 0.01
 ANG_VEL_STEP_SIZE = 0.1
 
-MAX_LIDAR_RANGE = 3500
+MAX_LIDAR_RANGE = 3.5
 
 class RobotController(Node):
     def __init__(self, robot_id, is_leader=False, safety_radius=0.7, danger_radius=0.4):
