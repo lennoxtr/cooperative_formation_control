@@ -51,8 +51,8 @@ class RobotController(Node):
         # TODO: Tune PID for collision avoidance
 
         # PID for goal seeking and flocking
-        self.PID_position = PidController(Kp=0.2, Ki=0.1, Kd=0.1)
-        self.PID_heading = PidController(Kp=0.6, Ki=0.0, Kd=0.0)
+        self.PID_position = PidController(Kp=0.8, Ki=0.1, Kd=0.2)
+        self.PID_heading = PidController(Kp=2.5, Ki=0.02, Kd=0.4)
 
         # PID for collision prevention
         self.PID_position_cp = PidController(Kp=0.5, Ki=0.0, Kd=0.0)

@@ -33,8 +33,8 @@ class ControlProtocol():
 
         self.avg_position_x = sum_position_x / (self.num_of_robot)
         self.avg_position_y = sum_position_y / (self.num_of_robot)
-        #if robot_controller.namespace == "turtlebot0":
-        #    print(robot_controller.namespace, " tracking position (", self.avg_position_x, ", ", self.avg_position_y, ")")
+        if robot_controller.namespace == "turtlebot4":
+            print(robot_controller.namespace, " tracking position (", self.avg_position_x, ", ", self.avg_position_y, ")")
 
         position_error = get_position_error(robot_controller.current_x, 
                                         robot_controller.current_y,
@@ -46,6 +46,8 @@ class ControlProtocol():
                                         self.avg_position_x,
                                         self.avg_position_y,
                                         robot_controller.current_imu_heading)
+        if position_error < self.rendezvous_distance:
+            position_error = 0
         #if robot_controller.namespace == "turtlebot0":
         #    print("Yaw error position matching: ", yaw_error)
         return position_error, yaw_error
@@ -159,9 +161,9 @@ class ControlProtocol():
         
         # Implement as logistic function
         if robot_controller.is_leader:
-            k = 1.5
+            k = 1
         else:
-            k = 1 # k is the flocking function steepness
+            k = 1.5 # k is the flocking function steepness
 
         # TODO: check whether -self.rendezvous_distance is needed
         flocking_gain = 1 / (1 + math.e ** (-k * (avg_distance - self.rendezvous_distance)))
@@ -190,9 +192,10 @@ class ControlProtocol():
         ca_yaw_error = self.collision_prevention(robot_controller)
 
         # Calculate total error with weightage of flocking and goal seeking
-        flocking_gain = self.get_flocking_gain(robot_controller, position_mapping)
-        if robot_controller.namespace == "turtlebot0": 
-            print("Flocking gain is: ", flocking_gain)
+        #flocking_gain = self.get_flocking_gain(robot_controller, position_mapping)
+        flocking_gain = 0
+        #if robot_controller.namespace == "turtlebot0": 
+        #    print("Flocking gain is: ", flocking_gain)
         fl_gs_position_error = (1 - flocking_gain) * lf_position_error + \
                                 flocking_gain * pm_position_error
   
@@ -211,7 +214,7 @@ class ControlProtocol():
         else:
             total_yaw_error = fl_gs_yaw_error
 
-        if robot_controller.namespace == "turtlebot0" or robot_controller.namespace == "turtlebot2":
+        if robot_controller.namespace == "turtlebot4":
             print("Total position error of ", robot_controller.namespace, " : ", total_position_error)                    
             print("Total yaw error of ", robot_controller.namespace, " : ", total_yaw_error)
         #Implementing method 1

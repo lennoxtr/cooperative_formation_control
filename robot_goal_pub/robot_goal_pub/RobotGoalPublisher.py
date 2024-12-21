@@ -22,7 +22,7 @@ class RobotGoalPublisher(Node):
         self.received_position_updated = False
         self.leader_namespace = 'turtlebot0'
         # TODO: tune rendezvous_distance
-        self.rendezvous_distance = 1.5
+        self.rendezvous_distance = 1.2
         self.control_protocol = ControlProtocol(self.num_of_robot, self.rendezvous_distance)
 
         self.robot_controller_map = {}
