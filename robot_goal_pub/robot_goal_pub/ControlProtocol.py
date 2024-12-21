@@ -33,8 +33,8 @@ class ControlProtocol():
 
         self.avg_position_x = sum_position_x / (self.num_of_robot)
         self.avg_position_y = sum_position_y / (self.num_of_robot)
-        if robot_controller.namespace == "turtlebot0":
-            print(robot_controller.namespace, " tracking position (", self.avg_position_x, ", ", self.avg_position_y, ")")
+        #if robot_controller.namespace == "turtlebot0":
+        #    print(robot_controller.namespace, " tracking position (", self.avg_position_x, ", ", self.avg_position_y, ")")
 
         position_error = get_position_error(robot_controller.current_x, 
                                         robot_controller.current_y,
@@ -46,8 +46,8 @@ class ControlProtocol():
                                         self.avg_position_x,
                                         self.avg_position_y,
                                         robot_controller.current_imu_heading)
-        if robot_controller.namespace == "turtlebot0":
-            print("Yaw error position matching: ", yaw_error)
+        #if robot_controller.namespace == "turtlebot0":
+        #    print("Yaw error position matching: ", yaw_error)
         return position_error, yaw_error
     
     def velocity_matching(self, robot_controller, velocity_mapping):
@@ -58,7 +58,7 @@ class ControlProtocol():
     
     def get_sensitivity_bubble_gain(self, angle_in_degree):
         ''' Map [-pi, +pi] to minimum and maximum gain for sensitivity bubble'''
-        min_gain = 2
+        min_gain = 3
         max_gain = 5
 
         angle_in_rad = angle_in_degree * math.pi / 180
@@ -78,7 +78,7 @@ class ControlProtocol():
         rclpy.spin_once(robot_controller)
         lidar_data = robot_controller.lidar_data
         current_vel = robot_controller.linear_x_velocity
-        delta_t = 2 # may tune to get actual delta t
+        delta_t = 3 # may tune to get actual delta t
 
         # Calculating Sensitivity Bubble
         sensitivity_bubble = np.array([self.get_sensitivity_bubble_gain(i) for i in range(360)]) * \
@@ -89,6 +89,9 @@ class ControlProtocol():
         if possible_collision_angle.size == 0:
             yaw_error = 0
             return yaw_error
+
+        #if robot_controller.namespace == "turtlebot3":
+        #    print(sensitivity_bubble)
 
         # Calculate rebound angle
         weighted_sum_of_distance = 0
@@ -111,7 +114,7 @@ class ControlProtocol():
         if rebound_angle == 0:
             yaw_error = np.pi/2
 
-        print("Rebound angle for ", robot_controller.namespace, " is: ", rebound_angle)
+        #print("Rebound angle for ", robot_controller.namespace, " is: ", rebound_angle)
 
         yaw_error = rebound_angle - robot_controller.current_imu_heading
         return yaw_error
@@ -133,8 +136,9 @@ class ControlProtocol():
                                     robot_controller.goal_x,
                                     robot_controller.goal_y,
                                     robot_controller.current_imu_heading)
-        if robot_controller.namespace == "turtlebot0":
-            print("Yaw error goal seeking: ", yaw_error)
+
+        #if robot_controller.namespace == "turtlebot0":
+        #    print("Yaw error goal seeking: ", yaw_error)
         return position_error, yaw_error
 
     def get_flocking_gain(self, robot_controller, position_mapping):
@@ -154,9 +158,9 @@ class ControlProtocol():
         
         # Implement as logistic function
         if robot_controller.is_leader:
-            k = 4
+            k = 1.5
         else:
-            k = 3 # k is the flocking function steepness
+            k = 1 # k is the flocking function steepness
 
         # TODO: check whether -self.rendezvous_distance is needed
         flocking_gain = 1 / (1 + math.e ** (-k * (avg_distance - self.rendezvous_distance)))
@@ -194,11 +198,21 @@ class ControlProtocol():
         fl_gs_yaw_error = (1 - flocking_gain) * lf_yaw_error + \
                             flocking_gain * pm_yaw_error
         
+
+
         total_position_error = fl_gs_position_error
-        total_yaw_error = fl_gs_yaw_error * (1 - self.collision_prevention_gain) + \
-                            ca_yaw_error * self.collision_prevention_gain
-        if robot_controller.namespace == "turtlebot0":                    
-            print("Total yaw error: ", total_yaw_error)
+        #total_yaw_error = fl_gs_yaw_error * (1 - self.collision_prevention_gain) + \
+        #                    ca_yaw_error * self.collision_prevention_gain
+
+        if ca_yaw_error > 0:
+            total_yaw_error = ca_yaw_error
+            print("Collision avoidance")
+        else:
+            total_yaw_error = fl_gs_yaw_error
+
+        if robot_controller.namespace == "turtlebot0" or robot_controller.namespace == "turtlebot2":
+            print("Total position error of ", robot_controller.namespace, " : ", total_position_error)                    
+            print("Total yaw error of ", robot_controller.namespace, " : ", total_yaw_error)
         #Implementing method 1
         current_time = time.time()
         linear_x_change = robot_controller.PID_position.compute(total_position_error, current_time)
