@@ -214,7 +214,7 @@ class ControlProtocol():
         else:
             total_yaw_error = fl_gs_yaw_error
 
-        if robot_controller.namespace == "turtlebot4":
+        if robot_controller.namespace == "turtlebot3":
             print("Total position error of ", robot_controller.namespace, " : ", total_position_error)                    
             print("Total yaw error of ", robot_controller.namespace, " : ", total_yaw_error)
         #Implementing method 1

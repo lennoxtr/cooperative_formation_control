@@ -1,7 +1,7 @@
 import rclpy
 import time
 import threading
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor
 
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
@@ -155,7 +155,7 @@ class RobotGoalPublisher(Node):
             while not self.received_position_updated:
                 rclpy.spin_once(self)
 
-            with ThreadPoolExecutor(max_workers=len(self.robot_controller_map)) as executor:
+            with ProcessPoolExecutor(self.num_of_robot) as executor:
                 futures = {
                     executor.submit(self.control_one_robot, robot_controller, self.control_protocol,
                                 self.position_mapping, self.velocity_mapping, self.heading_mapping)
