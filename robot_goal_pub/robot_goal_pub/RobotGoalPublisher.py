@@ -1,6 +1,7 @@
 import rclpy
 import time
 import threading
+from concurrent.futures import ThreadPoolExecutor
 
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
@@ -21,7 +22,7 @@ class RobotGoalPublisher(Node):
         self.received_position_updated = False
         self.leader_namespace = 'turtlebot0'
         # TODO: tune rendezvous_distance
-        self.rendezvous_distance = 1
+        self.rendezvous_distance = 1.5
         self.control_protocol = ControlProtocol(self.num_of_robot, self.rendezvous_distance)
 
         self.robot_controller_map = {}
@@ -131,6 +132,16 @@ class RobotGoalPublisher(Node):
         index = msg.robot_id
         self.heading_mapping[index] = msg.heading
         return
+    
+    def control_one_robot(self, robot_controller, control_protocol, position_mapping, velocity_mapping, heading_mapping):
+        rclpy.spin_once(robot_controller)
+        linear_x_change, angular_z_change = control_protocol.execute_control(robot_controller,
+                                                                                        position_mapping,
+                                                                                        velocity_mapping,
+                                                                                        heading_mapping)
+        robot_controller.move_bot(linear_x_change,
+                                        angular_z_change)
+        rclpy.spin_once(robot_controller)
         
     def execute(self):
         rclpy.spin_once(self)
@@ -144,20 +155,12 @@ class RobotGoalPublisher(Node):
             while not self.received_position_updated:
                 rclpy.spin_once(self)
 
-            for robot_controller_name in self.robot_controller_map:
-                robot_controller = self.robot_controller_map[robot_controller_name]
-                rclpy.spin_once(robot_controller)
-
-                # Control Protocol output linear and angular speed change
-                linear_x_change, angular_z_change = self.control_protocol.execute_control(robot_controller,
-                                                                                        self.position_mapping,
-                                                                                        self.velocity_mapping,
-                                                                                        self.heading_mapping)
-
-                # Move to goal
-                robot_controller.move_bot(linear_x_change,
-                                        angular_z_change)
-                rclpy.spin_once(robot_controller)
+            with ThreadPoolExecutor(max_workers=len(self.robot_controller_map)) as executor:
+                futures = {
+                    executor.submit(self.control_one_robot, robot_controller, self.control_protocol,
+                                self.position_mapping, self.velocity_mapping, self.heading_mapping)
+                    for robot_controller in self.robot_controller_map.values()
+                }
 
             self.received_position_updated = False
             rclpy.spin_once(self)

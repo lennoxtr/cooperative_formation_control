@@ -21,16 +21,12 @@ ANG_VEL_STEP_SIZE = 0.1
 MAX_LIDAR_RANGE = 3.5
 
 class RobotController(Node):
-    def __init__(self, robot_id, is_leader=False, safety_radius=0.7, danger_radius=0.4):
+    def __init__(self, robot_id, is_leader=False):
         namespace = "turtlebot" + str(robot_id)
         super().__init__('RobotController_' + namespace)
         self.robot_id = robot_id
         self.namespace = namespace
         self.is_leader = is_leader
-
-        # Collision avoidance threshold
-        self.safety_radius = safety_radius
-        self.danger_radius = danger_radius
 
         # Lidar data for collision avoidance
         self.lidar_data = np.zeros(360)
@@ -55,8 +51,8 @@ class RobotController(Node):
         # TODO: Tune PID for collision avoidance
 
         # PID for goal seeking and flocking
-        self.PID_position = PidController(Kp=0.3, Ki=0.0, Kd=0.0)
-        self.PID_heading = PidController(Kp=0.5, Ki=0.0, Kd=0.0)
+        self.PID_position = PidController(Kp=0.2, Ki=0.1, Kd=0.1)
+        self.PID_heading = PidController(Kp=0.6, Ki=0.0, Kd=0.0)
 
         # PID for collision prevention
         self.PID_position_cp = PidController(Kp=0.5, Ki=0.0, Kd=0.0)

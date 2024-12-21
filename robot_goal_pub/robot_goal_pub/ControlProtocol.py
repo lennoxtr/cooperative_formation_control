@@ -90,14 +90,10 @@ class ControlProtocol():
             yaw_error = 0
             return yaw_error
 
-        #if robot_controller.namespace == "turtlebot3":
-        #    print(sensitivity_bubble)
-
         # Calculate rebound angle
         weighted_sum_of_distance = 0
         sum_of_distance = 0
         for angle_in_degree in possible_collision_angle:
-            # TODO: Normalize this angle to +- pi instead of the rebound angle
             angle_in_rad =  angle_in_degree / 180 * np.pi
             if angle_in_rad > np.pi:
                 angle_in_rad -= 2 * np.pi
@@ -105,9 +101,6 @@ class ControlProtocol():
             distance_measured = lidar_data[angle_in_degree]
             sum_of_distance += distance_measured
             weighted_sum_of_distance += angle_in_rad * distance_measured
-
-        # bug when angle = 0
-        # TODO: fix this bug
         
         rebound_angle = weighted_sum_of_distance / sum_of_distance
 
@@ -117,6 +110,14 @@ class ControlProtocol():
         #print("Rebound angle for ", robot_controller.namespace, " is: ", rebound_angle)
 
         yaw_error = rebound_angle - robot_controller.current_imu_heading
+
+        if yaw_error > np.pi:
+            yaw_error -= 2 * np.pi
+        elif yaw_error < -np.pi:
+            yaw_error += 2 * np.pi
+
+        # TODO: implement slow down
+
         return yaw_error
     
     def heading_matching(self, robot_controller, heading_mapping):
