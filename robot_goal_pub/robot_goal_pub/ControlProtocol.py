@@ -19,6 +19,10 @@ class ControlProtocol():
         self.avg_position_y = 0
         self.rendezvoused = False
         self.bare_sensitivity_bubble = np.array([self.get_sensitivity_bubble_gain(i) for i in range(360)])
+        
+        angles_in_rad = np.arange(360) * np.pi / 180
+        self.normalized_angle_in_rad = (angles_in_rad + np.pi) % (2 * np.pi) - np.pi
+        self.valid_angles = (self.normalized_angle_in_rad >= -np.pi/2) & (self.normalized_angle_in_rad <= np.pi/2)
 
         #TODO: implement adjacency matrix for imperfect information between robots
         #self.adjacency_matrix = adjacency_matrix
@@ -90,7 +94,7 @@ class ControlProtocol():
                                 current_vel * delta_t
         
 
-        possible_collision_angle = np.where((lidar_data != np.isnan) & (lidar_data != 0.0) & (lidar_data < sensitivity_bubble))[0]
+        possible_collision_angle = np.where((lidar_data > 0.0) & (lidar_data < sensitivity_bubble))[0]
 
         if possible_collision_angle.size == 0:
             yaw_error = 0
@@ -107,23 +111,13 @@ class ControlProtocol():
             print(" ")
         '''
 
-        # Calculate rebound angle
-        weighted_sum_of_distance = 0
-        sum_of_distance = 0
-        for angle_in_degree in possible_collision_angle:
-            # TODO: Normalize this angle to +- pi instead of the rebound angle
-            angle_in_rad =  angle_in_degree / 180 * np.pi
-            if angle_in_rad > np.pi:
-                angle_in_rad -= 2 * np.pi
-            
-            if angle_in_rad > np.pi/2 or angle_in_rad < - np.pi/2:
-                continue
-            
-            distance_measured = lidar_data[angle_in_degree]
-            if distance_measured != 0.0 and distance_measured != np.nan:
-                sum_of_distance += distance_measured
-                weighted_sum_of_distance += angle_in_rad * (robot_controller.max_lidar_range - distance_measured)
+        valid_distances = lidar_data[possible_collision_angle]
+        valid_collision_angles_in_rad = self.normalized_angle_in_rad[possible_collision_angle]
+        distance_weights = robot_controller.max_lidar_range - valid_distances
 
+        # Calculate rebound angle
+        weighted_sum_of_distance = np.sum(valid_collision_angles_in_rad * distance_weights)
+        sum_of_distance = np.sum(valid_distances)
 
         # There is a chance collision angle all > 90 and < 270 causing sum_of_distance to be 0
         if sum_of_distance > 0:
