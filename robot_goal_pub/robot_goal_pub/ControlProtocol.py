@@ -6,6 +6,8 @@ import rclpy
 from robot_goal_pub.GoalProcessor import get_position_error
 from robot_goal_pub.GoalProcessor import get_yaw_error
 
+ANG_TOL = 0.2
+
 class ControlProtocol():
     def __init__(self, num_of_robot, rendezvous_distance):
         self.velocity_gain = 0
@@ -16,6 +18,7 @@ class ControlProtocol():
         self.avg_position_x = 0
         self.avg_position_y = 0
         self.rendezvoused = False
+        self.bare_sensitivity_bubble = np.array([self.get_sensitivity_bubble_gain(i) for i in range(360)])
 
         #TODO: implement adjacency matrix for imperfect information between robots
         #self.adjacency_matrix = adjacency_matrix
@@ -58,8 +61,8 @@ class ControlProtocol():
     
     def get_sensitivity_bubble_gain(self, angle_in_degree):
         ''' Map [-pi, +pi] to minimum and maximum gain for sensitivity bubble'''
-        min_gain = 3
-        max_gain = 5
+        min_gain = 2
+        max_gain = 4
 
         angle_in_rad = angle_in_degree * math.pi / 180
 
@@ -73,6 +76,8 @@ class ControlProtocol():
         return sensitivity_bubble_gain
     
     def collision_prevention(self, robot_controller):
+        # Test using only frontal 180
+
         # Needs to be implemented in all control algo
         # Using bubble rebound algo
         rclpy.spin_once(robot_controller)
@@ -81,17 +86,26 @@ class ControlProtocol():
         delta_t = 3 # may tune to get actual delta t
 
         # Calculating Sensitivity Bubble
-        sensitivity_bubble = np.array([self.get_sensitivity_bubble_gain(i) for i in range(360)]) * \
+        sensitivity_bubble = self.bare_sensitivity_bubble * \
                                 current_vel * delta_t
+        
 
-        possible_collision_angle = np.where((lidar_data != np.isnan) & (lidar_data < sensitivity_bubble))[0]
+        possible_collision_angle = np.where((lidar_data != np.isnan) & (lidar_data != 0.0) & (lidar_data < sensitivity_bubble))[0]
 
         if possible_collision_angle.size == 0:
             yaw_error = 0
             return yaw_error
-
-        #if robot_controller.namespace == "turtlebot3":
-        #    print(sensitivity_bubble)
+        '''
+        if (robot_controller.is_leader):
+            #print(sensitivity_bubble)
+            print(lidar_data)
+            print(" ")
+            print(lidar_data[possible_collision_angle])
+            print(" ")
+            print("Collision angle:")
+            print(possible_collision_angle)
+            print(" ")
+        '''
 
         # Calculate rebound angle
         weighted_sum_of_distance = 0
@@ -101,22 +115,43 @@ class ControlProtocol():
             angle_in_rad =  angle_in_degree / 180 * np.pi
             if angle_in_rad > np.pi:
                 angle_in_rad -= 2 * np.pi
-
+            
+            if angle_in_rad > np.pi/2 or angle_in_rad < - np.pi/2:
+                continue
+            
             distance_measured = lidar_data[angle_in_degree]
-            sum_of_distance += distance_measured
-            weighted_sum_of_distance += angle_in_rad * distance_measured
+            if distance_measured != 0.0 and distance_measured != np.nan:
+                sum_of_distance += distance_measured
+                weighted_sum_of_distance += angle_in_rad * (robot_controller.max_lidar_range - distance_measured)
 
-        # bug when angle = 0
-        # TODO: fix this bug
-        
-        rebound_angle = weighted_sum_of_distance / sum_of_distance
 
-        if rebound_angle == 0:
-            yaw_error = np.pi/2
+        # There is a chance collision angle all > 90 and < 270 causing sum_of_distance to be 0
+        if sum_of_distance > 0:
+            rebound_angle = weighted_sum_of_distance / sum_of_distance
+        else: 
+            yaw_error = 0
+            return yaw_error 
+
+        '''
+        if (robot_controller.is_leader):
+            #print(sensitivity_bubble)
+            print("Weighted sum: ", weighted_sum_of_distance)
+            print(" ")
+            print("Rebound angle: ", rebound_angle)
+            print("--------------")
+        '''
+
+        if -ANG_TOL < rebound_angle < ANG_TOL:
+            rebound_angle = np.pi
 
         #print("Rebound angle for ", robot_controller.namespace, " is: ", rebound_angle)
 
         yaw_error = rebound_angle - robot_controller.current_imu_heading
+        if yaw_error > np.pi:
+            yaw_error -= 2 * np.pi
+        elif yaw_error < -np.pi:
+            yaw_error += 2 * np.pi
+        
         return yaw_error
     
     def heading_matching(self, robot_controller, heading_mapping):
@@ -190,15 +225,17 @@ class ControlProtocol():
 
         # Calculate total error with weightage of flocking and goal seeking
         flocking_gain = self.get_flocking_gain(robot_controller, position_mapping)
+
+        '''
         if robot_controller.namespace == "turtlebot0": 
             print("Flocking gain is: ", flocking_gain)
+        '''
+
         fl_gs_position_error = (1 - flocking_gain) * lf_position_error + \
                                 flocking_gain * pm_position_error
   
         fl_gs_yaw_error = (1 - flocking_gain) * lf_yaw_error + \
                             flocking_gain * pm_yaw_error
-        
-
 
         total_position_error = fl_gs_position_error
         #total_yaw_error = fl_gs_yaw_error * (1 - self.collision_prevention_gain) + \
@@ -209,14 +246,23 @@ class ControlProtocol():
             print("Collision avoidance")
         else:
             total_yaw_error = fl_gs_yaw_error
-
-        if robot_controller.namespace == "turtlebot0" or robot_controller.namespace == "turtlebot2":
+        '''
+        if robot_controller.namespace == "turtlebot0":
             print("Total position error of ", robot_controller.namespace, " : ", total_position_error)                    
             print("Total yaw error of ", robot_controller.namespace, " : ", total_yaw_error)
+        '''
         #Implementing method 1
         current_time = time.time()
         linear_x_change = robot_controller.PID_position.compute(total_position_error, current_time)
         angular_z_change = robot_controller.PID_heading.compute(total_yaw_error, current_time)
 
+        '''
+        if (robot_controller.is_leader):
+            linear_x_change = robot_controller.PID_position.compute(total_position_error, current_time)
+            angular_z_change = robot_controller.PID_heading.compute(total_yaw_error, current_time)
+        else:
+            linear_x_change = 0.0
+            angular_z_change = 0.0
+        '''
         return linear_x_change, angular_z_change
     

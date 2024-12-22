@@ -29,8 +29,7 @@ class RobotController(Node):
         self.is_leader = is_leader
 
         # Collision avoidance threshold
-        self.safety_radius = safety_radius
-        self.danger_radius = danger_radius
+        self.max_lidar_range = MAX_LIDAR_RANGE
 
         # Lidar data for collision avoidance
         self.lidar_data = np.zeros(360)
