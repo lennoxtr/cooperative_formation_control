@@ -7,9 +7,12 @@ from robot_goal_pub.GoalProcessor import get_position_error
 from robot_goal_pub.GoalProcessor import get_yaw_error
 
 ANG_TOL = 0.2
+POSITION_TOL = 0.05
 
 class ControlProtocol():
     def __init__(self, num_of_robot, rendezvous_distance):
+        #TODO: need to find out the +- quadrant of angles
+        #TODO: Implement slow down for collision avoidance
         self.velocity_gain = 0
         self.heading_gain = 0
         self.collision_prevention_gain = 0.9
@@ -17,12 +20,11 @@ class ControlProtocol():
         self.rendezvous_distance = rendezvous_distance
         self.avg_position_x = 0
         self.avg_position_y = 0
-        self.rendezvoused = False
+        self.all_rendezvoused = False
         self.bare_sensitivity_bubble = np.array([self.get_sensitivity_bubble_gain(i) for i in range(360)])
         
         angles_in_rad = np.arange(360) * np.pi / 180
         self.normalized_angle_in_rad = (angles_in_rad + np.pi) % (2 * np.pi) - np.pi
-        self.valid_angles = (self.normalized_angle_in_rad >= -np.pi/2) & (self.normalized_angle_in_rad <= np.pi/2)
 
         #TODO: implement adjacency matrix for imperfect information between robots
         #self.adjacency_matrix = adjacency_matrix
@@ -55,6 +57,12 @@ class ControlProtocol():
                                         robot_controller.current_imu_heading)
         #if robot_controller.namespace == "turtlebot0":
         #    print("Yaw error position matching: ", yaw_error)
+
+        if position_error < self.rendezvous_distance:
+            robot_controller.is_rendezvoused = True
+        else:
+            robot_controller.is_rendezvoused = False
+
         return position_error, yaw_error
     
     def velocity_matching(self, robot_controller, velocity_mapping):
@@ -66,7 +74,7 @@ class ControlProtocol():
     def get_sensitivity_bubble_gain(self, angle_in_degree):
         ''' Map [-pi, +pi] to minimum and maximum gain for sensitivity bubble'''
         min_gain = 2
-        max_gain = 4
+        max_gain = 2
 
         angle_in_rad = angle_in_degree * math.pi / 180
 
@@ -93,16 +101,15 @@ class ControlProtocol():
         sensitivity_bubble = self.bare_sensitivity_bubble * \
                                 current_vel * delta_t
         
-
         possible_collision_angle = np.where((lidar_data > 0.0) & (lidar_data < sensitivity_bubble))[0]
 
-        if possible_collision_angle.size == 0:
-            yaw_error = 0
-            return yaw_error
+        valid_angles = (possible_collision_angle >= 270) | (possible_collision_angle <= 180)
+        possible_collision_angle = possible_collision_angle[valid_angles]
+
         '''
-        if (robot_controller.is_leader):
+        if (robot_controller.namespace == "turtlebot3"):
             #print(sensitivity_bubble)
-            print(lidar_data)
+            #print(lidar_data)
             print(" ")
             print(lidar_data[possible_collision_angle])
             print(" ")
@@ -110,6 +117,11 @@ class ControlProtocol():
             print(possible_collision_angle)
             print(" ")
         '''
+        
+
+        if possible_collision_angle.size == 0:
+            yaw_error = 0
+            return yaw_error
 
         valid_distances = lidar_data[possible_collision_angle]
         valid_collision_angles_in_rad = self.normalized_angle_in_rad[possible_collision_angle]
@@ -117,7 +129,7 @@ class ControlProtocol():
 
         # Calculate rebound angle
         weighted_sum_of_distance = np.sum(valid_collision_angles_in_rad * distance_weights)
-        sum_of_distance = np.sum(valid_distances)
+        sum_of_distance = np.sum(valid_distances) + robot_controller.max_lidar_range * possible_collision_angle.size
 
         # There is a chance collision angle all > 90 and < 270 causing sum_of_distance to be 0
         if sum_of_distance > 0:
@@ -127,24 +139,27 @@ class ControlProtocol():
             return yaw_error 
 
         '''
-        if (robot_controller.is_leader):
+        if (robot_controller.namespace == "turtlebot3"):
             #print(sensitivity_bubble)
+            print("Valid collision angles in rad: ", valid_collision_angles_in_rad)
             print("Weighted sum: ", weighted_sum_of_distance)
+            print("Sum of distances: ", sum_of_distance)
             print(" ")
             print("Rebound angle: ", rebound_angle)
             print("--------------")
         '''
-
+        
+        # For turtlebot 3, rebound angle is np.pi. However, current_imu_heading is also np.pi
+        # Hence, this rebound angle is relative to the 0 point of the lidar
         if -ANG_TOL < rebound_angle < ANG_TOL:
-            rebound_angle = np.pi
+            if rebound_angle > 0:
+                rebound_angle = np.pi - ANG_TOL
+            else: rebound_angle = -np.pi + ANG_TOL
 
         #print("Rebound angle for ", robot_controller.namespace, " is: ", rebound_angle)
 
-        yaw_error = rebound_angle - robot_controller.current_imu_heading
-        if yaw_error > np.pi:
-            yaw_error -= 2 * np.pi
-        elif yaw_error < -np.pi:
-            yaw_error += 2 * np.pi
+        yaw_error = rebound_angle
+        #yaw_error = rebound_angle - robot_controller.current_imu_heading
         
         return yaw_error
     
@@ -172,6 +187,11 @@ class ControlProtocol():
 
     def get_flocking_gain(self, robot_controller, position_mapping):
         # Must be called after position matching
+        # At the moment recalculated for all robots => wasteful
+
+        if self.all_rendezvoused:
+            flocking_gain = 0.0
+            return flocking_gain
 
         sum_distance_to_formation_center = 0
         for (x_coord, y_coord) in position_mapping:
@@ -182,20 +202,22 @@ class ControlProtocol():
         
         avg_distance = sum_distance_to_formation_center / self.num_of_robot
         if avg_distance < self.rendezvous_distance:
-            self.rendezvoused = True
+            self.all_rendezvoused = True
             print("RENDEZVOUS DETECTED")
+        else:
+            self.rendezvoused = False
         
         # Implement as logistic function
         if robot_controller.is_leader:
             k = 1.5
         else:
-            k = 1 # k is the flocking function steepness
+            k = 0.5 # k is the flocking function steepness
 
         # TODO: check whether -self.rendezvous_distance is needed
         flocking_gain = 1 / (1 + math.e ** (-k * (avg_distance - self.rendezvous_distance)))
         return flocking_gain
         
-    def execute_control(self, robot_controller, position_mapping, velocity_mapping, heading_mapping):
+    def calculate_control(self, robot_controller, position_mapping, velocity_mapping, heading_mapping):
         ### Sum of all control policies
 
         # Method 1: have 1 PID (currently only P) for all
@@ -204,7 +226,7 @@ class ControlProtocol():
         # Position Matching 
         pm_position_error, pm_yaw_error = self.position_matching(robot_controller,
                                                                 position_mapping)
-        
+
         # Velocity Matching
         velocity_control_output = self.velocity_matching(robot_controller, velocity_mapping)
 
@@ -216,6 +238,12 @@ class ControlProtocol():
 
         # Collision Prevention
         ca_yaw_error = self.collision_prevention(robot_controller)
+
+        # If robot is at rendezvous position, but still waiting for other
+        if robot_controller.is_rendezvoused and not self.all_rendezvoused:
+            total_position_error = 0.0
+            total_yaw_error = 0.0
+            return total_position_error, total_yaw_error
 
         # Calculate total error with weightage of flocking and goal seeking
         flocking_gain = self.get_flocking_gain(robot_controller, position_mapping)
@@ -240,15 +268,15 @@ class ControlProtocol():
             print("Collision avoidance")
         else:
             total_yaw_error = fl_gs_yaw_error
-        '''
-        if robot_controller.namespace == "turtlebot0":
+
+        
+        if robot_controller.namespace == "turtlebot3":
+            print("Flocking gain: ", flocking_gain)
+            print("LF_position_error: ", lf_position_error)
+            print("PM_position_error: ", pm_position_error)
             print("Total position error of ", robot_controller.namespace, " : ", total_position_error)                    
             print("Total yaw error of ", robot_controller.namespace, " : ", total_yaw_error)
-        '''
-        #Implementing method 1
-        current_time = time.time()
-        linear_x_change = robot_controller.PID_position.compute(total_position_error, current_time)
-        angular_z_change = robot_controller.PID_heading.compute(total_yaw_error, current_time)
+        
 
         '''
         if (robot_controller.is_leader):
@@ -258,5 +286,18 @@ class ControlProtocol():
             linear_x_change = 0.0
             angular_z_change = 0.0
         '''
+        return total_position_error, total_yaw_error
+
+    def execute_control(self, robot_controller, position_mapping, velocity_mapping, heading_mapping):
+        total_position_error, total_yaw_error = self.calculate_control(robot_controller,
+                                                                    position_mapping,
+                                                                    velocity_mapping,
+                                                                    heading_mapping)
+
+            # Implementing Method 1: 1 set of PID for all policies
+        current_time = time.time()
+        linear_x_change = robot_controller.PID_position.compute(total_position_error, current_time)
+        angular_z_change = robot_controller.PID_heading.compute(total_yaw_error, current_time)
+
         return linear_x_change, angular_z_change
     

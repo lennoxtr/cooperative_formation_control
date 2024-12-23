@@ -12,7 +12,7 @@ import numpy as np
 from robot_goal_pub.PidController import PidController
 from robot_goal_pub.GoalProcessor import arrived_at_goal
 
-MAX_LINEAR_VEL = 0.2
+MAX_LINEAR_VEL = 0.15
 MAX_ANGLE_VEL = 1.5 #1.5
 
 LIN_VEL_STEP_SIZE = 0.01
@@ -21,12 +21,18 @@ ANG_VEL_STEP_SIZE = 0.1
 MAX_LIDAR_RANGE = 3.5
 
 class RobotController(Node):
-    def __init__(self, robot_id, is_leader=False, safety_radius=0.7, danger_radius=0.4):
+    def __init__(self, robot_id, is_leader=False):
+        # TODO: consider adding a publisher for rendezvous
         namespace = "turtlebot" + str(robot_id)
         super().__init__('RobotController_' + namespace)
+
+        # Identification
         self.robot_id = robot_id
         self.namespace = namespace
         self.is_leader = is_leader
+        
+        # Rendezvous flag
+        self.is_rendezvoused = False
 
         # Collision avoidance threshold
         self.max_lidar_range = MAX_LIDAR_RANGE
@@ -54,7 +60,7 @@ class RobotController(Node):
         # TODO: Tune PID for collision avoidance
 
         # PID for goal seeking and flocking
-        self.PID_position = PidController(Kp=0.8, Ki=0.0, Kd=0.2)
+        self.PID_position = PidController(Kp=2, Ki=0.0, Kd=0.2)
         self.PID_heading = PidController(Kp=2.5, Ki=0.02, Kd=0.4)
 
         # PID for collision prevention
