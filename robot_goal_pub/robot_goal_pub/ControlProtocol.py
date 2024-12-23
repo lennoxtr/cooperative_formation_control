@@ -156,13 +156,21 @@ class ControlProtocol():
             print("--------------")
         '''
         
-        # For turtlebot 3, rebound angle is np.pi. However, current_imu_heading is also np.pi
-        # Hence, this rebound angle is relative to the 0 point of the lidar
+        left_lidar_data = lidar_data[85:85]
+        mean_distance_left_side = np.mean(left_lidar_data)
+        right_lidar_data = lidar_data[265:275]
+        mean_distance_right_side = np.mean(right_lidar_data)
+
         if -ANG_TOL < rebound_angle < ANG_TOL:
-            if rebound_angle > 0:
-                rebound_angle = np.pi - ANG_TOL
+            if mean_distance_left_side < robot_controller.max_lidar_range:
+                # Left side has obstacles
+                rebound_angle = -np.pi/2
+            elif mean_distance_right_side < robot_controller.max_lidar_range:
+                # Right side has obstacles
+                rebound_angle = np.pi/2
             else: 
-                rebound_angle = -np.pi + ANG_TOL
+                sign_of_rebound_angle = rebound_angle / abs(rebound_angle)
+                rebound_angle = sign_of_rebound_angle * np.pi - sign_of_rebound_angle * ANG_TOL
 
         #print("Rebound angle for ", robot_controller.namespace, " is: ", rebound_angle)
 
