@@ -1,0 +1,303 @@
+import rclpy
+
+from rclpy.node import Node
+from rclpy.executors import MultiThreadedExecutor
+
+from geometry_msgs.msg import Twist
+from sensor_msgs.msg import Imu
+from sensor_msgs.msg import LaserScan
+from nav_msgs.msg import Odometry
+from heading_msg.msg import Heading
+from velocity_msg.msg import Velocity
+from robot_goal.msg import Goal
+
+import numpy as np
+
+from robot_controller.PidController import PidController
+from robot_controller.ControlProtocol import ControlProtocol
+from robot_controller.GoalProcessor import arrived_at_goal, quaternion_to_euler
+
+
+MAX_LINEAR_VEL = 0.2
+MAX_ANGLE_VEL = 1.5 #1.5
+
+LIN_VEL_STEP_SIZE = 0.01
+ANG_VEL_STEP_SIZE = 0.1
+
+MAX_LIDAR_RANGE = 3.5
+
+class RobotController(Node):
+    def __init__(self, robot_id, is_leader=False):
+        # TODO: consider adding a publisher for rendezvous
+        namespace = "turtlebot" + str(robot_id)
+        super().__init__('RobotController_' + namespace)
+
+        # Identification
+        self.robot_id = robot_id
+        self.namespace = namespace
+        self.is_leader = is_leader
+
+        # Start execution flag
+        self.is_started = False
+
+        # Control Protocol
+        self.rendezvous_distance = 1.5
+        self.control_protocol = ControlProtocol(self.rendezvous_distance)
+        
+        # Mappings for control
+        # TODO: add position mapping
+        self.position_mapping = np.array([])
+        # TODO: add heading mapping
+        self.heading_mapping = np.array([])
+        # TODO: add velocity mapping
+        self.velocity_mapping = np.array([])
+        
+        # Rendezvous flag
+        self.is_rendezvoused = False
+
+        # Collision avoidance threshold
+        self.max_lidar_range = MAX_LIDAR_RANGE
+        self.dangerous_radius = 1.6
+
+        # Lidar data for collision avoidance
+        self.lidar_data = np.zeros(360)
+
+        # Rendezvous
+        self.is_in_formation = False
+
+        # Position variables
+        self.goal_x = 0.0
+        self.goal_y = 0.0
+        self.current_x = 0.0
+        self.current_y = 0.0
+
+        # Kinematic variables
+        # Yaw is +- pi from north
+        self.current_imu_heading = 0
+        self.linear_x_velocity = 0
+        self.angular_z_velocity = 0
+        
+        # Kinematic PID Controller (may add more for different control policies)
+        self.PID_position = PidController(Kp=1, Ki=0.0, Kd=0.0)
+        self.PID_heading = PidController(Kp=2.5, Ki=0.02, Kd=0.4)
+
+        # Subscriptions
+        # TODO: write start execution subscription
+        # TODO: write velocity list subscription
+        # TODO: write heading subscription
+        # TODO: write leader position subscriber
+        
+
+        self.imu_subscription = self.create_subscription(
+            Imu,
+            f'/{self.namespace}/imu',
+            self.imu_callback,
+            10)
+        
+        self.odom_subscription = self.create_subscription(
+            Odometry,
+            f'/{self.namespace}/odom',
+            self.odom_callback,
+            10)
+        
+        self.lidar_subscription = self.create_subscription(
+            LaserScan,
+            f'/{self.namespace}/scan',
+            self.lidar_callback,
+            10)
+        
+        self.goal_subscription = self.create_subscription(
+            Goal,
+            f'/{self.namespace}/goal',
+            self.goal_listener_callback,
+            10)
+        
+        self.is_leader_subscription = self.create_subscription(
+            String,
+            '/leader',
+            self.is_leader_callback,
+            10)
+        
+
+        self.is_started_subscription = self.create_subscription(
+            Bool,
+            '/start',
+            self.is_started_callback,
+            10)
+
+        # Publishers
+
+        self.heartbeat_publisher = self.create_publisher(
+            String,
+            '/heartbeat',
+            10
+        )
+
+        # TODO: write arrive at goal publisher
+        # TODO: write position publisher for leader
+
+        self.self_twist_publisher = self.create_publisher(
+            Twist,
+            f'/{self.namespace}/cmd_vel',
+            10)
+        
+        self.controller_velocity_publisher = self.create_publisher(
+            Velocity,
+            '/robot_linear_vel',
+            10)
+        
+        self.heading_publisher = self.create_publisher(
+            Heading,
+            '/robot_heading',
+            10)
+        
+        self.position_publisher = self.create_publisher(
+            Goal,
+            '/leader_position',
+            10)
+    
+    def update_position(self, current_x, current_y):
+        self.current_x = current_x
+        self.current_y = current_y
+    
+    def update_goal(self, goal_x, goal_y):
+        self.goal_x = goal_x
+        self.goal_y = goal_y
+    
+    def imu_callback(self, msg):
+        orientation_q = msg.orientation
+        quaternion = [orientation_q.x,
+                      orientation_q.y,
+                      orientation_q.z,
+                      orientation_q.w]
+        
+        euler = quaternion_to_euler(quaternion)
+        roll = euler[0]  # radians
+        pitch = euler[1]  # radians
+        yaw = euler[2]  # radians
+        self.current_imu_heading = float("{:.3f}".format(yaw))
+
+        # Publish yaw to central controller node
+        msg = Heading()
+        msg.robot_id = self.robot_id
+        msg.heading = self.current_imu_heading
+        self.heading_publisher.publish(msg)
+    
+    def odom_callback(self, msg):
+        linear_velocity = msg.twist.twist.linear
+        self.linear_x = linear_velocity.x
+        self.linear_y = linear_velocity.y
+
+        # Publish linear velocity to central controller node
+        msg = Velocity()
+        msg.robot_id = self.robot_id
+        msg.linear_x = self.linear_x
+        msg.linear_y = self.linear_y
+        self.controller_velocity_publisher.publish(msg)
+
+    def lidar_callback(self, msg):
+        self.lidar_data = np.array(msg.ranges)
+        #self.lidar_data[self.lidar_data==0.0] = np.nan
+        self.lidar_data[self.lidar_data==np.inf] = MAX_LIDAR_RANGE
+
+    def goal_listener_callback(self, msg):
+        self.goal_x = float("{:.3f}".format(msg.goal_x))
+        self.goal_y = float("{:.3f}".format(msg.goal_y))
+
+    def is_leader_callback(self, msg):
+        leader_namespace = msg
+        if self.namespace == leader_namespace:
+            self.is_leader = True
+            self.get_logger().info(self.namespace, " is leader")
+    
+    def is_started_callback(self, msg):
+        self.is_started = True
+    
+    def move_bot(self, linear_x_change, angular_z_change):
+        ## change
+        if abs(angular_z_change) > MAX_ANGLE_VEL:
+            target_angular_velocity = angular_z_change / abs(angular_z_change) * MAX_ANGLE_VEL
+        else:
+            target_angular_velocity = angular_z_change
+
+        if abs(linear_x_change) > MAX_LINEAR_VEL:
+            target_linear_velocity = linear_x_change / abs(linear_x_change) * MAX_LINEAR_VEL
+        else:
+            target_linear_velocity = linear_x_change
+        
+        self.linear_x_velocity = target_linear_velocity
+        self.angular_z_velocity = target_angular_velocity
+
+        twist = Twist()
+        twist.linear.x = target_linear_velocity
+        twist.linear.y = 0.0
+        twist.linear.z = 0.0
+
+        twist.angular.x = 0.0
+        twist.angular.y = 0.0
+        twist.angular.z = target_angular_velocity
+
+        self.self_twist_publisher.publish(twist)
+    
+    def stop_bot(self):
+        twist = Twist()
+        twist.linear.x = 0.0
+        twist.linear.y = 0.0
+        twist.linear.z = 0.0
+
+        twist.angular.x = 0.0
+        twist.angular.y = 0.0
+        twist.angular.z = 0.0
+
+        self.self_twist_publisher.publish(twist)
+        self.get_logger().info(self.namespace + " stopped")
+    
+    def arrived_at_goal(self):
+        return arrived_at_goal(self.current_x,
+                               self.current_y,
+                               self.goal_x,
+                               self.goal_y)
+    
+    def execute(self):
+        while not self.is_started:
+            # Publish heartbeat
+            msg = String()
+            msg.data = self.namespace
+            self.heartbeat_publisher.publish(msg)
+            return
+        
+        rclpy.spin_once(self)
+        # Control Protocol output linear and angular speed change
+        linear_x_change, angular_z_change = self.control_protocol.execute_control(self.position_mapping,
+                                                                                self.velocity_mapping,
+                                                                                self.heading_mapping)
+        # Move to goal
+        robot_controller.move_bot(linear_x_change, angular_z_change)
+        rclpy.spin_once(robot_controller)
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    robot_controller = RobotController()
+    rclpy.spin_once(robot_controller)
+    time.sleep(1)
+
+    # Allow simultaneous processing of callbacks
+    executor = MultiThreadedExecutor()
+    executor.add_node(robot_controller)
+    executor_thread = threading.Thread(target=executor.spin, daemon=True)
+    executor_thread.start()
+    self.get_logger().info(self.namespace, " initialized")
+
+    while True:
+        try:
+            rclpy.spin_once(robot_controller)
+            robot_controller.execute()
+        except KeyboardInterrupt:
+            break
+    
+    robot_controller.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
