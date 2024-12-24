@@ -12,7 +12,6 @@ class PidController():
         self.integral = 0
         self.last_time = time.time()
 
-
     def compute(self, error, current_time):
         # PID terms
         P = self.Kp * error
