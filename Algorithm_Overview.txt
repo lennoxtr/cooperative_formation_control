@@ -1,0 +1,44 @@
+1. Initialization
+- Initialize 5 robot controllers
+- Initialize central controller
+- Initialize environment
+- Initialize ask_input
+
+2. Before Execution
+- When start signal has not been received, each robot controller publishes a heartbeat message under /heartbeat
+to the central controller
+- Central controller listens to heartbeat and add to robot_controller_map (to determine the number of robots)
+- Before receiving goal, central controller publish leader namespace under /leader
+- All robots listens to /leader and change the is_leader flag accordingly
+- Leader robot acknowledge in console
+- Goal is published to central controller under /robot_goal
+- Upon hearing goal, central controller publishes this goal to leader robot under /{self.leader_namespace}/goal
+- Upon hearing goal, leader robot updates self.goal_x, self.goal_y
+- Central controler wait 1 second after sending goal and send start signal under /start
+- All robots receive start signal and acknowledge in console
+
+3. During execution
+- Robot controller receives imu, odom, and and lidar data from /{self.namespace}/imu,
+/{self.namespace}/odom, /{self.namespace}/scan
+- /imu gives imu_heading, /odom gives linear_x, linear_y speed, /scan gives lidar data
+- Upon receiving /imu, robot controller publish robot current heading to /robot_heading to be read by
+central controller
+- Upon receving /odom, robot controller publist robot linear_x, linear_y velocity to /robot_linear_vel to
+be read by central controller
+- Upon receiving /scan, robot controller modify its current lidar data
+
+- Upon receiving /robot_heading, central controller assembles robot heading to a heading mapping.
+- Central controller then publish the assembled heading mapping to /heading_mapping
+- Upon receiving /robot_linear_vel, central controller assembles robot linear_x velocity to a velocity mapping
+- Central controller then publish the assembled velocity mapping to /velocity_mapping
+- Central controller receives robot position from /gazebo/model_states
+- Central controller publish the position mapping to /position_mapping
+- Central controller publish the current position of each robot under ...
+- Leader robot publish leader position under /leader_position, which is listened to by other robots
+- Other robots update their goal based on the leader position
+
+
+4. End of execution
+- Upon reaching the goal, leader robot publish arrive_at_goal signal under /arrived_at_goal, listened to
+by central controller
+- Upon receiving the signal, central controller terminates

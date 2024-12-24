@@ -10,7 +10,7 @@ ANG_TOL = 0.2
 POSITION_TOL = 0.05
 
 class ControlProtocol():
-    def __init__(self, num_of_robot, rendezvous_distance):
+    def __init__(self, rendezvous_distance, num_of_robot=5):
         #TODO: need to find out the +- quadrant of angles
         #TODO: Implement slow down for collision avoidance
         self.velocity_gain = 0

@@ -1,8 +1,13 @@
 import rclpy
+import time
+import threading
 
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
 
+from std_msgs.msg import String
+from std_msgs.msg import Bool
+from std_msgs.msg import Float32MultiArray
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Imu
 from sensor_msgs.msg import LaserScan
@@ -27,10 +32,11 @@ ANG_VEL_STEP_SIZE = 0.1
 MAX_LIDAR_RANGE = 3.5
 
 class RobotController(Node):
-    def __init__(self, robot_id, is_leader=False):
-        # TODO: consider adding a publisher for rendezvous
+    def __init__(self, is_leader=False):
+        super().__init__('RobotController')
+        self.declare_parameter('robot_id', 0)
+        robot_id = self.get_parameter('robot_id').value
         namespace = "turtlebot" + str(robot_id)
-        super().__init__('RobotController_' + namespace)
 
         # Identification
         self.robot_id = robot_id
@@ -45,11 +51,8 @@ class RobotController(Node):
         self.control_protocol = ControlProtocol(self.rendezvous_distance)
         
         # Mappings for control
-        # TODO: add position mapping
         self.position_mapping = np.array([])
-        # TODO: add heading mapping
         self.heading_mapping = np.array([])
-        # TODO: add velocity mapping
         self.velocity_mapping = np.array([])
         
         # Rendezvous flag
@@ -82,12 +85,6 @@ class RobotController(Node):
         self.PID_heading = PidController(Kp=2.5, Ki=0.02, Kd=0.4)
 
         # Subscriptions
-        # TODO: write start execution subscription
-        # TODO: write velocity list subscription
-        # TODO: write heading subscription
-        # TODO: write leader position subscriber
-        
-
         self.imu_subscription = self.create_subscription(
             Imu,
             f'/{self.namespace}/imu',
@@ -118,23 +115,46 @@ class RobotController(Node):
             self.is_leader_callback,
             10)
         
-
         self.is_started_subscription = self.create_subscription(
             Bool,
             '/start',
             self.is_started_callback,
             10)
+        
+        self.leader_position_subscription = self.create_subscription(
+            Goal,
+            '/leader_position',
+            self.leader_position_callback,
+            10)
+        
+        self.position_mapping_subscription = self.create_subscription(
+            Float32MultiArray(),
+            '/position_mapping',
+            self.position_mapping_callback,
+            10)
+        
+        self.velocity_mapping_subscription = self.create_subscription(
+            Float32MultiArray(),
+            '/velocity_mapping',
+            self.velocity_mapping_callback,
+            10)
+        
+        self.heading_mapping_subscription = self.create_subscription(
+            Float32MultiArray(),
+            '/heading_mapping',
+            self.heading_mapping_callback,
+            10)
 
         # Publishers
-
         self.heartbeat_publisher = self.create_publisher(
             String,
             '/heartbeat',
-            10
-        )
+            10)
 
-        # TODO: write arrive at goal publisher
-        # TODO: write position publisher for leader
+        self.arrive_at_goal_publisher = self.create_publisher(
+            Bool,
+            '/arrived_at_goal',
+            10)
 
         self.self_twist_publisher = self.create_publisher(
             Twist,
@@ -151,6 +171,8 @@ class RobotController(Node):
             '/robot_heading',
             10)
         
+        # Leader to publish its position
+        # Need to implement
         self.position_publisher = self.create_publisher(
             Goal,
             '/leader_position',
@@ -211,7 +233,22 @@ class RobotController(Node):
             self.get_logger().info(self.namespace, " is leader")
     
     def is_started_callback(self, msg):
-        self.is_started = True
+        self.is_started = msg
+        self.get_logger().info("Received start signal. Executing")
+    
+    def leader_position_callback(self, msg):
+        if not self.is_leader:
+            self.goal_x = float("{:.3f}".format(msg.goal_x))
+            self.goal_y = float("{:.3f}".format(msg.goal_y))
+
+    def position_mapping_callback(self, msg):
+        self.position_mapping = msg.data
+    
+    def velocity_mapping_callback(self, msg):
+        self.velocity_mapping = msg.data
+    
+    def heading_mapping_callback(self, msg):
+        self.heading_mapping = msg.data
     
     def move_bot(self, linear_x_change, angular_z_change):
         ## change
@@ -264,6 +301,7 @@ class RobotController(Node):
             msg = String()
             msg.data = self.namespace
             self.heartbeat_publisher.publish(msg)
+            rclpy.spin_once(self)
             return
         
         rclpy.spin_once(self)
@@ -272,8 +310,8 @@ class RobotController(Node):
                                                                                 self.velocity_mapping,
                                                                                 self.heading_mapping)
         # Move to goal
-        robot_controller.move_bot(linear_x_change, angular_z_change)
-        rclpy.spin_once(robot_controller)
+        self.move_bot(linear_x_change, angular_z_change)
+        rclpy.spin_once(self)
 
 
 def main(args=None):
@@ -287,7 +325,7 @@ def main(args=None):
     executor.add_node(robot_controller)
     executor_thread = threading.Thread(target=executor.spin, daemon=True)
     executor_thread.start()
-    self.get_logger().info(self.namespace, " initialized")
+    robot_controller.get_logger().info(robot_controller.namespace, " initialized")
 
     while True:
         try:
