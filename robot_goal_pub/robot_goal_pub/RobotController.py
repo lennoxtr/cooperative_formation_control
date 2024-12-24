@@ -12,7 +12,7 @@ import numpy as np
 from robot_goal_pub.PidController import PidController
 from robot_goal_pub.GoalProcessor import arrived_at_goal
 
-MAX_LINEAR_VEL = 0.15
+MAX_LINEAR_VEL = 0.2
 MAX_ANGLE_VEL = 1.5 #1.5
 
 LIN_VEL_STEP_SIZE = 0.01
@@ -36,6 +36,7 @@ class RobotController(Node):
 
         # Collision avoidance threshold
         self.max_lidar_range = MAX_LIDAR_RANGE
+        self.dangerous_radius = 1.6
 
         # Lidar data for collision avoidance
         self.lidar_data = np.zeros(360)
@@ -60,7 +61,7 @@ class RobotController(Node):
         # TODO: Tune PID for collision avoidance
 
         # PID for goal seeking and flocking
-        self.PID_position = PidController(Kp=2, Ki=0.0, Kd=0.2)
+        self.PID_position = PidController(Kp=1, Ki=0.0, Kd=0.0)
         self.PID_heading = PidController(Kp=2.5, Ki=0.02, Kd=0.4)
 
         # PID for collision prevention

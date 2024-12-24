@@ -17,7 +17,7 @@ def gen_robot_list(number_of_robots):
         robot_name = "turtlebot"+str(i)
         x_pos = current_x_pos
         robots.append({'name': robot_name, 'x_pose': x_pos, 'y_pose': 0.0, 'z_pose': 0.01})
-        current_x_pos += 10.0
+        current_x_pos += 5.0
 
     return robots 
 
