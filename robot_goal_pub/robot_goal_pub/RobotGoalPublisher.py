@@ -19,7 +19,7 @@ from position_mapping_msg.msg import PositionMapping
 class RobotGoalPublisher(Node):
     def __init__(self):
         super().__init__('robot_goal_publisher')
-        self.num_of_robot = 5
+        self.num_of_robot = 4
         self.received_goal = False
         self.leader_namespace = 'turtlebot0'
         self.arrived_at_goal = False
@@ -96,12 +96,13 @@ class RobotGoalPublisher(Node):
             String,
             '/leader',
             10)
+        
+        self.leader_namespace_publisher_timer = self.create_timer(1, self.timer_callback)
 
-        # Need to implement
         self.is_started_publisher = self.create_publisher(
             Bool,
             '/start',
-            100)
+            10)
 
     def goal_listener_callback(self, msg):
         self.goal_x = float("{:.3f}".format(msg.goal_x))
@@ -113,7 +114,8 @@ class RobotGoalPublisher(Node):
         time.sleep(1)
 
         # Publish start signal to all robots
-        msg = True
+        msg = Bool()
+        msg.data = True
         self.is_started_publisher.publish(msg)
 
     def position_listener_callback(self, msg):
@@ -170,17 +172,21 @@ class RobotGoalPublisher(Node):
             self.robot_controller_map[robot_namespace] = 1
             self.heading_mapping.append(0.0)
             self.velocity_mapping.append(0.0)
+            print(self.robot_controller_map)
 
     def arrived_at_goal_callback(self, msg):
         self.arrived_at_goal = msg.data
-        
-    def execute(self):
-        # Have not received goal
-        while not self.received_goal:
+
+    def timer_callback(self):
+        if not self.received_goal:
             msg = String()
             msg.data = self.leader_namespace
             self.leader_namespace_publisher.publish(msg)
-            return
+
+        
+    def execute(self):
+        # Have not received goal
+        rclpy.spin_once(self)
 
         # Executing while leader robot has not reached goal
         while not self.arrived_at_goal:

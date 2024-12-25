@@ -10,7 +10,7 @@ ANG_TOL = 0.2
 POSITION_TOL = 0.05
 
 class ControlProtocol():
-    def __init__(self, rendezvous_distance, num_of_robot=5):
+    def __init__(self, rendezvous_distance, num_of_robot=4):
         #TODO: need to find out the +- quadrant of angles
         #TODO: Implement slow down for collision avoidance
         self.velocity_gain = 0
@@ -114,7 +114,8 @@ class ControlProtocol():
 
         valid_angles = (possible_collision_angle >= 270) | (possible_collision_angle <= 180)
         possible_collision_angle = possible_collision_angle[valid_angles]
-
+        
+        '''
         if (robot_controller.namespace == "turtlebot0"):
             print(sensitivity_bubble)
             print(lidar_data)
@@ -124,6 +125,7 @@ class ControlProtocol():
             print("Collision angle:")
             print(possible_collision_angle)
             print(" ")
+        '''
         
         
         if possible_collision_angle.size == 0:
@@ -150,7 +152,7 @@ class ControlProtocol():
         # There is a chance collision angle all > 90 and < 270 causing sum_of_distance to be 0
         rebound_angle = weighted_sum_of_distance / sum_of_distance
 
-        
+        '''
         if (robot_controller.namespace == "turtlebot0"):
             print(sensitivity_bubble)
             print("Valid collision angles in rad: ", valid_collision_angles_in_rad)
@@ -159,14 +161,17 @@ class ControlProtocol():
             print(" ")
             print("Rebound angle: ", rebound_angle)
             print("--------------")
+        '''
         
         
         left_lidar_data = lidar_data[45:100]
         mean_distance_left_side = np.mean(left_lidar_data)
-        
+
+        '''
         if (robot_controller.namespace == "turtlebot0"):
             print("Left mean: ", mean_distance_left_side)
-        
+        '''
+
         if -ANG_TOL < rebound_angle < ANG_TOL:
             sign_of_rebound_angle = rebound_angle / abs(rebound_angle)
             if mean_distance_left_side < robot_controller.max_lidar_range:
@@ -242,6 +247,7 @@ class ControlProtocol():
 
         # Collision Prevention
         ca_position_error, ca_yaw_error = self.collision_prevention(robot_controller)
+
         if ca_yaw_error != 0.0:
             total_yaw_error = ca_yaw_error
             total_position_error = ca_position_error
@@ -269,8 +275,8 @@ class ControlProtocol():
         # If robot is at rendezvous position, but still waiting for other
 
         # Calculate total error with weightage of flocking and goal seeking
-        flocking_gain = self.get_flocking_gain(robot_controller, position_mapping)
-
+        #flocking_gain = self.get_flocking_gain(robot_controller, position_mapping)
+        flocking_gain = 0
         '''
         if robot_controller.namespace == "turtlebot0": 
             print("Flocking gain is: ", flocking_gain)
@@ -287,14 +293,14 @@ class ControlProtocol():
         total_yaw_error = fl_gs_yaw_error
         total_position_error = fl_gs_position_error
 
-        
+        '''
         if robot_controller.namespace == "turtlebot0":
             print("Flocking gain: ", flocking_gain)
             print("LF_position_error: ", lf_position_error)
             print("PM_position_error: ", pm_position_error)
             print("Total position error of ", robot_controller.namespace, " : ", total_position_error)                    
             print("Total yaw error of ", robot_controller.namespace, " : ", total_yaw_error)
-        
+        '''
         
         return total_position_error, total_yaw_error
 

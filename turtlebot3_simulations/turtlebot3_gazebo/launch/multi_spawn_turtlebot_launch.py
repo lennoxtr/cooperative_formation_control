@@ -40,7 +40,7 @@ def generate_launch_description():
     
 
     # Names and poses of the robots
-    robots = gen_robot_list(5)
+    robots = gen_robot_list(4)
 
     # We create the list of spawn robots commands
     spawn_robots_cmds = []

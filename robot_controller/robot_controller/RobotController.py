@@ -82,7 +82,7 @@ class RobotController(Node):
         
         # Kinematic PID Controller (may add more for different control policies)
         self.PID_position = PidController(Kp=1, Ki=0.0, Kd=0.0)
-        self.PID_heading = PidController(Kp=2.5, Ki=0.02, Kd=0.4)
+        self.PID_heading = PidController(Kp=6, Ki=0.0, Kd=0.1)
 
         # Subscriptions
         self.imu_subscription = self.create_subscription(
@@ -156,6 +156,8 @@ class RobotController(Node):
             String,
             '/heartbeat',
             10)
+        
+        self.heartbeat_timer = self.create_timer(1, self.heartbeat_timer_callback)
 
         self.arrive_at_goal_publisher = self.create_publisher(
             Bool,
@@ -221,12 +223,13 @@ class RobotController(Node):
     def goal_listener_callback(self, msg):
         self.goal_x = float("{:.3f}".format(msg.goal_x))
         self.goal_y = float("{:.3f}".format(msg.goal_y))
+        print("Received Goal at ", self.goal_x, " ", self.goal_y)
 
     def is_leader_callback(self, msg):
-        leader_namespace = msg
+        leader_namespace = msg.data
         if self.namespace == leader_namespace:
             self.is_leader = True
-            self.get_logger().info(self.namespace, " is leader")
+            print(self.namespace, " is leader")
     
     def is_started_callback(self, msg):
         self.is_started = msg
@@ -250,6 +253,12 @@ class RobotController(Node):
     
     def heading_mapping_callback(self, msg):
         self.heading_mapping = np.array(msg.data)
+    
+    def heartbeat_timer_callback(self):
+        if not self.is_started:
+            msg = String()
+            msg.data = self.namespace
+            self.heartbeat_publisher.publish(msg)
     
     def move_bot(self, linear_x_change, angular_z_change):
         ## change
@@ -298,11 +307,6 @@ class RobotController(Node):
     
     def execute(self):
         while not self.is_started:
-            # Publish heartbeat
-            msg = String()
-            msg.data = self.namespace
-            self.heartbeat_publisher.publish(msg)
-            time.sleep(1)
             return
         
         if self.is_leader:
@@ -313,11 +317,13 @@ class RobotController(Node):
             # Consider adding a timer for this
 
         # Control Protocol output linear and angular speed change
-        linear_x_change, angular_z_change = self.control_protocol.execute_control(self.position_mapping,
+        linear_x_change, angular_z_change = self.control_protocol.execute_control(self,
+                                                                                self.position_mapping,
                                                                                 self.velocity_mapping,
                                                                                 self.heading_mapping)
         # Move to goal
-        self.move_bot(linear_x_change, angular_z_change)
+        if self.namespace == 'turtlebot0':
+            self.move_bot(linear_x_change, angular_z_change)
 
 
 def main(args=None):
@@ -331,11 +337,12 @@ def main(args=None):
     executor.add_node(robot_controller)
     executor_thread = threading.Thread(target=executor.spin, daemon=True)
     executor_thread.start()
-    print(robot_controller.namespace, " initialized")
+    robot_controller.get_logger().info(robot_controller.namespace + " initialized")
 
     # TODO: use executor.spin()
     while True:
         try:
+            rclpy.spin_once(robot_controller)
             robot_controller.execute()
         except KeyboardInterrupt:
             break
