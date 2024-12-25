@@ -61,12 +61,13 @@ class RobotController(Node):
 
         # Collision avoidance threshold
         self.max_lidar_range = MAX_LIDAR_RANGE
-        self.dangerous_radius = 1
+        self.dangerous_radius = 0.8
 
         # Lidar data for collision avoidance
         self.lidar_data = np.zeros(360)
 
         # Rendezvous
+        # TODO: Need to implement
         self.is_in_formation = False
 
         # Position variables
@@ -275,7 +276,6 @@ class RobotController(Node):
             print(self.namespace, " arrived")
     
     def move_bot(self, linear_x_change, angular_z_change):
-        ## change
         if abs(angular_z_change) > MAX_ANGLE_VEL:
             target_angular_velocity = angular_z_change / abs(angular_z_change) * MAX_ANGLE_VEL
         else:

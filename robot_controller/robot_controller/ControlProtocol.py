@@ -224,7 +224,6 @@ class ControlProtocol():
         avg_distance = sum_distance_to_formation_center / self.num_of_robot
         if avg_distance < self.rendezvous_distance:
             self.all_rendezvoused = True
-            print("RENDEZVOUS DETECTED")
         else:
             self.rendezvoused = False
         
@@ -234,6 +233,8 @@ class ControlProtocol():
             k = 1.5
         else:
             k = 0.5 # k is the flocking function steepness
+            # Lower k for followers causes flocking gain to be low even at the beginning,
+            # Resulting in turtlebot1 seemingly moving away from the rendezvvous path
 
         # TODO: check whether -self.rendezvous_distance is needed
         flocking_gain = 1 / (1 + math.e ** (-k * (avg_distance - self.rendezvous_distance)))
@@ -243,7 +244,6 @@ class ControlProtocol():
         ### Sum of all control policies
 
         # Method 1: have 1 PID (currently only P) for all
-        # Method 2: have individual PID for each control policy
 
         # Collision Prevention
         ca_position_error, ca_yaw_error = self.collision_prevention(robot_controller)
@@ -280,11 +280,6 @@ class ControlProtocol():
         # Set to 0 to test PID
         #flocking_gain = 0 
 
-        '''
-        if robot_controller.namespace == "turtlebot0": 
-            print("Flocking gain is: ", flocking_gain)
-        '''
-
         fl_gs_position_error = (1 - flocking_gain) * lf_position_error + \
                                 flocking_gain * pm_position_error
   
@@ -296,14 +291,14 @@ class ControlProtocol():
         total_yaw_error = fl_gs_yaw_error
         total_position_error = fl_gs_position_error
 
-        '''
-        if robot_controller.namespace == "turtlebot0":
+        
+        if robot_controller.namespace == "turtlebot1":
             print("Flocking gain: ", flocking_gain)
             print("LF_position_error: ", lf_position_error)
             print("PM_position_error: ", pm_position_error)
             print("Total position error of ", robot_controller.namespace, " : ", total_position_error)                    
             print("Total yaw error of ", robot_controller.namespace, " : ", total_yaw_error)
-        '''
+        
         
         return total_position_error, total_yaw_error
 
@@ -315,6 +310,8 @@ class ControlProtocol():
 
         # Implementing Method 1: 1 set of PID for all policies
         current_time = time.time()
+
+        # Uncomment to test PID
         '''
         if (robot_controller.is_leader):
             linear_x_change = robot_controller.PID_position.compute(total_position_error, current_time)
