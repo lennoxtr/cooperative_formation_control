@@ -13,6 +13,7 @@ def generate_launch_description():
             name=f'robot_controller{i}',  # Unique name for each instance
             parameters=[{'robot_id': i}],
             output='screen',
+            emulate_tty=True
         )
         robot_controller_node_list.append(node)
         i += 1

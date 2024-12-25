@@ -7,7 +7,7 @@ from rclpy.executors import MultiThreadedExecutor
 
 from std_msgs.msg import String
 from std_msgs.msg import Bool
-from std_msgs.msg import Float32MultiArray
+from std_msgs.msg import Float64MultiArray
 from gazebo_msgs.msg import ModelStates
 from robot_goal.msg import Goal
 from velocity_msg.msg import Velocity
@@ -16,20 +16,20 @@ from heading_msg.msg import Heading
 class RobotGoalPublisher(Node):
     def __init__(self):
         super().__init__('robot_goal_publisher')
+        self.num_of_robot = 5
         self.received_goal = False
-        self.received_position_updated = False
         self.leader_namespace = 'turtlebot0'
         self.arrived_at_goal = False
         self.robot_controller_map = {}
     
         # Position mapping
-        self.position_mapping = []
+        self.position_mapping = [0.0] * self.num_of_robot
 
         # Velocity mapping
-        self.velocity_mapping = []
+        self.velocity_mapping = [0.0] * self.num_of_robot
 
         # Heading mapping
-        self.heading_mapping = []
+        self.heading_mapping = [0.0] * self.num_of_robot
 
         # Subscription
         self.goal_subscription = self.create_subscription(
@@ -60,7 +60,7 @@ class RobotGoalPublisher(Node):
             String,
             '/heartbeat',
             self.heartbeat_callback,
-            15)
+            20)
 
         self.arrived_at_goal_subscription = self.create_subscription(
             Bool,
@@ -75,17 +75,17 @@ class RobotGoalPublisher(Node):
             10)
 
         self.position_mapping_publisher = self.create_publisher(
-            Float32MultiArray(),
+            Float64MultiArray,
             '/position_mapping',
             10)
 
         self.heading_mapping_publisher = self.create_publisher(
-            Float32MultiArray(),
+            Float64MultiArray,
             '/heading_mapping',
             10)
 
         self.velocity_mapping_publisher = self.create_publisher(
-            Float32MultiArray(),
+            Float64MultiArray,
             '/velocity_mapping',
             10)
 
@@ -93,7 +93,6 @@ class RobotGoalPublisher(Node):
             String,
             '/leader',
             10)
-
 
         # Need to implement
         self.is_started_publisher = self.create_publisher(
@@ -125,30 +124,31 @@ class RobotGoalPublisher(Node):
             position = msg.pose[i].position
             current_x = float("{:.3f}".format(position.x))
             current_y = float("{:.3f}".format(position.y))
-
-            # TODO: Need to publish robot current position
             self.position_mapping[index] = (current_x, current_y)
-            # Check this
 
-            self.robot_controller_map[namespace].update_position(current_x, current_y)
+            dynamic_topic = f'/{namespace}/robot_position'
+            position_publisher = self.create_publisher(
+                Goal,
+                dynamic_topic,
+                5)
+            
+            current_pos_msg = Goal()
+            current_pos_msg.goal_x = current_x
+            current_pos_msg.goal_y = current_y
 
-            if (namespace == self.leader_namespace):
-                self.leader_x = current_x
-                self.leader_y = current_y
-            else:
-                self.robot_controller_map[namespace].update_goal(self.leader_x, self.leader_y)
+            # Publish robot current position
+            position_publisher.publish(current_pos_msg)
         
         # Publish position update to all robots
-        msg = Float32MultiArray()
+        msg = Float64MultiArray()
         msg.data = self.position_mapping
         self.position_mapping_publisher.publish(msg)
-        self.received_position_updated = True
     
     def velocity_listener_callback(self, msg):
         index = msg.robot_id
         self.velocity_mapping[index] = msg.linear_x
         # Publish position update to all robots
-        msg = Float32MultiArray()
+        msg = Float64MultiArray()
         msg.data = self.velocity_mapping
         self.velocity_mapping_publisher.publish(msg)
     
@@ -156,13 +156,14 @@ class RobotGoalPublisher(Node):
         index = msg.robot_id
         self.heading_mapping[index] = msg.heading
         # Publish position update to all robots
-        msg = Float32MultiArray()
+        msg = Float64MultiArray()
         msg.data = self.heading_mapping
         self.heading_mapping_publisher.publish(msg)
 
     def heartbeat_callback(self, msg):
-        robot_namespace = msg
+        robot_namespace = msg.data
         if robot_namespace not in self.robot_controller_map:
+            print("I heard ", robot_namespace)
             self.robot_controller_map[robot_namespace] = 1
             self.heading_mapping.append(0.0)
             self.velocity_mapping.append(0.0)
@@ -171,19 +172,15 @@ class RobotGoalPublisher(Node):
         self.arrived_at_goal = msg.data
         
     def execute(self):
-        rclpy.spin_once(self)
-
         # Have not received goal
         while not self.received_goal:
-            self.leader_namespace_publisher.publish(self.leader_namespace)
+            msg = String()
+            msg.data = self.leader_namespace
+            self.leader_namespace_publisher.publish(msg)
             return
 
         # Executing while leader robot has not reached goal
         while not self.arrived_at_goal:
-            while not self.received_position_updated:
-                rclpy.spin_once(self)
-            rclpy.spin_once(self)
-            self.received_position_updated = False
             rclpy.spin_once(self)
 
 def main(args=None):

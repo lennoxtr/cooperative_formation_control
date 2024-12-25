@@ -127,6 +127,12 @@ class RobotController(Node):
             self.leader_position_callback,
             10)
         
+        self.current_position_subscription = self.create_subscription(
+            Goal,
+            f'/{self.namespace}/robot_position',
+            self.current_position_callback,
+            10)
+        
         self.position_mapping_subscription = self.create_subscription(
             Float32MultiArray(),
             '/position_mapping',
@@ -177,14 +183,6 @@ class RobotController(Node):
             Goal,
             '/leader_position',
             10)
-    
-    def update_position(self, current_x, current_y):
-        self.current_x = current_x
-        self.current_y = current_y
-    
-    def update_goal(self, goal_x, goal_y):
-        self.goal_x = goal_x
-        self.goal_y = goal_y
     
     def imu_callback(self, msg):
         orientation_q = msg.orientation
@@ -240,6 +238,10 @@ class RobotController(Node):
         if not self.is_leader:
             self.goal_x = float("{:.3f}".format(msg.goal_x))
             self.goal_y = float("{:.3f}".format(msg.goal_y))
+    
+    def current_position_callback(self, msg):
+        self.current_x = float("{:.3f}".format(msg.goal_x))
+        self.current_y = float("{:.3f}".format(msg.goal_y))
 
     def position_mapping_callback(self, msg):
         self.position_mapping = msg.data
@@ -301,7 +303,7 @@ class RobotController(Node):
             msg = String()
             msg.data = self.namespace
             self.heartbeat_publisher.publish(msg)
-            rclpy.spin_once(self)
+            time.sleep(1)
             return
         
         rclpy.spin_once(self)
