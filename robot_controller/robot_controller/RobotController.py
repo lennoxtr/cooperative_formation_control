@@ -327,6 +327,7 @@ def main(args=None):
     executor_thread.start()
     robot_controller.get_logger().info(robot_controller.namespace, " initialized")
 
+    # TODO: use executor.spin()
     while True:
         try:
             rclpy.spin_once(robot_controller)
