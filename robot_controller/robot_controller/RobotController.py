@@ -1,6 +1,7 @@
 import rclpy
 import time
 import threading
+import numpy as np
 
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
@@ -15,8 +16,6 @@ from nav_msgs.msg import Odometry
 from heading_msg.msg import Heading
 from velocity_msg.msg import Velocity
 from robot_goal.msg import Goal
-
-import numpy as np
 
 from robot_controller.PidController import PidController
 from robot_controller.ControlProtocol import ControlProtocol
@@ -244,13 +243,14 @@ class RobotController(Node):
         self.current_y = float("{:.3f}".format(msg.goal_y))
 
     def position_mapping_callback(self, msg):
-        self.position_mapping = msg.data
+        position_list = msg.data
+        self.position_mapping = np.array([(position.x, position.y) for position in position_list])
     
     def velocity_mapping_callback(self, msg):
-        self.velocity_mapping = msg.data
+        self.velocity_mapping = np.array(msg.data)
     
     def heading_mapping_callback(self, msg):
-        self.heading_mapping = msg.data
+        self.heading_mapping = np.array(msg.data)
     
     def move_bot(self, linear_x_change, angular_z_change):
         ## change

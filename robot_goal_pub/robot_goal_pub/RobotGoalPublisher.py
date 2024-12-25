@@ -8,10 +8,13 @@ from rclpy.executors import MultiThreadedExecutor
 from std_msgs.msg import String
 from std_msgs.msg import Bool
 from std_msgs.msg import Float64MultiArray
+from geometry_msgs.msg import Point
 from gazebo_msgs.msg import ModelStates
 from robot_goal.msg import Goal
 from velocity_msg.msg import Velocity
 from heading_msg.msg import Heading
+from position_mapping_msg.msg import PositionMapping
+
 
 class RobotGoalPublisher(Node):
     def __init__(self):
@@ -23,7 +26,7 @@ class RobotGoalPublisher(Node):
         self.robot_controller_map = {}
     
         # Position mapping
-        self.position_mapping = [0.0] * self.num_of_robot
+        self.position_mapping = [(0.0, 0.0)] * self.num_of_robot
 
         # Velocity mapping
         self.velocity_mapping = [0.0] * self.num_of_robot
@@ -75,7 +78,7 @@ class RobotGoalPublisher(Node):
             10)
 
         self.position_mapping_publisher = self.create_publisher(
-            Float64MultiArray,
+            PositionMapping,
             '/position_mapping',
             10)
 
@@ -140,8 +143,8 @@ class RobotGoalPublisher(Node):
             position_publisher.publish(current_pos_msg)
         
         # Publish position update to all robots
-        msg = Float64MultiArray()
-        msg.data = self.position_mapping
+        msg = PositionMapping()
+        msg.data = [Point(x=t[0], y=t[1], z=0.0) for t in self.position_mapping]
         self.position_mapping_publisher.publish(msg)
     
     def velocity_listener_callback(self, msg):
