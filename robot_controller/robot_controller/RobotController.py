@@ -45,6 +45,7 @@ class RobotController(Node):
 
         # Start execution flag
         self.is_started = False
+        self.received_goal = False
 
         # Control Protocol
         self.rendezvous_distance = 1.3
@@ -150,6 +151,12 @@ class RobotController(Node):
             '/heading_mapping',
             self.heading_mapping_callback,
             10)
+        
+        self.arrived_at_goal_subscription = self.create_subscription(
+            Bool,
+            '/arrived_at_goal',
+            self.arrived_at_goal_callback,
+            15)
 
         # Publishers
         self.heartbeat_publisher = self.create_publisher(
@@ -224,6 +231,7 @@ class RobotController(Node):
         self.goal_x = float("{:.3f}".format(msg.goal_x))
         self.goal_y = float("{:.3f}".format(msg.goal_y))
         print("Received Goal at ", self.goal_x, " ", self.goal_y)
+        self.received_goal = True
 
     def is_leader_callback(self, msg):
         leader_namespace = msg.data
@@ -259,6 +267,12 @@ class RobotController(Node):
             msg = String()
             msg.data = self.namespace
             self.heartbeat_publisher.publish(msg)
+    
+    def arrived_at_goal_callback(self, msg):
+        self.arrived_at_goal = msg.data
+        if self.arrived_at_goal:
+            self.stop_bot()
+            print(self.namespace, " arrived")
     
     def move_bot(self, linear_x_change, angular_z_change):
         ## change
@@ -314,7 +328,14 @@ class RobotController(Node):
             msg.goal_x = self.current_x
             msg.goal_y = self.current_y
             self.leader_position_publisher.publish(msg)
-            # Consider adding a timer for this
+            
+            '''
+            if self.arrived_at_goal and self.received_goal:
+                arrived_msg = Bool()
+                arrived_msg.data = True
+                self.arrive_at_goal_publisher.publish(arrived_msg)
+            ''' 
+
 
         # Control Protocol output linear and angular speed change
         linear_x_change, angular_z_change = self.control_protocol.execute_control(self,
@@ -344,7 +365,6 @@ def main(args=None):
     executor_thread.start()
     robot_controller.get_logger().info(robot_controller.namespace + " initialized")
 
-    # TODO: use executor.spin()
     while True:
         try:
             rclpy.spin_once(robot_controller)

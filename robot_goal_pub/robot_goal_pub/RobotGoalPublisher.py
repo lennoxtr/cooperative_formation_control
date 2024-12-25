@@ -205,7 +205,6 @@ def main(args=None):
 
     while True:
         try:
-            rclpy.spin_once(robot_goal_publisher)
             robot_goal_publisher.execute()
         except KeyboardInterrupt:
             break
