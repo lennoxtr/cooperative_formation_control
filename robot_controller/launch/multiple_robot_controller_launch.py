@@ -8,9 +8,9 @@ def generate_launch_description():
     i = 1
     while i <= num_of_robot:
         node = Node(
-            package='my_package',
-            executable='example_node',
-            name=f'node_instance{i}',  # Unique name for each instance
+            package='robot_controller',
+            executable='robot_controller',
+            name=f'robot_controller{i}',  # Unique name for each instance
             output='screen',
         )
         robot_controller_node_list.append(node)

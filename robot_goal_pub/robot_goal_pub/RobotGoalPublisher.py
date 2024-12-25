@@ -115,7 +115,7 @@ class RobotGoalPublisher(Node):
         self.is_started_publisher.publish(msg)
 
     def position_listener_callback(self, msg):
-        if len(enumerate(msg.name)) != len(self.robot_controller_map):
+        if len(msg.name) - 1 != len(self.robot_controller_map):
             return
 
         for i, namespace in enumerate(msg.name):

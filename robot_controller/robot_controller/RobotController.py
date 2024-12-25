@@ -325,7 +325,7 @@ def main(args=None):
     executor.add_node(robot_controller)
     executor_thread = threading.Thread(target=executor.spin, daemon=True)
     executor_thread.start()
-    robot_controller.get_logger().info(robot_controller.namespace, " initialized")
+    print(robot_controller.namespace, " initialized")
 
     # TODO: use executor.spin()
     while True:
