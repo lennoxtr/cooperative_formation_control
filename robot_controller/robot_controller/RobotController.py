@@ -16,6 +16,7 @@ from nav_msgs.msg import Odometry
 from heading_msg.msg import Heading
 from velocity_msg.msg import Velocity
 from robot_goal.msg import Goal
+from position_mapping_msg.msg import PositionMapping
 
 from robot_controller.PidController import PidController
 from robot_controller.ControlProtocol import ControlProtocol
@@ -133,19 +134,19 @@ class RobotController(Node):
             10)
         
         self.position_mapping_subscription = self.create_subscription(
-            Float32MultiArray(),
+            PositionMapping,
             '/position_mapping',
             self.position_mapping_callback,
             10)
         
         self.velocity_mapping_subscription = self.create_subscription(
-            Float32MultiArray(),
+            Float32MultiArray,
             '/velocity_mapping',
             self.velocity_mapping_callback,
             10)
         
         self.heading_mapping_subscription = self.create_subscription(
-            Float32MultiArray(),
+            Float32MultiArray,
             '/heading_mapping',
             self.heading_mapping_callback,
             10)
@@ -176,9 +177,7 @@ class RobotController(Node):
             '/robot_heading',
             10)
         
-        # Leader to publish its position
-        # Need to implement
-        self.position_publisher = self.create_publisher(
+        self.leader_position_publisher = self.create_publisher(
             Goal,
             '/leader_position',
             10)
@@ -306,14 +305,19 @@ class RobotController(Node):
             time.sleep(1)
             return
         
-        rclpy.spin_once(self)
+        if self.is_leader:
+            msg = Goal()
+            msg.goal_x = self.current_x
+            msg.goal_y = self.current_y
+            self.leader_position_publisher.publish(msg)
+            # Consider adding a timer for this
+
         # Control Protocol output linear and angular speed change
         linear_x_change, angular_z_change = self.control_protocol.execute_control(self.position_mapping,
                                                                                 self.velocity_mapping,
                                                                                 self.heading_mapping)
         # Move to goal
         self.move_bot(linear_x_change, angular_z_change)
-        rclpy.spin_once(self)
 
 
 def main(args=None):
@@ -332,7 +336,6 @@ def main(args=None):
     # TODO: use executor.spin()
     while True:
         try:
-            rclpy.spin_once(robot_controller)
             robot_controller.execute()
         except KeyboardInterrupt:
             break
