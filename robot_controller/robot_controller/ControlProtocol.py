@@ -28,7 +28,12 @@ class ControlProtocol():
         # Sensitivity bubble for individual robots
         angles_in_rad = np.arange(360) * np.pi / 180
         self.normalized_angle_in_rad = (angles_in_rad + np.pi) % (2 * np.pi) - np.pi
-        self.bare_sensitivity_bubble = np.array([self.get_sensitivity_bubble_gain(i) for i in range(360)])
+        bare_sensitivity_bubble = np.array([self.get_sensitivity_bubble_gain(i) for i in range(360)])
+
+        # Assume current_vel = max_vel = 0.2 to reduce calculation
+        current_vel = 0.2
+        delta_t = 4
+        self.sensitivity_bubble = bare_sensitivity_bubble * current_vel * delta_t
 
 
         #TODO: implement adjacency matrix for imperfect information between robots
@@ -68,6 +73,7 @@ class ControlProtocol():
             robot_controller.is_rendezvoused = True
             position_error = 0.0
             yaw_error = 0.0
+            print(robot_controller.namespace, " rendezvoused")
         else:
             robot_controller.is_rendezvoused = False
 
@@ -81,8 +87,8 @@ class ControlProtocol():
     
     def get_sensitivity_bubble_gain(self, angle_in_degree):
         ''' Map [-pi, +pi] to minimum and maximum gain for sensitivity bubble'''
-        min_gain = 2 #2
-        max_gain = 2 #2
+        min_gain = 0.2 #2
+        max_gain = 1.1 #2
 
         angle_in_rad = self.normalized_angle_in_rad[angle_in_degree]
 
@@ -103,14 +109,8 @@ class ControlProtocol():
         # Using bubble rebound algo
         rclpy.spin_once(robot_controller)
         lidar_data = robot_controller.lidar_data
-        current_vel = robot_controller.linear_x_velocity
-        delta_t = 5 # may tune to get actual delta t
-
-        # Calculating Sensitivity Bubble
-        sensitivity_bubble = self.bare_sensitivity_bubble * \
-                                current_vel * delta_t
         
-        possible_collision_angle = np.where((lidar_data > 0.0) & (lidar_data < sensitivity_bubble))[0]
+        possible_collision_angle = np.where((lidar_data > 0.0) & (lidar_data < self.sensitivity_bubble))[0]
 
         valid_angles = (possible_collision_angle >= 270) | (possible_collision_angle <= 180)
         possible_collision_angle = possible_collision_angle[valid_angles]
@@ -275,8 +275,11 @@ class ControlProtocol():
         # If robot is at rendezvous position, but still waiting for other
 
         # Calculate total error with weightage of flocking and goal seeking
-        #flocking_gain = self.get_flocking_gain(robot_controller, position_mapping)
-        flocking_gain = 0
+        flocking_gain = self.get_flocking_gain(robot_controller, position_mapping)
+
+        # Set to 0 to test PID
+        #flocking_gain = 0 
+
         '''
         if robot_controller.namespace == "turtlebot0": 
             print("Flocking gain is: ", flocking_gain)

@@ -47,7 +47,7 @@ class RobotController(Node):
         self.is_started = False
 
         # Control Protocol
-        self.rendezvous_distance = 1.5
+        self.rendezvous_distance = 1.3
         self.control_protocol = ControlProtocol(self.rendezvous_distance)
         
         # Mappings for control
@@ -60,7 +60,7 @@ class RobotController(Node):
 
         # Collision avoidance threshold
         self.max_lidar_range = MAX_LIDAR_RANGE
-        self.dangerous_radius = 1.6
+        self.dangerous_radius = 1
 
         # Lidar data for collision avoidance
         self.lidar_data = np.zeros(360)
@@ -322,8 +322,13 @@ class RobotController(Node):
                                                                                 self.velocity_mapping,
                                                                                 self.heading_mapping)
         # Move to goal
+        # Uncomment to test collision avoidance
+        '''
         if self.namespace == 'turtlebot0':
             self.move_bot(linear_x_change, angular_z_change)
+        '''
+        
+        self.move_bot(linear_x_change, angular_z_change)
 
 
 def main(args=None):
