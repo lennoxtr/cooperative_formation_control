@@ -3,8 +3,9 @@ import math
 import numpy as np
 import rclpy
 
-from robot_goal_pub.GoalProcessor import get_position_error
-from robot_goal_pub.GoalProcessor import get_yaw_error
+from robot_controller.GoalProcessor import get_position_error
+from robot_controller.GoalProcessor import get_yaw_error
+from robot_controller.GoalProcessor import normalize_yaw_error
 
 ANG_TOL = 0.2
 POSITION_TOL = 0.05
@@ -85,8 +86,13 @@ class ControlProtocol():
     
     def heading_matching(self, robot_controller, heading_mapping):
         a_ij_val = 1
-        heading_error = self.num_of_robot * a_ij_val * robot_controller.current_imu_heading - \
-                            a_ij_val * sum(heading_mapping)
+        heading_error = 0
+
+        for heading in heading_mapping:
+            heading_diff = robot_controller.current_imu_heading - heading
+            normalize_heading_diff = normalize_yaw_error(heading_diff)
+            heading_error += normalize_heading_diff
+        
         return heading_error
     
     def get_sensitivity_bubble_gain(self, angle_in_degree):
@@ -210,19 +216,10 @@ class ControlProtocol():
         ### Sum of all control policies
 
         # Method 1: have 1 PID (currently only P) for all
-
-        print("Velocity Mapping: ")
-        print(velocity_mapping)
-        print(" ")
-        print("Heading Mapping: ")
-        print(heading_mapping)
-        print(" ")
-        print("*************************************")
-
         # Collision Avoidance
         ca_position_error, ca_yaw_error = self.collision_prevention(robot_controller)
 
-        if ca_yaw_error != 0.0 and not self.all_rendezvoused:
+        if ca_yaw_error != 0.0:
             total_yaw_error = ca_yaw_error
             total_position_error = ca_position_error
             return total_position_error, total_yaw_error
@@ -245,7 +242,7 @@ class ControlProtocol():
         # Leader Follower
         lf_position_error, lf_yaw_error = self.leader_follower(robot_controller)
 
-        if robot_controller.is_rendezvoused and flocking_gain > 0.7:
+        if robot_controller.is_rendezvoused and flocking_gain > 0.6:
             total_position_error = 0.0
             total_yaw_error = 0.0
             return total_position_error, total_yaw_error
@@ -264,10 +261,19 @@ class ControlProtocol():
             total_yaw_error = fl_gs_yaw_error
             total_position_error = fl_gs_position_error
         else: # all rendezvoused
-            total_position_error = velocity_error
+            total_position_error = fl_gs_position_error
             if robot_controller.is_leader:
                 total_yaw_error = fl_gs_yaw_error
             else:
+                if robot_controller.namespace == "turtlebot1":
+                    #print("Velocity Mapping: ")
+                    #print(velocity_mapping)
+                    #print(" ")
+                    print("Heading Mapping: ")
+                    print(heading_mapping)
+                    print(" ")
+                    print("Heaading error: ", heading_error)
+                    print("*************************************")
                 total_yaw_error = heading_error
 
         

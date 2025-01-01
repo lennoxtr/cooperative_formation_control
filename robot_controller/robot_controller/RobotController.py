@@ -8,7 +8,7 @@ from rclpy.executors import MultiThreadedExecutor
 
 from std_msgs.msg import String
 from std_msgs.msg import Bool
-from std_msgs.msg import Float32MultiArray
+from std_msgs.msg import Float64MultiArray
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Imu
 from sensor_msgs.msg import LaserScan
@@ -142,13 +142,13 @@ class RobotController(Node):
             10)
         
         self.velocity_mapping_subscription = self.create_subscription(
-            Float32MultiArray,
+            Float64MultiArray,
             '/velocity_mapping',
             self.velocity_mapping_callback,
             10)
         
         self.heading_mapping_subscription = self.create_subscription(
-            Float32MultiArray,
+            Float64MultiArray,
             '/heading_mapping',
             self.heading_mapping_callback,
             10)
@@ -335,7 +335,6 @@ class RobotController(Node):
                 arrived_msg.data = True
                 self.arrive_at_goal_publisher.publish(arrived_msg)
             ''' 
-
 
         # Control Protocol output linear and angular speed change
         linear_x_change, angular_z_change = self.control_protocol.execute_control(self,

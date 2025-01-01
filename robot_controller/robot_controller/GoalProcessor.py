@@ -38,17 +38,21 @@ def get_target_yaw(current_x, current_y, goal_x, goal_y):
     target_yaw = float("{:.3f}".format(target_heading))
     return target_yaw
 
+def normalize_yaw_error(yaw_error):
+    # Normalize yaw_error to [-π, π]
+    if yaw_error > np.pi:
+        yaw_error -= 2 * np.pi
+    elif yaw_error < -np.pi:
+        yaw_error += 2 * np.pi
+    
+    return yaw_error
+
 def get_yaw_error(current_x, current_y, goal_x, goal_y, current_imu_heading):
     target_yaw = get_target_yaw(current_x, current_y, goal_x, goal_y)
     yaw_error = target_yaw - current_imu_heading
 
     # Normalize yaw_error to [-π, π]
-    # TODO: Check whether this is - pi or -2 pi
-    if yaw_error > np.pi:
-        yaw_error -= 2 * np.pi
-    elif yaw_error < -np.pi:
-        yaw_error += 2 * np.pi
-        
+    yaw_error = normalize_yaw_error(yaw_error)
     return yaw_error
 
 def arrived_at_goal(current_x, current_y, goal_x, goal_y):
