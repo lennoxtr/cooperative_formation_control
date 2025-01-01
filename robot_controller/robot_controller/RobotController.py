@@ -48,7 +48,7 @@ class RobotController(Node):
         self.received_goal = False
 
         # Control Protocol
-        self.rendezvous_distance = 1.3
+        self.rendezvous_distance = 0.8
         self.control_protocol = ControlProtocol(self.rendezvous_distance)
         
         # Mappings for control
@@ -61,7 +61,7 @@ class RobotController(Node):
 
         # Collision avoidance threshold
         self.max_lidar_range = MAX_LIDAR_RANGE
-        self.dangerous_radius = 0.8
+        self.dangerous_radius = 0.6
 
         # Lidar data for collision avoidance
         self.lidar_data = np.zeros(360)
