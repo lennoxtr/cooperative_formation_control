@@ -75,6 +75,7 @@ class RobotController(Node):
         self.goal_y = 0.0
         self.current_x = 0.0
         self.current_y = 0.0
+        self.leader_heading = 0.0
 
         # Kinematic variables
         # Yaw is +- pi from north
@@ -84,7 +85,7 @@ class RobotController(Node):
         
         # Kinematic PID Controller (may add more for different control policies)
         self.PID_position = PidController(Kp=1, Ki=0.0, Kd=0.0)
-        self.PID_heading = PidController(Kp=6, Ki=0.0, Kd=0.1)
+        self.PID_heading = PidController(Kp=5, Ki=0.0, Kd=0.1)
 
         # Subscriptions
         self.imu_subscription = self.create_subscription(
@@ -127,6 +128,13 @@ class RobotController(Node):
             Goal,
             '/leader_position',
             self.leader_position_callback,
+            10)
+        
+        #TODO: implement
+        self.leader_heading_subscription = self.create_subscription(
+            Heading,
+            '/leader_heading',
+            self.leader_heading_callback,
             10)
         
         self.current_position_subscription = self.create_subscription(
@@ -191,6 +199,13 @@ class RobotController(Node):
             Goal,
             '/leader_position',
             10)
+        
+        self.leader_heading_publisher = self.create_publisher(
+            Heading,
+            '/leader_heading',
+            10)
+
+        
     
     def imu_callback(self, msg):
         orientation_q = msg.orientation
@@ -210,6 +225,9 @@ class RobotController(Node):
         msg.robot_id = self.robot_id
         msg.heading = self.current_imu_heading
         self.heading_publisher.publish(msg)
+        if self.is_leader:
+            self.leader_heading = self.current_imu_heading
+            self.leader_heading_publisher.publish(msg)
     
     def odom_callback(self, msg):
         linear_velocity = msg.twist.twist.linear
@@ -248,6 +266,9 @@ class RobotController(Node):
         if not self.is_leader:
             self.goal_x = float("{:.3f}".format(msg.goal_x))
             self.goal_y = float("{:.3f}".format(msg.goal_y))
+    
+    def leader_heading_callback(self, msg):
+        self.leader_heading = msg.heading
     
     def current_position_callback(self, msg):
         self.current_x = float("{:.3f}".format(msg.goal_x))
@@ -329,12 +350,12 @@ class RobotController(Node):
             msg.goal_y = self.current_y
             self.leader_position_publisher.publish(msg)
             
-            '''
-            if self.arrived_at_goal and self.received_goal:
+            
+            if self.arrived_at_goal and self.is_rendezvoused:
                 arrived_msg = Bool()
                 arrived_msg.data = True
                 self.arrive_at_goal_publisher.publish(arrived_msg)
-            ''' 
+            
 
         # Control Protocol output linear and angular speed change
         linear_x_change, angular_z_change = self.control_protocol.execute_control(self,

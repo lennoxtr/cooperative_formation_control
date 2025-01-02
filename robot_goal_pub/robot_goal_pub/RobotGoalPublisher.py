@@ -170,8 +170,8 @@ class RobotGoalPublisher(Node):
         if robot_namespace not in self.robot_controller_map:
             print("I heard ", robot_namespace)
             self.robot_controller_map[robot_namespace] = 1
-            self.heading_mapping.append(0.0)
-            self.velocity_mapping.append(0.0)
+            #self.heading_mapping.append(0.0)
+            #self.velocity_mapping.append(0.0)
             print(self.robot_controller_map)
 
     def arrived_at_goal_callback(self, msg):

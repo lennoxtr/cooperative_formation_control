@@ -12,6 +12,7 @@ POSITION_TOL = 0.05
 
 class ControlProtocol():
     def __init__(self, rendezvous_distance, num_of_robot=4):
+        #TODO: consider changing collision threshold when rendezvous
         self.velocity_gain = 0
         self.heading_gain = 0
         self.num_of_robot = num_of_robot
@@ -19,7 +20,6 @@ class ControlProtocol():
 
         # Gains for control output
         self.velocity_matching_gain = 1
-        self.heading_matching_gain = 1
 
         # To determine rendezvous position
         self.avg_position_x = 0
@@ -70,8 +70,6 @@ class ControlProtocol():
 
         if position_error < self.rendezvous_distance:
             robot_controller.is_rendezvoused = True
-            position_error = 0.0
-            yaw_error = 0.0
             #print(robot_controller.namespace, " rendezvoused")
         else:
             robot_controller.is_rendezvoused = False
@@ -85,20 +83,18 @@ class ControlProtocol():
         return velocity_error
     
     def heading_matching(self, robot_controller, heading_mapping):
-        a_ij_val = 1
-        heading_error = 0
-
-        for heading in heading_mapping:
-            heading_diff = robot_controller.current_imu_heading - heading
-            normalize_heading_diff = normalize_yaw_error(heading_diff)
-            heading_error += normalize_heading_diff
-        
+        heading_error =  robot_controller.leader_heading - robot_controller.current_imu_heading
+        heading_error = normalize_yaw_error(heading_error)
         return heading_error
     
     def get_sensitivity_bubble_gain(self, angle_in_degree):
         ''' Map [-pi, +pi] to minimum and maximum gain for sensitivity bubble'''
-        min_gain = 0.2 
-        max_gain = 1
+        if not self.all_rendezvoused:
+            min_gain = 0.2 
+            max_gain = 1
+        else:
+            min_gain = 0.1
+            max_gain = 0.1
 
         angle_in_rad = self.normalized_angle_in_rad[angle_in_degree]
 
@@ -199,7 +195,7 @@ class ControlProtocol():
         if avg_distance < self.rendezvous_distance:
             self.all_rendezvoused = True
         else:
-            self.rendezvoused = False
+            self.all_rendezvoused = False
         
         # Implement as logistic function
         # TODO: Need to tune
@@ -255,36 +251,19 @@ class ControlProtocol():
   
         fl_gs_yaw_error = (1 - flocking_gain) * lf_yaw_error + \
                             flocking_gain * pm_yaw_error
-
-
+                            
         if not self.all_rendezvoused:
             total_yaw_error = fl_gs_yaw_error
             total_position_error = fl_gs_position_error
+            return total_position_error, total_yaw_error
         else: # all rendezvoused
             total_position_error = fl_gs_position_error
+            
             if robot_controller.is_leader:
                 total_yaw_error = fl_gs_yaw_error
             else:
-                if robot_controller.namespace == "turtlebot1":
-                    #print("Velocity Mapping: ")
-                    #print(velocity_mapping)
-                    #print(" ")
-                    print("Heading Mapping: ")
-                    print(heading_mapping)
-                    print(" ")
-                    print("Heaading error: ", heading_error)
-                    print("*************************************")
                 total_yaw_error = heading_error
-
-        
-        
-        #if robot_controller.namespace == "turtlebot0":
-            #print("Flocking gain: ", flocking_gain)
-            #print("LF_position_error: ", lf_position_error)
-            #print("PM_position_error: ", pm_position_error)
-            #print("Total position error of ", robot_controller.namespace, " : ", total_position_error)                    
-            #print("Total yaw error of ", robot_controller.namespace, " : ", total_yaw_error)
-        
+            return total_position_error, total_yaw_error
         
         return total_position_error, total_yaw_error
 
