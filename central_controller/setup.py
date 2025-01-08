@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'robot_goal_pub'
+package_name = 'central_controller'
 
 setup(
     name=package_name,
@@ -20,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'goal_pub = robot_goal_pub.RobotGoalPublisher:main',
+            'central_controller = central_controller.CentralController:main',
         ],
     },
 )

@@ -16,9 +16,9 @@ from heading_msg.msg import Heading
 from position_mapping_msg.msg import PositionMapping
 
 
-class RobotGoalPublisher(Node):
+class CentralController(Node):
     def __init__(self):
-        super().__init__('robot_goal_publisher')
+        super().__init__('central_controller')
         self.num_of_robot = 4
         self.received_goal = False
         self.leader_namespace = 'turtlebot0'
@@ -168,11 +168,8 @@ class RobotGoalPublisher(Node):
     def heartbeat_callback(self, msg):
         robot_namespace = msg.data
         if robot_namespace not in self.robot_controller_map:
-            print("I heard ", robot_namespace)
+            self.get_logger().info("I heard " + robot_namespace)
             self.robot_controller_map[robot_namespace] = 1
-            #self.heading_mapping.append(0.0)
-            #self.velocity_mapping.append(0.0)
-            print(self.robot_controller_map)
 
     def arrived_at_goal_callback(self, msg):
         self.arrived_at_goal = msg.data
@@ -194,22 +191,22 @@ class RobotGoalPublisher(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    robot_goal_publisher = RobotGoalPublisher()
-    rclpy.spin_once(robot_goal_publisher)
+    central_controller = CentralController()
+    rclpy.spin_once(central_controller)
     time.sleep(1)
 
     executor = MultiThreadedExecutor()
-    executor.add_node(robot_goal_publisher)
+    executor.add_node(central_controller)
     executor_thread = threading.Thread(target=executor.spin, daemon=True)
     executor_thread.start()
 
     while True:
         try:
-            robot_goal_publisher.execute()
+            central_controller.execute()
         except KeyboardInterrupt:
             break
     
-    robot_goal_publisher.destroy_node()
+    central_controller.destroy_node()
     rclpy.shutdown()
 
 if __name__ == '__main__':
