@@ -41,8 +41,11 @@ class ControlProtocol():
 
         # For reporting flocking gain
         self.start_time = time.time()
+        self.last_time = time.time()
         self.flocking_gain_list = []
-        self.flocking_gain_time = []
+        self.collision_avoidance_list = []
+        self.yaw_error_list = []
+        self.recorded_time = []
 
     def position_matching(self, robot_controller, position_mapping):
         # Position matching may have higher weight for leader
@@ -189,9 +192,9 @@ class ControlProtocol():
         # Must be called after position matching
         # At the moment recalculated for all robots => wasteful
 
-        if self.all_rendezvoused:
-            flocking_gain = 0.0
-            return flocking_gain
+        #if self.all_rendezvoused:
+        #    flocking_gain = 0.0
+        #    return flocking_gain
 
         sum_distance_to_formation_center = 0
         for (x_coord, y_coord) in position_mapping:
@@ -215,9 +218,9 @@ class ControlProtocol():
         # Implement as logistic function
         # TODO: Need to tune
         if robot_controller.is_leader:
-            k = 6
+            k = 7
         else:
-            k = 5 # k is the flocking function steepness
+            k = 4 # k is the flocking function steepness
 
         # TODO: check whether -self.rendezvous_distance is needed
         flocking_gain = (1 - math.e ** (-k * (dist_to_rendezvous - self.rendezvous_distance))) / (1 + math.e ** (-k * (dist_to_rendezvous - self.rendezvous_distance)))
@@ -229,10 +232,6 @@ class ControlProtocol():
         if self.avg_flocking_gain < 0.0:
             self.avg_flocking_gain = 0.0
         
-        if robot_controller.namespace == "turtlebot0":
-            #print("Flocking gain: ", flocking_gain)
-            self.flocking_gain_list.append(flocking_gain)
-            self.flocking_gain_time.append(time.time() - self.start_time)
             
         return flocking_gain
         
@@ -279,11 +278,11 @@ class ControlProtocol():
   
         fl_gs_yaw_error = (1 - flocking_gain) * lf_yaw_error + \
                             flocking_gain * pm_yaw_error
-                            
+
         if not self.all_rendezvoused:
             total_yaw_error = fl_gs_yaw_error
             total_position_error = fl_gs_position_error
-            return total_position_error, total_yaw_error
+
         else: # all rendezvoused
             total_position_error = fl_gs_position_error
             
@@ -291,7 +290,18 @@ class ControlProtocol():
                 total_yaw_error = fl_gs_yaw_error
             else:
                 total_yaw_error = heading_error
-            return total_position_error, total_yaw_error
+        
+        current_time = time.time()
+
+        if robot_controller.namespace == "turtlebot0" and current_time - self.last_time > 0.5:
+            #print("Flocking gain: ", flocking_gain)
+            self.flocking_gain_list.append(flocking_gain)
+            self.collision_avoidance_list.append(ca_yaw_error)
+            self.yaw_error_list.append(total_yaw_error)
+            self.recorded_time.append(time.time() - self.start_time)
+
+            self.last_time = current_time
+            
         
         return total_position_error, total_yaw_error
 
