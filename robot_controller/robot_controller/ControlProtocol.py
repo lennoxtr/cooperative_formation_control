@@ -26,6 +26,7 @@ class ControlProtocol():
         self.avg_position_y = 0
 
         # All robots in formation flag
+        self.avg_flocking_gain = 1.0
         self.all_rendezvoused = False
 
         # Sensitivity bubble for individual robots
@@ -35,8 +36,13 @@ class ControlProtocol():
 
         # Assume current_vel = max_vel = 0.2 to reduce calculation
         current_vel = 0.2
-        delta_t = 4
+        delta_t = 3.5
         self.sensitivity_bubble = bare_sensitivity_bubble * current_vel * delta_t
+
+        # For reporting flocking gain
+        self.start_time = time.time()
+        self.flocking_gain_list = []
+        self.flocking_gain_time = []
 
     def position_matching(self, robot_controller, position_mapping):
         # Position matching may have higher weight for leader
@@ -148,6 +154,9 @@ class ControlProtocol():
         left_lidar_data = lidar_data[45:100]
         mean_distance_left_side = np.mean(left_lidar_data)
 
+        if rebound_angle == 0.0:
+            rebound_angle += ANG_TOL
+
         if -ANG_TOL < rebound_angle < ANG_TOL:
             sign_of_rebound_angle = rebound_angle / abs(rebound_angle)
             if mean_distance_left_side < robot_controller.max_lidar_range:
@@ -192,6 +201,12 @@ class ControlProtocol():
                                                                self.avg_position_y)
         
         avg_distance = sum_distance_to_formation_center / self.num_of_robot
+
+        dist_to_rendezvous = get_position_error(robot_controller.current_x,
+                                                robot_controller.current_y,
+                                                self.avg_position_x,
+                                                self.avg_position_y)
+
         if avg_distance < self.rendezvous_distance:
             self.all_rendezvoused = True
         else:
@@ -202,10 +217,23 @@ class ControlProtocol():
         if robot_controller.is_leader:
             k = 6
         else:
-            k = 3 # k is the flocking function steepness
+            k = 5 # k is the flocking function steepness
 
         # TODO: check whether -self.rendezvous_distance is needed
-        flocking_gain = 1 / (1 + math.e ** (-k * (avg_distance - self.rendezvous_distance)))
+        flocking_gain = (1 - math.e ** (-k * (dist_to_rendezvous - self.rendezvous_distance))) / (1 + math.e ** (-k * (dist_to_rendezvous - self.rendezvous_distance)))
+        self.avg_flocking_gain = (1 - math.e ** (-k * (avg_distance - self.rendezvous_distance))) / (1 + math.e ** (-k * (avg_distance - self.rendezvous_distance)))
+        
+        if flocking_gain < 0.0:
+            flocking_gain = 0.0
+        
+        if self.avg_flocking_gain < 0.0:
+            self.avg_flocking_gain = 0.0
+        
+        if robot_controller.namespace == "turtlebot0":
+            #print("Flocking gain: ", flocking_gain)
+            self.flocking_gain_list.append(flocking_gain)
+            self.flocking_gain_time.append(time.time() - self.start_time)
+            
         return flocking_gain
         
     def calculate_control(self, robot_controller, position_mapping, velocity_mapping, heading_mapping):
@@ -215,7 +243,7 @@ class ControlProtocol():
         # Collision Avoidance
         ca_position_error, ca_yaw_error = self.collision_prevention(robot_controller)
 
-        if ca_yaw_error != 0.0:
+        if ca_yaw_error != 0.0 and not self.all_rendezvoused:
             total_yaw_error = ca_yaw_error
             total_position_error = ca_position_error
             return total_position_error, total_yaw_error
@@ -238,7 +266,7 @@ class ControlProtocol():
         # Leader Follower
         lf_position_error, lf_yaw_error = self.leader_follower(robot_controller)
 
-        if robot_controller.is_rendezvoused and flocking_gain > 0.6:
+        if robot_controller.is_rendezvoused and self.avg_flocking_gain > 0.1:
             total_position_error = 0.0
             total_yaw_error = 0.0
             return total_position_error, total_yaw_error

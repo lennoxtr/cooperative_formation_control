@@ -3,6 +3,8 @@ import time
 import threading
 import numpy as np
 
+import pandas as pd
+
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
 
@@ -48,7 +50,7 @@ class RobotController(Node):
         self.received_goal = False
 
         # Control Protocol
-        self.rendezvous_distance = 0.8
+        self.rendezvous_distance = 0.6
         self.control_protocol = ControlProtocol(self.rendezvous_distance)
         
         # Mappings for control
@@ -334,7 +336,7 @@ class RobotController(Node):
         self.self_twist_publisher.publish(twist)
         self.get_logger().info(self.namespace + " stopped")
     
-    def arrived_at_goal(self):
+    def is_arrived(self):
         return arrived_at_goal(self.current_x,
                                self.current_y,
                                self.goal_x,
@@ -351,7 +353,7 @@ class RobotController(Node):
             self.leader_position_publisher.publish(msg)
             
             
-            if self.arrived_at_goal and self.is_rendezvoused:
+            if self.is_arrived() and self.is_rendezvoused:
                 arrived_msg = Bool()
                 arrived_msg.data = True
                 self.arrive_at_goal_publisher.publish(arrived_msg)
@@ -390,7 +392,12 @@ def main(args=None):
             rclpy.spin_once(robot_controller)
             robot_controller.execute()
         except KeyboardInterrupt:
-            break
+            if robot_controller.namespace == "turtlebot0":
+                df = pd.DataFrame(data={"col1": robot_controller.control_protocol.flocking_gain_list,
+                                         "col2": robot_controller.control_protocol.flocking_gain_time})
+                df.to_csv("./flocking_gain_data.csv", sep=',',index=False)
+            else:
+                break
     
     robot_controller.destroy_node()
     rclpy.shutdown()
