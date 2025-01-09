@@ -50,7 +50,7 @@ class RobotController(Node):
         self.received_goal = False
 
         # Control Protocol
-        self.rendezvous_distance = 0.6
+        self.rendezvous_distance = 0.8
         self.control_protocol = ControlProtocol(self.rendezvous_distance)
         
         # Mappings for control
@@ -392,14 +392,14 @@ def main(args=None):
             rclpy.spin_once(robot_controller)
             robot_controller.execute()
         except KeyboardInterrupt:
-            if robot_controller.namespace == "turtlebot0":
-                df = pd.DataFrame(data={"Flocking_gain": robot_controller.control_protocol.flocking_gain_list,
-                                        "Yaw_Error": robot_controller.control_protocol.yaw_error_list,
-                                        "Collision_Avoidance": robot_controller.control_protocol.collision_avoidance_list,
-                                         "Time": robot_controller.control_protocol.recorded_time})
-                df.to_csv("./flocking_gain_data.csv", sep=',',index=False)
-            else:
-                break
+
+            df = pd.DataFrame(data={"Flocking_gain": robot_controller.control_protocol.flocking_gain_list,
+                                    "Total_Yaw_Error": robot_controller.control_protocol.total_yaw_error_list,
+                                    "Collision_Avoidance": robot_controller.control_protocol.collision_avoidance_list,
+                                    "Goal_seeking_Error": robot_controller.control_protocol.flocking_goal_seeking_error,
+                                     "Time": robot_controller.control_protocol.recorded_time})
+            df.to_csv(f'./{robot_controller.namespace}.csv', sep=',',index=False)
+
     
     robot_controller.destroy_node()
     rclpy.shutdown()

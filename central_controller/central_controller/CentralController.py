@@ -24,6 +24,18 @@ class CentralController(Node):
         self.leader_namespace = 'turtlebot0'
         self.arrived_at_goal = False
         self.robot_controller_map = {}
+
+        self.robot0_x = []
+        self.robot0_y = []
+
+        self.robot1_x = []
+        self.robot1_y = []
+
+        self.robot2_x = []
+        self.robot2_y = []
+
+        self.robot3_x = []
+        self.robot3_y = []
     
         # Position mapping
         self.position_mapping = [(0.0, 0.0)] * self.num_of_robot

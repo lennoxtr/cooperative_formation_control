@@ -44,7 +44,8 @@ class ControlProtocol():
         self.last_time = time.time()
         self.flocking_gain_list = []
         self.collision_avoidance_list = []
-        self.yaw_error_list = []
+        self.total_yaw_error_list = []
+        self.flocking_goal_seeking_error = []
         self.recorded_time = []
 
     def position_matching(self, robot_controller, position_mapping):
@@ -98,12 +99,10 @@ class ControlProtocol():
     
     def get_sensitivity_bubble_gain(self, angle_in_degree):
         ''' Map [-pi, +pi] to minimum and maximum gain for sensitivity bubble'''
-        if not self.all_rendezvoused:
-            min_gain = 0.2 
-            max_gain = 1
-        else:
-            min_gain = 0.1
-            max_gain = 0.1
+
+        min_gain = 0.2 
+        max_gain = 1
+
 
         angle_in_rad = self.normalized_angle_in_rad[angle_in_degree]
 
@@ -220,7 +219,7 @@ class ControlProtocol():
         if robot_controller.is_leader:
             k = 7
         else:
-            k = 4 # k is the flocking function steepness
+            k = 5 # k is the flocking function steepness
 
         # TODO: check whether -self.rendezvous_distance is needed
         flocking_gain = (1 - math.e ** (-k * (dist_to_rendezvous - self.rendezvous_distance))) / (1 + math.e ** (-k * (dist_to_rendezvous - self.rendezvous_distance)))
@@ -293,15 +292,15 @@ class ControlProtocol():
         
         current_time = time.time()
 
-        if robot_controller.namespace == "turtlebot0" and current_time - self.last_time > 0.5:
+        if current_time - self.last_time > 0.3:
             #print("Flocking gain: ", flocking_gain)
             self.flocking_gain_list.append(flocking_gain)
             self.collision_avoidance_list.append(ca_yaw_error)
-            self.yaw_error_list.append(total_yaw_error)
+            self.total_yaw_error_list.append(total_yaw_error)
+            self.flocking_goal_seeking_error.append(fl_gs_yaw_error)
             self.recorded_time.append(time.time() - self.start_time)
 
-            self.last_time = current_time
-            
+            self.last_time = current_time        
         
         return total_position_error, total_yaw_error
 
