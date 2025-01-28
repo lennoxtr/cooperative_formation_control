@@ -35,6 +35,10 @@ MAX_LIDAR_RANGE = 3.5
 
 class RobotController(Node):
     def __init__(self, is_leader=False):
+        
+        # TODO: implement formation projection for leader robot
+         
+
         super().__init__('RobotController')
         self.declare_parameter('robot_id', 0)
         robot_id = self.get_parameter('robot_id').value
@@ -88,6 +92,9 @@ class RobotController(Node):
         # Kinematic PID Controller (may add more for different control policies)
         self.PID_position = PidController(Kp=1, Ki=0.0, Kd=0.0)
         self.PID_heading = PidController(Kp=5, Ki=0.0, Kd=0.1)
+
+        # TODO: Remove this as it is hard-coded
+        self.follower_robot_id_list = [1, 2, 3]
 
         # Subscriptions
         self.imu_subscription = self.create_subscription(
@@ -351,6 +358,22 @@ class RobotController(Node):
             msg.goal_x = self.current_x
             msg.goal_y = self.current_y
             self.leader_position_publisher.publish(msg)
+
+            robot_formation_position_list = GoalProcessor.get_all_postion_in_formation(self.current_x,
+                                                                                    self.current_y,
+                                                                                    self.current_imu_heading,
+                                                                                    self.follower_robot_id_list)
+            print("-----------------------------------")
+            for item in robot_formation_position_list:
+                robot_id = item[0]
+                position_tuple = item[1]
+                position_x = position_tuple[0]
+                position_y = position_tuple[1]
+
+                print("Robot id: ", robot_id)
+                print("Position x: ", position_x)
+                print("Position y: ", position_y)
+            print("-----------------------------------")
             
             
             if self.is_arrived() and self.is_rendezvoused:
@@ -392,14 +415,14 @@ def main(args=None):
             rclpy.spin_once(robot_controller)
             robot_controller.execute()
         except KeyboardInterrupt:
-
+            '''
             df = pd.DataFrame(data={"Flocking_gain": robot_controller.control_protocol.flocking_gain_list,
                                     "Total_Yaw_Error": robot_controller.control_protocol.total_yaw_error_list,
                                     "Collision_Avoidance": robot_controller.control_protocol.collision_avoidance_list,
                                     "Goal_seeking_Error": robot_controller.control_protocol.flocking_goal_seeking_error,
                                      "Time": robot_controller.control_protocol.recorded_time})
             df.to_csv(f'./{robot_controller.namespace}.csv', sep=',',index=False)
-
+            '''
     
     robot_controller.destroy_node()
     rclpy.shutdown()
