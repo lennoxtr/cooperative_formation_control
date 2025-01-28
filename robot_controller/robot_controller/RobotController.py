@@ -22,7 +22,7 @@ from position_mapping_msg.msg import PositionMapping
 
 from robot_controller.PidController import PidController
 from robot_controller.ControlProtocol import ControlProtocol
-from robot_controller.GoalProcessor import arrived_at_goal, quaternion_to_euler
+from robot_controller.GoalProcessor import arrived_at_goal, quaternion_to_euler, get_all_postion_in_formation
 
 
 MAX_LINEAR_VEL = 0.2
@@ -359,11 +359,16 @@ class RobotController(Node):
             msg.goal_y = self.current_y
             self.leader_position_publisher.publish(msg)
 
-            robot_formation_position_list = GoalProcessor.get_all_postion_in_formation(self.current_x,
-                                                                                    self.current_y,
-                                                                                    self.current_imu_heading,
-                                                                                    self.follower_robot_id_list)
+            robot_formation_position_list = get_all_postion_in_formation(self.current_x,
+                                                                        self.current_y,
+                                                                        self.current_imu_heading,
+                                                                        self.follower_robot_id_list,
+                                                                        adjacent_distance = 1)
             print("-----------------------------------")
+            print("Leader Robot")
+            print("Heading: ", self.current_imu_heading)
+            print("Position x: ", self.current_x)
+            print("Position y: ", self.current_y)
             for item in robot_formation_position_list:
                 robot_id = item[0]
                 position_tuple = item[1]

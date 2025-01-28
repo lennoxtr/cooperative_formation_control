@@ -65,7 +65,7 @@ def arrived_at_goal(current_x, current_y, goal_x, goal_y):
 
 # this is essentially derived from the shape function
 def get_angle_increment(num_of_robots):
-    total_interior_angle = (num_of_robots - 2) * 180
+    total_interior_angle = (num_of_robots - 2) * np.pi
     interior_angle = total_interior_angle / num_of_robots
 
     remaining_robots = num_of_robots - 2
@@ -82,7 +82,7 @@ def get_single_position_in_formation(leader_position_x, leader_position_y, leade
 
     remaining_robots = num_of_robots - 2
     interior_angle = remaining_robots * angle_increment
-    initial_angle = (180 - interior_angle) / 2
+    initial_angle = (np.pi - interior_angle) / 2
 
     # This is because index 0 is leader
     # TODO: make this more generalized
@@ -90,21 +90,26 @@ def get_single_position_in_formation(leader_position_x, leader_position_y, leade
 
     global_frame_angle = normalized_leader_heading - (np.pi / 2 + relative_angle_from_leader)
 
-    x_coord_formation = leader_position_x + math.cos(global_frame_angle)
-    y_coord_formation = leader_position_y + math.sin(global_frame_angle)
+    robot_step = follower_robot_id
+    actual_distance = adjacent_distance * math.sin(robot_step * np.pi / num_of_robots) / math.sin(np.pi / num_of_robots)
+
+    x_coord_formation = leader_position_x + actual_distance * math.cos(global_frame_angle)
+    y_coord_formation = leader_position_y + actual_distance * math.sin(global_frame_angle)
     return (x_coord_formation, y_coord_formation)
 
 
 # Called only by leader robot to project formation
-def get_all_postion_in_formation(leader_position_x, leader_position_y, leader_heading, follower_robot_id_list):
-    postion_in_formation_list = []
-    num_of_robots = len(follower_robot_id_list)
+def get_all_postion_in_formation(leader_position_x, leader_position_y, leader_heading, follower_robot_id_list, adjacent_distance):
+    position_in_formation_list = []
+    num_of_robots = len(follower_robot_id_list) + 1
 
     for follower_robot_id in  follower_robot_id_list:
-        position_in_formation = get_single_position_in_formation(leader_position,
+        position_in_formation = get_single_position_in_formation(leader_position_x,
+                                                                leader_position_y,
                                                                 leader_heading,
                                                                 follower_robot_id,
-                                                                num_of_robots)
+                                                                num_of_robots,
+                                                                adjacent_distance)
         position_in_formation_list.append((follower_robot_id, position_in_formation))
     
     return position_in_formation_list
