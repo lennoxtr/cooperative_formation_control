@@ -260,10 +260,23 @@ class ControlProtocol():
         # Leader Follower
         lf_position_error, lf_yaw_error = self.leader_follower(robot_controller)
 
+        if robot_controller.is_leader:
+            if robot_controller.is_rendezvoused:
+                total_position_error = 0.0
+                total_yaw_error = 0.0
+                return total_position_error, total_yaw_error
+        else:
+            if robot_controller.is_in_formation:
+                total_position_error = 0.0
+                total_yaw_error = 0.0
+                return total_position_error, total_yaw_error
+
+        '''
         if robot_controller.is_rendezvoused and self.avg_flocking_gain > 0.1:
             total_position_error = 0.0
             total_yaw_error = 0.0
             return total_position_error, total_yaw_error
+        '''
 
         # Set to 0 to test PID
         # Set to 1 to test forming formation
