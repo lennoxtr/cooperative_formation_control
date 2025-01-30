@@ -266,7 +266,10 @@ class ControlProtocol():
             return total_position_error, total_yaw_error
 
         # Set to 0 to test PID
-        #flocking_gain = 0 
+        # Set to 1 to test forming formation
+        flocking_gain = 1
+
+        
 
         fl_gs_position_error = (1 - flocking_gain) * lf_position_error + \
                                 flocking_gain * pm_position_error
