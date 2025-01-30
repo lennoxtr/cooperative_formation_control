@@ -344,6 +344,11 @@ class RobotController(Node):
             return
         
         if self.is_leader:
+            print("-----------------------------------")
+            print("Leader Robot")
+            print("Heading: ", self.current_imu_heading)
+            print("Position x: ", self.current_x)
+            print("Position y: ", self.current_y)
             robot_formation_position_list = get_all_postion_in_formation(self.current_x,
                                                                         self.current_y,
                                                                         self.current_imu_heading,
@@ -358,6 +363,10 @@ class RobotController(Node):
                 position_tuple = item[1]
                 position_x = position_tuple[0]
                 position_y = position_tuple[1]
+
+                print("Robot id: ", robot_id)
+                print("Position x: ", position_x)
+                print("Position y: ", position_y)
 
                 # Preparing tracking position message
                 msg = Goal()

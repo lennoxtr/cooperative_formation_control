@@ -102,8 +102,7 @@ def get_single_position_in_formation(leader_position_x, leader_position_y, leade
 def get_all_postion_in_formation(leader_position_x, leader_position_y, leader_heading, follower_robot_id_list, adjacent_distance):
     position_in_formation_list = []
     num_of_robots = len(follower_robot_id_list) + 1
-
-    for follower_robot_id in  follower_robot_id_list:
+    for follower_robot_id in follower_robot_id_list:
         position_in_formation = get_single_position_in_formation(leader_position_x,
                                                                 leader_position_y,
                                                                 leader_heading,
