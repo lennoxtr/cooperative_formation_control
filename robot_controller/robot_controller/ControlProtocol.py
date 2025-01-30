@@ -206,12 +206,15 @@ class ControlProtocol():
                                                 robot_controller.current_y,
                                                 self.avg_position_x,
                                                 self.avg_position_y)
-
+        
+        #Check
+        '''
         if avg_distance < self.rendezvous_distance:
             self.all_rendezvoused = True
         else:
             self.all_rendezvoused = False
-        
+        '''
+
         # Implement as logistic function
         # TODO: Need to tune
         if robot_controller.is_leader:
