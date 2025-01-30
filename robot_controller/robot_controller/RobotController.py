@@ -408,6 +408,8 @@ class RobotController(Node):
         else:
             if self.is_arrived():
                 self.is_in_formation = True
+            else:
+                self.is_in_formation = False
             
 
         # Control Protocol output linear and angular speed change
