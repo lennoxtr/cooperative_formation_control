@@ -267,7 +267,7 @@ class ControlProtocol():
 
         # Set to 0 to test PID
         # Set to 1 to test forming formation
-        flocking_gain = 1
+        #flocking_gain = 0
 
         
 
