@@ -217,7 +217,7 @@ class ControlProtocol():
         if robot_controller.is_leader:
             k = 7
         else:
-            k = 3 # k is the flocking function steepness
+            k = 0 # k is the flocking function steepness
 
         # TODO: check whether -self.rendezvous_distance is needed
         flocking_gain = (1 - math.e ** (-k * (dist_to_rendezvous - self.rendezvous_distance))) / (1 + math.e ** (-k * (dist_to_rendezvous - self.rendezvous_distance)))
