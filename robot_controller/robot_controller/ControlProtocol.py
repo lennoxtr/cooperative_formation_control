@@ -36,7 +36,7 @@ class ControlProtocol():
 
         # Assume current_vel = max_vel = 0.2 to reduce calculation
         current_vel = 0.2
-        delta_t = 3.5
+        delta_t = 3
         self.sensitivity_bubble = bare_sensitivity_bubble * current_vel * delta_t
 
         # For reporting flocking gain
