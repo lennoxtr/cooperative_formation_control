@@ -121,7 +121,6 @@ class ControlProtocol():
 
         # Needs to be implemented in all control algo
         # Using bubble rebound algo
-        rclpy.spin_once(robot_controller)
         lidar_data = robot_controller.lidar_data
         
         possible_collision_angle = np.where((lidar_data > 0.0) & (lidar_data < self.sensitivity_bubble))[0]
@@ -189,7 +188,6 @@ class ControlProtocol():
 
     def get_flocking_gain(self, robot_controller, position_mapping):
         # Must be called after position matching
-        # At the moment recalculated for all robots => wasteful
 
         #if self.all_rendezvoused:
         #    flocking_gain = 0.0
@@ -219,7 +217,7 @@ class ControlProtocol():
         if robot_controller.is_leader:
             k = 7
         else:
-            k = 5 # k is the flocking function steepness
+            k = 3 # k is the flocking function steepness
 
         # TODO: check whether -self.rendezvous_distance is needed
         flocking_gain = (1 - math.e ** (-k * (dist_to_rendezvous - self.rendezvous_distance))) / (1 + math.e ** (-k * (dist_to_rendezvous - self.rendezvous_distance)))
@@ -231,13 +229,11 @@ class ControlProtocol():
         if self.avg_flocking_gain < 0.0:
             self.avg_flocking_gain = 0.0
         
-            
         return flocking_gain
         
     def calculate_control(self, robot_controller, position_mapping, velocity_mapping, heading_mapping):
         ### Sum of all control policies
 
-        # Method 1: have 1 PID (currently only P) for all
         # Collision Avoidance
         ca_position_error, ca_yaw_error = self.collision_prevention(robot_controller)
 
@@ -251,7 +247,7 @@ class ControlProtocol():
                                                                 position_mapping)
 
         # Velocity Matching
-        velocity_error = self.velocity_matching(robot_controller, velocity_mapping)
+        #velocity_error = self.velocity_matching(robot_controller, velocity_mapping)
 
         # Heading Matching
         heading_error = self.heading_matching(robot_controller, heading_mapping)
@@ -290,6 +286,7 @@ class ControlProtocol():
             else:
                 total_yaw_error = heading_error
         
+        '''
         current_time = time.time()
 
         if current_time - self.last_time > 0.3:
@@ -300,7 +297,8 @@ class ControlProtocol():
             self.flocking_goal_seeking_error.append(fl_gs_yaw_error)
             self.recorded_time.append(time.time() - self.start_time)
 
-            self.last_time = current_time        
+            self.last_time = current_time
+        '''
         
         return total_position_error, total_yaw_error
 

@@ -89,6 +89,9 @@ class RobotController(Node):
         self.PID_position = PidController(Kp=1, Ki=0.0, Kd=0.0)
         self.PID_heading = PidController(Kp=5, Ki=0.0, Kd=0.1)
 
+        # Formation
+        self.is_in_formation = False
+
         # TODO: Remove this as it is hard-coded
         self.follower_robot_id_list = [1, 2, 3]
 
@@ -387,12 +390,15 @@ class RobotController(Node):
                 print("Position x: ", position_x)
                 print("Position y: ", position_y)
             print("-----------------------------------")
-            '''
-            
+            '''   
             if self.is_arrived() and self.is_rendezvoused:
                 arrived_msg = Bool()
                 arrived_msg.data = True
                 self.arrive_at_goal_publisher.publish(arrived_msg)
+        
+        else:
+            if self.is_arrived():
+                self.is_in_formation = True
             
 
         # Control Protocol output linear and angular speed change
