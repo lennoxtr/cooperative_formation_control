@@ -72,10 +72,6 @@ class RobotController(Node):
         # Lidar data for collision avoidance
         self.lidar_data = np.zeros(360)
 
-        # Rendezvous
-        # TODO: Need to implement
-        self.is_in_formation = False
-
         # Position variables
         self.goal_x = 0.0
         self.goal_y = 0.0
@@ -133,13 +129,12 @@ class RobotController(Node):
             self.is_started_callback,
             10)
         
-        self.leader_position_subscription = self.create_subscription(
+        self.tracking_position_subscription = self.create_subscription(
             Goal,
-            '/leader_position',
-            self.leader_position_callback,
+            f'/{self.namespace}/tracking_position',
+            self.tracking_position_callback,
             10)
         
-        #TODO: implement
         self.leader_heading_subscription = self.create_subscription(
             Heading,
             '/leader_heading',
@@ -204,18 +199,11 @@ class RobotController(Node):
             '/robot_heading',
             10)
         
-        self.leader_position_publisher = self.create_publisher(
-            Goal,
-            '/leader_position',
-            10)
-        
         self.leader_heading_publisher = self.create_publisher(
             Heading,
             '/leader_heading',
             10)
-
         
-    
     def imu_callback(self, msg):
         orientation_q = msg.orientation
         quaternion = [orientation_q.x,
@@ -271,10 +259,9 @@ class RobotController(Node):
         self.is_started = msg
         self.get_logger().info("Received start signal. Executing")
     
-    def leader_position_callback(self, msg):
-        if not self.is_leader:
-            self.goal_x = float("{:.3f}".format(msg.goal_x))
-            self.goal_y = float("{:.3f}".format(msg.goal_y))
+    def tracking_position_callback(self, msg):
+        self.goal_x = float("{:.3f}".format(msg.goal_x))
+        self.goal_y = float("{:.3f}".format(msg.goal_y))
     
     def leader_heading_callback(self, msg):
         self.leader_heading = msg.heading
@@ -354,16 +341,37 @@ class RobotController(Node):
             return
         
         if self.is_leader:
-            msg = Goal()
-            msg.goal_x = self.current_x
-            msg.goal_y = self.current_y
-            self.leader_position_publisher.publish(msg)
-
             robot_formation_position_list = get_all_postion_in_formation(self.current_x,
                                                                         self.current_y,
                                                                         self.current_imu_heading,
                                                                         self.follower_robot_id_list,
                                                                         adjacent_distance = 1)
+            for item in robot_formation_position_list:
+                # Namespace of follower robot
+                robot_id = item[0]
+                namespace = 'turtlebot' + str(robot_id)
+
+                # Tracking position for follower robot
+                position_tuple = item[1]
+                position_x = position_tuple[0]
+                position_y = position_tuple[1]
+
+                # Preparing tracking position message
+                msg = Goal()
+                msg.goal_x = position_x
+                msg.goal_y = position_y
+
+                # Dynamic publisher
+                dynamic_topic = f'/{namespace}/tracking_position'
+                tracking_position_publisher = self.create_publisher(
+                Goal,
+                dynamic_topic,
+                10)
+
+
+                tracking_position_publisher.publish(msg)
+
+            '''
             print("-----------------------------------")
             print("Leader Robot")
             print("Heading: ", self.current_imu_heading)
@@ -379,7 +387,7 @@ class RobotController(Node):
                 print("Position x: ", position_x)
                 print("Position y: ", position_y)
             print("-----------------------------------")
-            
+            '''
             
             if self.is_arrived() and self.is_rendezvoused:
                 arrived_msg = Bool()
