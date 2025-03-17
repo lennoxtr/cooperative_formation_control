@@ -255,8 +255,8 @@ RobotController::RobotController(bool is_leader)
                 for (const auto &item : robot_formation_position_list) {
                     int robot_id = item.first;
                     std::string namespace_ = "turtlebot" + std::to_string(robot_id);
-                    float position_x = item.second[0];
-                    float position_y = item.second[1];
+                    float position_x = item.second.first;
+                    float position_y = item.second.second;
                                   
                     RCLCPP_INFO(this->get_logger(), "Robot id: %d", robot_id);
                     RCLCPP_INFO(this->get_logger(), "Position x: %.3f", position_x);
