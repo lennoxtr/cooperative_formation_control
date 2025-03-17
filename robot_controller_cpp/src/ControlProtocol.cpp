@@ -76,7 +76,7 @@ std::pair<double, double> ControlProtocol::leader_follower(RobotController& rc) 
     };
 }
 
-double ControlProtocol::get_flocking_gain(RobotController& rc, const std::vector<std::pair<double, double>>& pos_map) {
+double ControlProtocol::get_flocking_gain(RobotController& rc, const std::vector<std::array<double, 2>>& pos_map) {
     double sum_dist = 0.0;
     for (const auto& pos : pos_map)
         sum_dist += FormationUtils::get_position_error(pos.first, pos.second, avg_position_x_, avg_position_y_);
@@ -88,7 +88,7 @@ double ControlProtocol::get_flocking_gain(RobotController& rc, const std::vector
     return std::max(fg, 0.0);
 }
 
-std::pair<double, double> ControlProtocol::calculate_control(RobotController& rc, const std::vector<std::pair<double, double>>& pos_map, const std::vector<double>& vel_map, const std::vector<double>& head_map) {
+std::pair<double, double> ControlProtocol::calculate_control(RobotController& rc, const std::vector<std::array<double, 2>>& pos_map, const std::vector<double>& vel_map, const std::vector<double>& head_map) {
     auto [ca_pe, ca_ye] = collision_prevention(rc);
     if (ca_ye != 0.0 && !all_rendezvoused_) return {ca_pe, ca_ye};
 
@@ -103,7 +103,7 @@ std::pair<double, double> ControlProtocol::calculate_control(RobotController& rc
     return {total_pe, total_ye};
 }
 
-std::pair<double, double> ControlProtocol::execute_control(RobotController& rc, const std::vector<std::pair<double, double>>& pos_map, const std::vector<double>& vel_map, const std::vector<double>& head_map) {
+std::pair<double, double> ControlProtocol::execute_control(RobotController& rc, const std::vector<std::array<double, 2>>& pos_map, const std::vector<double>& vel_map, const std::vector<double>& head_map) {
     auto [total_pe, total_ye] = calculate_control(rc, pos_map, vel_map, head_map);
     auto now = std::chrono::steady_clock::now();
     double time_now = std::chrono::duration<double>(now.time_since_epoch()).count();

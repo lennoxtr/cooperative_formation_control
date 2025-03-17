@@ -110,7 +110,7 @@ RobotController::RobotController(bool is_leader)
             heading_publisher_->publish(msg_out);
 
             if (is_leader_) {
-                leader_heading_ = current_imu_heading;
+                leader_heading_ = current_imu_heading_;
                 leader_heading_publisher_->publish(msg_out);
             }
         }

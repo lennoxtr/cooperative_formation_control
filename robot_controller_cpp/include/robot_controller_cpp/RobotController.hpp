@@ -50,7 +50,7 @@ private:
     ControlProtocol control_protocol_;
 
     // Mappings for control
-    std::vector<std::array<float, 2>> position_mapping_;
+    std::vector<std::array<double, 2>> position_mapping_;
     std::vector<float> velocity_mapping_;
     std::vector<float> heading_mapping_;
 
@@ -83,7 +83,7 @@ private:
     bool is_in_formation_;
 
     // TODO: Remove this as it is hard-coded
-    std::array<int, 3> follower_robot_id_list_ = {1, 2, 3};
+    std::vector<int>& follower_robot_id_list_ = {1, 2, 3};
 
     // Subscriptions
     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_subscription_;
