@@ -22,9 +22,9 @@
 #include "position_mapping_msg/msg/position_mapping.hpp"
 
 // PID Controller & other utilities
-#include "PidController.hpp"
-#include "ControlProtocol.hpp"
-#include "FormationUtils.hpp"
+#include "robot_controller_cpp/PidController.hpp"
+#include "robot_controller_cpp/ControlProtocol.hpp"
+#include "robot_controller_cpp/FormationUtils.hpp"
 
 class RobotController : public rclcpp::Node
 {

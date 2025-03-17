@@ -24,7 +24,10 @@ include_directories(
 add_executable(robot_controller_cpp src/RobotController.cpp)
 
 # Specify the directory where header files are located
-target_include_directories(robot_controller_cpp PUBLIC include)
+target_include_directories(robot_controller_cpp PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
 
 # Define the macro to disable Boost functions in pluginlib
 target_compile_definitions(robot_controller_cpp PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
