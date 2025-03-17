@@ -32,8 +32,8 @@ public:
 private:
     double get_sensitivity_bubble_gain(int angle_in_degree);
 
-    int num_of_robot_;
     double rendezvous_distance_;
+    int num_of_robot_;
     double avg_position_x_, avg_position_y_;
     bool all_rendezvoused_;
     double avg_flocking_gain_;
