@@ -62,7 +62,7 @@ private:
     float dangerous_radius_;
 
     // Lidar data for collision avoidance
-    std::array<float> lidar_data_;
+    std::vector<float> lidar_data_;
 
     // Position variables
     double goal_x_, goal_y_;

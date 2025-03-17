@@ -85,7 +85,7 @@ RobotController::RobotController(bool is_leader)
             "/arrived_at_goal", 10, std::bind(&RobotController::arrived_at_goal_callback, this, std::placeholders::_1));
 
         // Timer
-        heartbeat_timer_ = this->create_wall_timer(1s, std::bind(&RobotController::heartbeat_timer_callback, this));
+        heartbeat_timer_ = this->create_wall_timer(std::chrono::seconds(1), std::bind(&RobotController::heartbeat_timer_callback, this));
 
         // Publishers
         heartbeat_publisher_ = this->create_publisher<std_msgs::msg::String>("/heartbeat", 10);
@@ -100,8 +100,8 @@ RobotController::RobotController(bool is_leader)
             auto orientation_q = msg->orientation;
             std::vector<double> quaternion = {orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w};
 
-            std::vector<double> euler = FormationUtils::quaternion_to_euler(quaternion);
-            double yaw = euler[2];
+            std::tuple<double, double, double> euler_tuple = FormationUtils::quaternion_to_euler(quaternion);
+            double yaw = std::get<2>(euler_tuple);
 
             current_imu_heading_ = round(yaw * 1000.0) / 1000.0;
             heading_msg::msg::Heading msg_out;
