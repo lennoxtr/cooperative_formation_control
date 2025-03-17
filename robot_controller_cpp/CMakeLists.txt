@@ -9,6 +9,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
 find_package(gazebo_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(velocity_msg REQUIRED)
@@ -16,7 +17,7 @@ find_package(heading_msg REQUIRED)
 find_package(robot_goal REQUIRED)
 
 add_executable(robot_controller_cpp src/RobotController.cpp)
-ament_target_dependencies(robot_controller_cpp rclcpp std_msgs gazebo_msgs sensor_msgs velocity_msg heading_msg robot_goal)
+ament_target_dependencies(robot_controller_cpp rclcpp std_msgs nav_msgs gazebo_msgs sensor_msgs velocity_msg heading_msg robot_goal)
 
 install(TARGETS
   robot_controller_cpp
