@@ -8,7 +8,6 @@
 #include <chrono>
 
 #include "FormationUtils.hpp"
-#include "RobotController.hpp"
 
 #define ANG_TOL 0.2
 #define POSITION_TOL 0.05
