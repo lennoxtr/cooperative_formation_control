@@ -1,5 +1,6 @@
 #include "robot_controller_cpp/ControlProtocol.hpp"
 #include "robot_controller_cpp/RobotController.hpp"
+#include "robot_controller_cpp/PidController.hpp"
 
 ControlProtocol::ControlProtocol(double rendezvous_distance, int num_of_robot)
     : rendezvous_distance_(rendezvous_distance), num_of_robot_(num_of_robot), avg_position_x_(0), avg_position_y_(0), all_rendezvoused_(false), avg_flocking_gain_(1.0) {
@@ -21,7 +22,7 @@ double ControlProtocol::get_sensitivity_bubble_gain(int angle_in_degree) {
     return A + B * cos(angle_in_rad);
 }
 
-std::pair<double, double> ControlProtocol::position_matching(RobotController& rc, const std::vector<std::pair<double, double>>& pos_map) {
+std::pair<double, double> ControlProtocol::position_matching(RobotController& rc, const std::vector<std::array<double, 2>>& pos_map) {
     avg_position_x_ = avg_position_y_ = 0.0;
     for (const auto& pos : pos_map) {
         avg_position_x_ += pos[0];
