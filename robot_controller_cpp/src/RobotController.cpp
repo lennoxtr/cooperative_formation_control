@@ -248,7 +248,7 @@ RobotController::RobotController(bool is_leader)
                 RCLCPP_INFO(this->get_logger(), "Position y: %.3f", current_y_);
             
 
-                std::vector<std::pair<int, std::array<float, 2>>> robot_formation_position_list =
+                std::vector<std::pair<int, std::pair<double, double>>> robot_formation_position_list =
                             FormationUtils::get_all_position_in_formation(current_x_, current_y_, current_imu_heading_,
                                           follower_robot_id_list_, 1.0); 
                 
