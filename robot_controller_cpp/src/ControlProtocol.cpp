@@ -1,6 +1,5 @@
 #include "robot_controller_cpp/ControlProtocol.hpp"
-
-class RobotController;
+#include "robot_controller_cpp/RobotController.hpp"
 
 ControlProtocol::ControlProtocol(double rendezvous_distance, int num_of_robot)
     : rendezvous_distance_(rendezvous_distance), num_of_robot_(num_of_robot), avg_position_x_(0), avg_position_y_(0), all_rendezvoused_(false), avg_flocking_gain_(1.0) {
