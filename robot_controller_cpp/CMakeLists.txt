@@ -21,7 +21,7 @@ include_directories(
   include
 )
 
-add_executable(robot_controller_cpp src/RobotController.cpp)
+add_executable(robot_controller_cpp src/RobotController.cpp src/ControlProtocol.cpp src/PidController.cpp src/FormationUtils.cpp)
 
 # Specify the directory where header files are located
 target_include_directories(robot_controller_cpp PUBLIC
