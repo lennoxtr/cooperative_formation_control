@@ -13,6 +13,8 @@
 #define ANG_TOL 0.2
 #define POSITION_TOL 0.05
 
+class RobotController;
+
 class ControlProtocol {
 
 public:
