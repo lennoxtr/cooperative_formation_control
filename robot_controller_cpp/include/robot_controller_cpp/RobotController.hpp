@@ -33,6 +33,7 @@ class RobotController : public rclcpp::Node
 {
 public: 
     explicit RobotController(bool is_leader = false);
+    void execute();
 
 private:
     // Identification
@@ -61,7 +62,7 @@ private:
     float dangerous_radius_;
 
     // Lidar data for collision avoidance
-    std::array<float, 360> lidar_data_;
+    std::array<float> lidar_data_;
 
     // Position variables
     double goal_x_, goal_y_;
@@ -127,10 +128,9 @@ private:
     void heartbeat_timer_callback();
 
     // Control methods
-    void move_bot(float linear_x_change, float angular_z_change);
+    void move_bot(float linear_x, float angular_z);
     void stop_bot();
     bool is_arrived();
-    void execute();
 
 };
 

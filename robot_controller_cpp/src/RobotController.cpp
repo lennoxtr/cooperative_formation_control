@@ -106,7 +106,7 @@ RobotController::RobotController(bool is_leader)
             current_imu_heading_ = round(yaw * 1000.0) / 1000.0;
             heading_msg::msg::Heading msg_out;
             msg_out.robot_id = robot_id_;
-            msg_out.heading = current_imu_heading;
+            msg_out.heading = current_imu_heading_;
             heading_publisher_->publish(msg_out);
 
             if (is_leader_) {
@@ -189,7 +189,7 @@ RobotController::RobotController(bool is_leader)
         void RobotController::arrived_at_goal_callback(const std_msgs::msg::Bool::SharedPtr msg) {
             auto arrived_at_goal_ = msg->data;
             if (arrived_at_goal_) {
-                stopbot();
+                stop_bot();
                 std::cout << namespace_ << " arrived" << std::endl;
             }
         }
@@ -198,11 +198,11 @@ RobotController::RobotController(bool is_leader)
             if (!is_started_) {
                 auto message = std_msgs::msg::String();
                 message.data = namespace_;
-                heartbeat_publisher->publish(message);
+                heartbeat_publisher_->publish(message);
             }
         }
 
-        void RobotController::move_bot(double linear_x, double angular_z) {
+        void RobotController::move_bot(float linear_x, float angular_z) {
             linear_x_velocity_ = linear_x;
             angular_z_velocity_ = angular_z;
 
@@ -250,7 +250,7 @@ RobotController::RobotController(bool is_leader)
 
                 std::vector<std::pair<int, std::array<float, 2>>> robot_formation_position_list =
                             FormationUtils::get_all_position_in_formation(current_x_, current_y_, current_imu_heading_,
-                                          follower_robot_id_list, 1.0); 
+                                          follower_robot_id_list_, 1.0); 
                 
                 for (const auto &item : robot_formation_position_list) {
                     int robot_id = item.first;
