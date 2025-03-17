@@ -17,7 +17,21 @@ find_package(heading_msg REQUIRED)
 find_package(position_mapping_msg REQUIRED)
 find_package(robot_goal REQUIRED)
 
+include_directories(
+  include
+)
+
 add_executable(robot_controller_cpp src/RobotController.cpp)
+
+# Specify the directory where header files are located
+target_include_directories(robot_controller_cpp PUBLIC include)
+
+# Define the macro to disable Boost functions in pluginlib
+target_compile_definitions(robot_controller_cpp PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
+
+# Specify C99 for C and C++17 for C++ language standards
+target_compile_features(robot_controller_cpp PUBLIC c_std_99 cxx_std_17)
+
 ament_target_dependencies(robot_controller_cpp rclcpp std_msgs nav_msgs gazebo_msgs sensor_msgs velocity_msg heading_msg position_mapping_msg robot_goal)
 
 install(TARGETS
