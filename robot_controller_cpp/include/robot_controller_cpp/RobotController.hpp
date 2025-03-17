@@ -80,7 +80,6 @@ private:
 
     // Formation
     bool is_in_formation_;
-    bool arrived_at_goal_;
 
     // TODO: Remove this as it is hard-coded
     std::array<int, 3> follower_robot_id_list_ = {1, 2, 3};
