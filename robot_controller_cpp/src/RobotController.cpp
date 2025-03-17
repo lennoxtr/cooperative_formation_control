@@ -22,6 +22,7 @@
 #include "position_mapping_msg/msg/position_mapping.hpp"
 
 // PID Controller & other utilities
+#include "robot_controller_cpp/RobotController.hpp"
 #include "robot_controller_cpp/PidController.hpp"
 #include "robot_controller_cpp/ControlProtocol.hpp"
 #include "robot_controller_cpp/FormationUtils.hpp"
