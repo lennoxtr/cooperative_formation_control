@@ -24,8 +24,8 @@ double ControlProtocol::get_sensitivity_bubble_gain(int angle_in_degree) {
 std::pair<double, double> ControlProtocol::position_matching(RobotController& rc, const std::vector<std::pair<double, double>>& pos_map) {
     avg_position_x_ = avg_position_y_ = 0.0;
     for (const auto& pos : pos_map) {
-        avg_position_x_ += pos.first;
-        avg_position_y_ += pos.second;
+        avg_position_x_ += pos[0];
+        avg_position_y_ += pos[1];
     }
     avg_position_x_ /= num_of_robot_;
     avg_position_y_ /= num_of_robot_;
@@ -52,7 +52,7 @@ std::pair<double, double> ControlProtocol::collision_prevention(RobotController&
     auto& lidar = rc.lidar_data_;
     std::vector<int> coll_angles;
 
-    for (int i = 0; i < lidar.size(); i++) {
+    for (size_t i = 0; i < lidar.size(); i++) {
         if (lidar[i] > 0.0 && lidar[i] < sensitivity_bubble_[i] && (i >= 270 || i <= 180))
             coll_angles.push_back(i);
     }
@@ -66,6 +66,7 @@ std::pair<double, double> ControlProtocol::collision_prevention(RobotController&
     }
 
     double min_distance = *std::min_element(distances.begin(), distances.end());
+    min_distance;
     double pos_error = 0.2;
     double rebound_angle = ANG_TOL; // simplified for now
 
@@ -82,16 +83,18 @@ std::pair<double, double> ControlProtocol::leader_follower(RobotController& rc) 
 double ControlProtocol::get_flocking_gain(RobotController& rc, const std::vector<std::array<double, 2>>& pos_map) {
     double sum_dist = 0.0;
     for (const auto& pos : pos_map)
-        sum_dist += FormationUtils::get_position_error(pos.first, pos.second, avg_position_x_, avg_position_y_);
+        sum_dist += FormationUtils::get_position_error(pos[0], pos[1], avg_position_x_, avg_position_y_);
 
     double avg_dist = sum_dist / num_of_robot_;
-    double dist_to_rendezvous = FormationUtils::get_position_error(rc.current_x, rc.current_y, avg_position_x_, avg_position_y_);
-    double k = rc.is_leader ? 7 : 0;
+    avg_dist;
+    double dist_to_rendezvous = FormationUtils::get_position_error(rc.current_x_, rc.current_y_, avg_position_x_, avg_position_y_);
+    double k = rc.is_leader_ ? 7 : 0;
     double fg = (1 - exp(-k * (dist_to_rendezvous - rendezvous_distance_))) / (1 + exp(-k * (dist_to_rendezvous - rendezvous_distance_)));
     return std::max(fg, 0.0);
 }
 
 std::pair<double, double> ControlProtocol::calculate_control(RobotController& rc, const std::vector<std::array<double, 2>>& pos_map, const std::vector<float>& vel_map, const std::vector<float>& head_map) {
+    vel_map;
     auto [ca_pe, ca_ye] = collision_prevention(rc);
     if (ca_ye != 0.0 && !all_rendezvoused_) return {ca_pe, ca_ye};
 
@@ -101,7 +104,7 @@ std::pair<double, double> ControlProtocol::calculate_control(RobotController& rc
     double heading_err = heading_matching(rc, head_map);
 
     double total_pe = (1 - flock_gain) * lf_pe + flock_gain * pm_pe;
-    double total_ye = rc.is_leader ? ((1 - flock_gain) * lf_ye + flock_gain * pm_ye) : heading_err;
+    double total_ye = rc.is_leader_ ? ((1 - flock_gain) * lf_ye + flock_gain * pm_ye) : heading_err;
 
     return {total_pe, total_ye};
 }
@@ -111,8 +114,8 @@ std::pair<double, double> ControlProtocol::execute_control(RobotController& rc, 
     auto now = std::chrono::steady_clock::now();
     double time_now = std::chrono::duration<double>(now.time_since_epoch()).count();
 
-    double linear = rc.PID_position.compute(total_pe, time_now);
-    double angular = rc.PID_heading.compute(total_ye, time_now);
+    double linear = rc.PID_position_.compute(total_pe, time_now);
+    double angular = rc.PID_heading_.compute(total_ye, time_now);
 
     return {linear, angular};
 }
