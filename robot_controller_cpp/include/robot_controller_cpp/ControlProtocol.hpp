@@ -20,14 +20,14 @@ public:
     ControlProtocol(double rendezvous_distance, int num_of_robot = 4);
 
     std::pair<double, double> position_matching(RobotController& robot_controller, const std::vector<std::array<double, 2>>& position_mapping);
-    double velocity_matching(RobotController& robot_controller, const std::vector<double>& velocity_mapping);
-    double heading_matching(RobotController& robot_controller, const std::vector<double>& heading_mapping);
+    double velocity_matching(RobotController& robot_controller, const std::vector<float>& velocity_mapping);
+    double heading_matching(RobotController& robot_controller, const std::vector<float>& heading_mapping);
     std::pair<double, double> collision_prevention(RobotController& robot_controller);
     std::pair<double, double> leader_follower(RobotController& robot_controller);
     double get_flocking_gain(RobotController& robot_controller, const std::vector<std::array<double, 2>>& position_mapping);
 
-    std::pair<double, double> calculate_control(RobotController& robot_controller, const std::vector<std::array<double, 2>>& position_mapping, const std::vector<double>& velocity_mapping, const std::vector<double>& heading_mapping);
-    std::pair<double, double> execute_control(RobotController& robot_controller, const std::vector<std::array<double, 2>>& position_mapping, const std::vector<double>& velocity_mapping, const std::vector<double>& heading_mapping);
+    std::pair<double, double> calculate_control(RobotController& robot_controller, const std::vector<std::array<double, 2>>& position_mapping, const std::vector<float>& velocity_mapping, const std::vector<float>& heading_mapping);
+    std::pair<double, double> execute_control(RobotController& robot_controller, const std::vector<std::array<double, 2>>& position_mapping, const std::vector<float>& velocity_mapping, const std::vector<float>& heading_mapping);
 
 private:
     double get_sensitivity_bubble_gain(int angle_in_degree);

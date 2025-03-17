@@ -35,12 +35,12 @@ std::pair<double, double> ControlProtocol::position_matching(RobotController& rc
     return {pos_error, yaw_error};
 }
 
-double ControlProtocol::velocity_matching(RobotController& rc, const std::vector<double>& vel_map) {
+double ControlProtocol::velocity_matching(RobotController& rc, const std::vector<float>& vel_map) {
     double sum_vel = std::accumulate(vel_map.begin(), vel_map.end(), 0.0);
     return num_of_robot_ * rc.linear_x_velocity - sum_vel;
 }
 
-double ControlProtocol::heading_matching(RobotController& rc, const std::vector<double>& head_map) {
+double ControlProtocol::heading_matching(RobotController& rc, const std::vector<float>& head_map) {
     double error = rc.leader_heading - rc.current_imu_heading;
     return FormationUtils::normalize_yaw_error(error);
 }
@@ -88,7 +88,7 @@ double ControlProtocol::get_flocking_gain(RobotController& rc, const std::vector
     return std::max(fg, 0.0);
 }
 
-std::pair<double, double> ControlProtocol::calculate_control(RobotController& rc, const std::vector<std::array<double, 2>>& pos_map, const std::vector<double>& vel_map, const std::vector<double>& head_map) {
+std::pair<double, double> ControlProtocol::calculate_control(RobotController& rc, const std::vector<std::array<double, 2>>& pos_map, const std::vector<float>& vel_map, const std::vector<float>& head_map) {
     auto [ca_pe, ca_ye] = collision_prevention(rc);
     if (ca_ye != 0.0 && !all_rendezvoused_) return {ca_pe, ca_ye};
 
@@ -103,7 +103,7 @@ std::pair<double, double> ControlProtocol::calculate_control(RobotController& rc
     return {total_pe, total_ye};
 }
 
-std::pair<double, double> ControlProtocol::execute_control(RobotController& rc, const std::vector<std::array<double, 2>>& pos_map, const std::vector<double>& vel_map, const std::vector<double>& head_map) {
+std::pair<double, double> ControlProtocol::execute_control(RobotController& rc, const std::vector<std::array<double, 2>>& pos_map, const std::vector<float>& vel_map, const std::vector<float>& head_map) {
     auto [total_pe, total_ye] = calculate_control(rc, pos_map, vel_map, head_map);
     auto now = std::chrono::steady_clock::now();
     double time_now = std::chrono::duration<double>(now.time_since_epoch()).count();

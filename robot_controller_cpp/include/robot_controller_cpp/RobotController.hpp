@@ -83,7 +83,7 @@ private:
     bool is_in_formation_;
 
     // TODO: Remove this as it is hard-coded
-    std::vector<int>& follower_robot_id_list_ = {1, 2, 3};
+    std::vector<int> follower_robot_id_list_ = {1, 2, 3};
 
     // Subscriptions
     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_subscription_;
