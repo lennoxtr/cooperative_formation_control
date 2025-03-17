@@ -66,22 +66,22 @@ RobotController::RobotController(bool is_leader)
         tracking_position_subscription_ = this->create_subscription<robot_goal::msg::Goal>(
             "/" + namespace_ + "/tracking_position", 10, std::bind(&RobotController::tracking_position_callback, this, std::placeholders::_1));
         
-        leader_heading_subscription = this->create_subscription<heading_msg::msg::Heading>(
+        leader_heading_subscription_ = this->create_subscription<heading_msg::msg::Heading>(
             "/leader_heading", 10, std::bind(&RobotController::leader_heading_callback, this, std::placeholders::_1));
 
-        current_position_subscription = this->create_subscription<robot_goal::msg::Goal>(
+        current_position_subscription_ = this->create_subscription<robot_goal::msg::Goal>(
             "/" + namespace_ + "/robot_position", 10, std::bind(&RobotController::current_position_callback, this, std::placeholders::_1));
         
-        position_mapping_subscription = this->create_subscription<position_mapping_msg::msg::PositionMapping>(
+        position_mapping_subscription_ = this->create_subscription<position_mapping_msg::msg::PositionMapping>(
             "/position_mapping", 10, std::bind(&RobotController::position_mapping_callback, this, std::placeholders::_1));
 
-        velocity_mapping_subscription = this->create_subscription<std_msgs::msg::Float64MultiArray>(
+        velocity_mapping_subscription_ = this->create_subscription<std_msgs::msg::Float64MultiArray>(
             "/velocity_mapping", 10, std::bind(&RobotController::velocity_mapping_callback, this, std::placeholders::_1));
         
-        heading_mapping_subscription = this->create_subscription<std_msgs::msg::Float64MultiArray>(
+        heading_mapping_subscription_ = this->create_subscription<std_msgs::msg::Float64MultiArray>(
             "/heading_mapping", 10, std::bind(&RobotController::heading_mapping_callback, this, std::placeholders::_1));
         
-        arrived_at_goal_subscription = this->create_subscription<std_msgs::msg::Bool>(
+        arrived_at_goal_subscription_ = this->create_subscription<std_msgs::msg::Bool>(
             "/arrived_at_goal", 10, std::bind(&RobotController::arrived_at_goal_callback, this, std::placeholders::_1));
 
         // Timer
@@ -97,20 +97,20 @@ RobotController::RobotController(bool is_leader)
     }  
         // Callbacks
         void RobotController::imu_callback(const sensor_msgs::msg::Imu::SharedPtr msg) {
-            cauto orientation_q = msg->orientation;
+            auto orientation_q = msg->orientation;
             std::vector<double> quaternion = {orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w};
 
-            std::vector<double> euler = quaternion_to_euler(quaternion);
+            std::vector<double> euler = FormationUtils::quaternion_to_euler(quaternion);
             double yaw = euler[2];
 
-            current_imu_heading = round(yaw * 1000.0) / 1000.0;
+            current_imu_heading_ = round(yaw * 1000.0) / 1000.0;
             heading_msg::msg::Heading msg_out;
-            msg_out.robot_id = robot_id;
+            msg_out.robot_id = robot_id_;
             msg_out.heading = current_imu_heading;
             heading_publisher_->publish(msg_out);
 
-            if (is_leader) {
-                leader_heading = current_imu_heading;
+            if (is_leader_) {
+                leader_heading_ = current_imu_heading;
                 leader_heading_publisher_->publish(msg_out);
             }
         }
@@ -121,7 +121,7 @@ RobotController::RobotController(bool is_leader)
             auto linear_y_ = linear_velocity.y;
 
             velocity_msg::msg::Velocity velocity_msg;
-            velocity_msg.robot_id = robot_id;
+            velocity_msg.robot_id = robot_id_;
             velocity_msg.linear_x = linear_x_;
             velocity_msg.linear_y = linear_y_;
             controller_velocity_publisher_->publish(velocity_msg);
@@ -141,7 +141,7 @@ RobotController::RobotController(bool is_leader)
         }
 
         void RobotController::is_leader_callback(const std_msgs::msg::String::SharedPtr msg) {
-            auto leader_namespace = msg.data;
+            auto leader_namespace = msg->data;
             if (namespace_ == leader_namespace) {
                 is_leader_ = true;
             }
@@ -157,7 +157,7 @@ RobotController::RobotController(bool is_leader)
         }
 
         void RobotController::leader_heading_callback(const heading_msg::msg::Heading::SharedPtr msg) {
-            leader_heading_ = msg.heading;
+            leader_heading_ = msg->heading;
         }
 
         void RobotController::current_position_callback(const robot_goal::msg::Goal::SharedPtr msg) {
@@ -187,7 +187,7 @@ RobotController::RobotController(bool is_leader)
         }
 
         void RobotController::arrived_at_goal_callback(const std_msgs::msg::Bool::SharedPtr msg) {
-            arrived_at_goal_ = msg->data;
+            auto arrived_at_goal_ = msg->data;
             if (arrived_at_goal_) {
                 stopbot();
                 std::cout << namespace_ << " arrived" << std::endl;
