@@ -33,9 +33,7 @@ class RobotController : public rclcpp::Node
 {
 public: 
     explicit RobotController(bool is_leader = false);
-    void execute();
 
-private:
     // Identification
     int robot_id_;
     std::string namespace_;
@@ -84,6 +82,11 @@ private:
 
     // TODO: Remove this as it is hard-coded
     std::vector<int> follower_robot_id_list_ = {1, 2, 3};
+
+    void execute();
+
+private:
+
 
     // Subscriptions
     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_subscription_;

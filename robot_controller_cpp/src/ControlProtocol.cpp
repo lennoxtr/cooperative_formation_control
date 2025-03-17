@@ -38,16 +38,18 @@ std::pair<double, double> ControlProtocol::position_matching(RobotController& rc
 
 double ControlProtocol::velocity_matching(RobotController& rc, const std::vector<float>& vel_map) {
     double sum_vel = std::accumulate(vel_map.begin(), vel_map.end(), 0.0);
-    return num_of_robot_ * rc.linear_x_velocity - sum_vel;
+    vel_map;
+    return num_of_robot_ * rc.linear_x_velocity_ - sum_vel;
 }
 
 double ControlProtocol::heading_matching(RobotController& rc, const std::vector<float>& head_map) {
-    double error = rc.leader_heading - rc.current_imu_heading;
+    double error = rc.leader_heading_ - rc.current_imu_heading_;
+    head_map;
     return FormationUtils::normalize_yaw_error(error);
 }
 
 std::pair<double, double> ControlProtocol::collision_prevention(RobotController& rc) {
-    auto& lidar = rc.lidar_data;
+    auto& lidar = rc.lidar_data_;
     std::vector<int> coll_angles;
 
     for (int i = 0; i < lidar.size(); i++) {
@@ -72,8 +74,8 @@ std::pair<double, double> ControlProtocol::collision_prevention(RobotController&
 
 std::pair<double, double> ControlProtocol::leader_follower(RobotController& rc) {
     return {
-        FormationUtils::get_position_error(rc.current_x, rc.current_y, rc.goal_x, rc.goal_y),
-        FormationUtils::get_yaw_error(rc.current_x, rc.current_y, rc.goal_x, rc.goal_y, rc.current_imu_heading)
+        FormationUtils::get_position_error(rc.current_x_, rc.current_y_, rc.goal_x_, rc.goal_y_),
+        FormationUtils::get_yaw_error(rc.current_x_, rc.current_y_, rc.goal_x_, rc.goal_y_, rc.current_imu_heading_)
     };
 }
 
