@@ -57,32 +57,32 @@ RobotController::RobotController(bool is_leader)
         goal_subscription_ = this->create_subscription<robot_goal::msg::Goal>(
             "/" + namespace_ + "/goal", 10, std::bind(&RobotController::goal_listener_callback, this, std::placeholders::_1));
 
-        is_leader_subscription_ = this->create_subscription<std_msgs::msg::Bool>(
-            "/leader", 10, std::bind(&RobotController::is_started_callback, this, std::placeholders::_1));
+        is_leader_subscription_ = this->create_subscription<std_msgs::msg::String>(
+            "/leader", 10, std::bind(&RobotController::is_leader_callback, this, std::placeholders::_1));
     
         is_started_subscription_ = this->create_subscription<std_msgs::msg::Bool>(
             "/start", 10, std::bind(&RobotController::is_started_callback, this, std::placeholders::_1));
 
-        tracking_position_subscription_ = this->create_subscription<std_msgs::msg::Bool>(
-            "/" + namespace_ + "/tracking_position", 10, std::bind(&RobotController::is_started_callback, this, std::placeholders::_1));
+        tracking_position_subscription_ = this->create_subscription<robot_goal::msg::Goal>(
+            "/" + namespace_ + "/tracking_position", 10, std::bind(&RobotController::tracking_position_callback, this, std::placeholders::_1));
         
-        leader_heading_subscription = this->create_subscription<std_msgs::msg::Bool>(
-            "/leader_heading", 10, std::bind(&RobotController::is_started_callback, this, std::placeholders::_1));
+        leader_heading_subscription = this->create_subscription<heading_msg::msg::Heading>(
+            "/leader_heading", 10, std::bind(&RobotController::leader_heading_callback, this, std::placeholders::_1));
 
-        current_position_subscription = this->create_subscription<std_msgs::msg::Bool>(
-            "/" + namespace_ + "/robot_position", 10, std::bind(&RobotController::is_started_callback, this, std::placeholders::_1));
+        current_position_subscription = this->create_subscription<robot_goal::msg::Goal>(
+            "/" + namespace_ + "/robot_position", 10, std::bind(&RobotController::current_position_callback, this, std::placeholders::_1));
         
-        position_mapping_subscription = this->create_subscription<std_msgs::msg::Bool>(
-            "/position_mapping", 10, std::bind(&RobotController::is_started_callback, this, std::placeholders::_1));
+        position_mapping_subscription = this->create_subscription<position_mapping_msg::msg::PositionMapping>(
+            "/position_mapping", 10, std::bind(&RobotController::position_mapping_callback, this, std::placeholders::_1));
 
-        velocity_mapping_subscription = this->create_subscription<std_msgs::msg::Bool>(
-            "/velocity_mapping", 10, std::bind(&RobotController::is_started_callback, this, std::placeholders::_1));
+        velocity_mapping_subscription = this->create_subscription<std_msgs::msg::Float64MultiArray>(
+            "/velocity_mapping", 10, std::bind(&RobotController::velocity_mapping_callback, this, std::placeholders::_1));
         
-        heading_mapping_subscription = this->create_subscription<std_msgs::msg::Bool>(
-            "/heading_mapping", 10, std::bind(&RobotController::is_started_callback, this, std::placeholders::_1));
+        heading_mapping_subscription = this->create_subscription<std_msgs::msg::Float64MultiArray>(
+            "/heading_mapping", 10, std::bind(&RobotController::heading_mapping_callback, this, std::placeholders::_1));
         
         arrived_at_goal_subscription = this->create_subscription<std_msgs::msg::Bool>(
-            "/arrived_at_goal", 10, std::bind(&RobotController::is_started_callback, this, std::placeholders::_1));
+            "/arrived_at_goal", 10, std::bind(&RobotController::arrived_at_goal_callback, this, std::placeholders::_1));
 
         // Timer
         heartbeat_timer_ = this->create_wall_timer(1s, std::bind(&RobotController::heartbeat_timer_callback, this));
