@@ -24,10 +24,7 @@
 // PID Controller & other utilities
 #include "robot_controller_cpp/RobotController.hpp"
 
-class RobotController : public rclcpp::Node
-{
-public:
-    RobotController(bool is_leader = false)
+RobotController::RobotController(bool is_leader)
     : Node("RobotController"),
     is_leader_(is_leader),
     rendezvous_distance_(2.0),
@@ -97,9 +94,9 @@ public:
         controller_velocity_publisher_ = this->create_publisher<velocity_msg::msg::Velocity>("/robot_linear_vel", 10);
         heading_publisher_ = this->create_publisher<heading_msg::msg::Heading>("/robot_heading", 10);
         leader_heading_publisher_ = this->create_publisher<heading_msg::msg::Heading>("/leader_heading", 10);
-      
+    }  
         // Callbacks
-        void imu_callback(const sensor_msgs::msg::Imu::SharedPtr msg) {
+        void RobotController::imu_callback(const sensor_msgs::msg::Imu::SharedPtr msg) {
             cauto orientation_q = msg->orientation;
             std::vector<double> quaternion = {orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w};
 
@@ -118,7 +115,7 @@ public:
             }
         }
 
-        void odom_callback(const nav_msgs::msg::Odometry::SharedPtr msg) {
+        void RobotController::odom_callback(const nav_msgs::msg::Odometry::SharedPtr msg) {
             auto linear_velocity = msg->twist.twist.linear;
             auto linear_x_ = linear_velocity.x;
             auto linear_y_ = linear_velocity.y;
@@ -130,66 +127,66 @@ public:
             controller_velocity_publisher_->publish(velocity_msg);
         }
 
-        void lidar_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg) {
+        void RobotController::lidar_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg) {
             lidar_data_ = msg->ranges;
             for (auto &range : lidar_data_) {
                 if (range == std::numeric_limits<float>::infinity()) range = max_lidar_range_;
             }
         }
 
-        void goal_callback(const robot_goal::msg::Goal::SharedPtr msg) {
+        void RobotController::goal_callback(const robot_goal::msg::Goal::SharedPtr msg) {
             goal_x_ = msg->goal_x;
             goal_y_ = msg->goal_y;
             received_goal_ = true;
         }
 
-        void is_leader_callback(const std_msgs::msg::String::SharedPtr msg) {
+        void RobotController::is_leader_callback(const std_msgs::msg::String::SharedPtr msg) {
             auto leader_namespace = msg.data;
             if (namespace_ == leader_namespace) {
                 is_leader_ = true;
             }
         }
 
-        void is_started_callback(const std_msgs::msg::Bool::SharedPtr msg) {
+        void RobotController::is_started_callback(const std_msgs::msg::Bool::SharedPtr msg) {
             is_started_ = msg->data;
         }
 
-        void tracking_position_callback(const robot_goal::msg::Goal::SharedPtr msg) {
+        void RobotController::tracking_position_callback(const robot_goal::msg::Goal::SharedPtr msg) {
             goal_x_ = std::round(msg->goal_x * 1000.0) / 1000.0;
             goal_y_ = std::round(msg->goal_y * 1000.0) / 1000.0;
         }
 
-        void leader_heading_callback(const heading_msg::msg::Heading::SharedPtr msg) {
+        void RobotController::leader_heading_callback(const heading_msg::msg::Heading::SharedPtr msg) {
             leader_heading_ = msg.heading;
         }
 
-        void current_position_callback(const robot_goal::msg::Goal::SharedPtr msg) {
+        void RobotController::current_position_callback(const robot_goal::msg::Goal::SharedPtr msg) {
             current_x_ = std::round(msg->goal_x * 1000.0) / 1000.0;
             current_y_ = std::round(msg->goal_y * 1000.0) / 1000.0;
         }
 
-        void position_mapping_callback(const position_mapping_msg::msg::PositionMapping::SharedPtr msg) {
+        void RobotController::position_mapping_callback(const position_mapping_msg::msg::PositionMapping::SharedPtr msg) {
             position_mapping_.clear();
             for (const auto& position : msg->data) {
                 position_mapping_.push_back({position.x, position.y});
             }
         }
 
-        void velocity_mapping_callback(const std_msgs::msg::Float64MultiArray::SharedPtr msg) {
+        void RobotController::velocity_mapping_callback(const std_msgs::msg::Float64MultiArray::SharedPtr msg) {
             velocity_mapping_.clear();
             for (const auto& value : msg->data) {
                 velocity_mapping_.push_back(static_cast<float>(value));
             }
         }
 
-        void heading_mapping_callback(const std_msgs::msg::Float64MultiArray::SharedPtr msg) {
+        void RobotController::heading_mapping_callback(const std_msgs::msg::Float64MultiArray::SharedPtr msg) {
             heading_mapping_.clear();
             for (const auto& value : msg->data) {
                 heading_mapping_.push_back(static_cast<float>(value)); // Cast double to float
             }
         }
 
-        void arrived_at_goal_callback(const std_msgs::msg::Bool::SharedPtr msg) {
+        void RobotController::arrived_at_goal_callback(const std_msgs::msg::Bool::SharedPtr msg) {
             arrived_at_goal_ = msg->data;
             if (arrived_at_goal_) {
                 stopbot();
@@ -197,7 +194,7 @@ public:
             }
         }
 
-        void heartbeat_timer_callback() {
+        void RobotController::heartbeat_timer_callback() {
             if (!is_started_) {
                 auto message = std_msgs::msg::String();
                 message.data = namespace_;
@@ -205,7 +202,7 @@ public:
             }
         }
 
-        void move_bot(double linear_x, double angular_z) {
+        void RobotController::move_bot(double linear_x, double angular_z) {
             linear_x_velocity_ = linear_x;
             angular_z_velocity_ = angular_z;
 
@@ -221,7 +218,7 @@ public:
             self_twist_publisher_->publish(twist);
         }
 
-        void stop_bot() {
+        void RobotController::stop_bot() {
             auto twist = geometry_msgs::msg::Twist();
             twist.linear.x = 0.0;
             twist.linear.y = 0.0;
@@ -235,11 +232,11 @@ public:
             RCLCPP_INFO(this->get_logger(), "%s arrived", namespace_.c_str());
         }
 
-        bool is_arrived() {
+        bool RobotController::is_arrived() {
             return FormationUtils::arrived_at_goal(current_x_, current_y_, goal_x_, goal_y_);
         }
 
-        void execute() {
+        void RobotController::execute() {
             if (!is_started_) {
                 return;
             }
@@ -252,7 +249,7 @@ public:
             
 
                 std::vector<std::pair<int, std::array<float, 2>>> robot_formation_position_list =
-                        get_all_position_in_formation(current_x_, current_y_, current_imu_heading_,
+                            FormationUtils::get_all_position_in_formation(current_x_, current_y_, current_imu_heading_,
                                           follower_robot_id_list, 1.0); 
                 
                 for (const auto &item : robot_formation_position_list) {
@@ -303,8 +300,6 @@ public:
 
             move_bot(target_linear_velocity, target_angular_velocity);
         }
-    }
-};
 
 int main(int argc, char *argv[]) {
     rclcpp::init(argc, argv);

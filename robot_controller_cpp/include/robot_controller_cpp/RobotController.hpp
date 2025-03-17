@@ -133,9 +133,6 @@ private:
     bool is_arrived();
     void execute();
 
-    // Helper methods for control logic
-    bool arrived_at_goal(float x1, float y1, float x2, float y2);
-    std::vector<std::array<float, 2>> get_all_position_in_formation(float x, float y, float heading, const std::vector<int> &robot_ids, float adjacent_distance);
 };
 
 #endif // ROBOT_CONTROLLER_HPP
