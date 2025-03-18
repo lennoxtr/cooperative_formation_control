@@ -31,9 +31,9 @@ std::pair<double, double> ControlProtocol::position_matching(RobotController& rc
     avg_position_x_ /= num_of_robot_;
     avg_position_y_ /= num_of_robot_;
 
-    double pos_error = FormationUtils::get_position_error(rc.current_x, rc.current_y, avg_position_x_, avg_position_y_);
-    double yaw_error = FormationUtils::get_yaw_error(rc.current_x, rc.current_y, avg_position_x_, avg_position_y_, rc.current_imu_heading);
-    rc.is_rendezvoused = (pos_error < rendezvous_distance_);
+    double pos_error = FormationUtils::get_position_error(rc.current_x_, rc.current_y_, avg_position_x_, avg_position_y_);
+    double yaw_error = FormationUtils::get_yaw_error(rc.current_x_, rc.current_y_, avg_position_x_, avg_position_y_, rc.current_imu_heading_);
+    rc.is_rendezvoused_ = (pos_error < rendezvous_distance_);
     return {pos_error, yaw_error};
 }
 
@@ -112,7 +112,7 @@ std::pair<double, double> ControlProtocol::calculate_control(RobotController& rc
 
 std::pair<double, double> ControlProtocol::execute_control(RobotController& rc, const std::vector<std::array<double, 2>>& pos_map, const std::vector<float>& vel_map, const std::vector<float>& head_map) {
     auto [total_pe, total_ye] = calculate_control(rc, pos_map, vel_map, head_map);
-    auto time_now = std::chrono::steady_clock::now();
+    std::chrono::steady_clock::time_point time_now = std::chrono::steady_clock::now();
 
     double linear = rc.PID_position_.compute(total_pe, time_now);
     double angular = rc.PID_heading_.compute(total_ye, time_now);
