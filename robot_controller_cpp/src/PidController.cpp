@@ -7,7 +7,7 @@ PidController::PidController(double Kp, double Ki, double Kd)
     last_time_ = std::chrono::steady_clock::now(); // Initialize time
 }
 
-double PidController::compute(double error)
+double PidController::compute(double error, std::chrono::steady_clock::time_point current_time)
 {
     // Get current time
     auto current_time = std::chrono::steady_clock::now();

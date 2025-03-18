@@ -112,8 +112,7 @@ std::pair<double, double> ControlProtocol::calculate_control(RobotController& rc
 
 std::pair<double, double> ControlProtocol::execute_control(RobotController& rc, const std::vector<std::array<double, 2>>& pos_map, const std::vector<float>& vel_map, const std::vector<float>& head_map) {
     auto [total_pe, total_ye] = calculate_control(rc, pos_map, vel_map, head_map);
-    auto now = std::chrono::steady_clock::now();
-    double time_now = std::chrono::duration<double>(now.time_since_epoch()).count();
+    auto time_now = std::chrono::steady_clock::now();
 
     double linear = rc.PID_position_.compute(total_pe, time_now);
     double angular = rc.PID_heading_.compute(total_ye, time_now);

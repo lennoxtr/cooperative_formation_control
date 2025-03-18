@@ -10,7 +10,7 @@ public:
     PidController(double Kp, double Ki, double Kd);
 
     // Compute PID output
-    double compute(double error);
+    double compute(double error, std::chrono::steady_clock::time_point current_time);
 
 private:
     // PID coefficients
