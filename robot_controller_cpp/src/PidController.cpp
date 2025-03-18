@@ -9,8 +9,6 @@ PidController::PidController(double Kp, double Ki, double Kd)
 
 double PidController::compute(double error, std::chrono::steady_clock::time_point current_time)
 {
-    // Get current time
-    auto current_time = std::chrono::steady_clock::now();
     std::chrono::duration<double> elapsed_time = current_time - last_time_;
     double dt = elapsed_time.count(); // Duration in seconds
 
