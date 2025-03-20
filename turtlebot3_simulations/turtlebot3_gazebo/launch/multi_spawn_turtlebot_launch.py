@@ -10,7 +10,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, TextSubstitution
 
 def gen_robot_list(number_of_robots):
-    position = [(4.4, 2.5), (0.0, 0.0), (0.0, 5.0)]
+    position = [(0.86, 0.5), (0.0, 0.0), (0.0, 1.0)]
     # (0.0, 0.0), (5.0, 0.0), (10.0, 0.0), (15.0, 0.0)
     # (0.0, 0.0), (5.0, 8.0), (10.0, -5.0), (3.0, -7.0)
     # (0.0, 0.0), (5.0, 0.0), (10.0, 0.0), (15.0, 0.0)
