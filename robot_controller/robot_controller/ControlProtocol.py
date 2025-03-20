@@ -105,7 +105,7 @@ class ControlProtocol():
                                       robot_controller.goal_y)
         look_ahead_coord = (0, 0)
         if robot_controller.is_leader:
-            lookahead_dist = 2.0
+            lookahead_dist = 1.5
         else:
             lookahead_dist = 0.05
         found_dist = 0.0

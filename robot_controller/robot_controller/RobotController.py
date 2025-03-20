@@ -25,7 +25,7 @@ from robot_controller.ControlProtocol import ControlProtocol
 from robot_controller.GoalProcessor import arrived_at_goal, quaternion_to_euler, get_all_postion_in_formation
 
 
-MAX_LINEAR_VEL = 0.15
+MAX_LINEAR_VEL = 0.2
 MAX_ANGLE_VEL = 1.5 #1.5
 
 LIN_VEL_STEP_SIZE = 0.01
