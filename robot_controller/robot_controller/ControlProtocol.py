@@ -107,7 +107,8 @@ class ControlProtocol():
         if robot_controller.is_leader:
             lookahead_dist = 0.8
         else:
-            lookahead_dist = 0.1
+            lookahead_dist = 0.05
+        found_dist = 0.0
         for coord in path:
             x = coord[0]
             y = coord[1]
@@ -116,6 +117,7 @@ class ControlProtocol():
                                       x, y)
             if dist > lookahead_dist:
                 look_ahead_coord = coord
+                found_dist = dist
                 break
         
         lookahead_x = look_ahead_coord[0]
@@ -138,6 +140,13 @@ class ControlProtocol():
             linear_vel  *= robot_controller.curvature_thres / abs(curvature)
 
         angular_vel = robot_controller.desired_linear_vel * curvature
+
+        print("Robot id: ", robot_controller.robot_id)
+        print("Angular vel: ", angular_vel)
+        print("Linear vel: ", linear_vel)
+        print("Curvature: ", curvature)
+        print("Distance to look ahead: ", found_dist)
+
 
         return linear_vel, angular_vel
 
