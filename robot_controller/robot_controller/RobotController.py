@@ -94,7 +94,7 @@ class RobotController(Node):
 
         # Pure pursuit settings
         self.lookahead_dist = 0.8
-        self.curvature_thres
+        self.curvature_thres = 7.0
         self.desired_linear_vel = MAX_LINEAR_VEL
 
         # TODO: Remove this as it is hard-coded

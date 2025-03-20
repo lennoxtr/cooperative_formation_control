@@ -15,7 +15,6 @@ def gen_robot_list(number_of_robots):
     # (0.0, 0.0), (5.0, 8.0), (10.0, -5.0), (3.0, -7.0)
     # (0.0, 0.0), (5.0, 0.0), (10.0, 0.0), (15.0, 0.0)
     robots = []
-    current_x_pos = 0.0
     for i in range(number_of_robots):
         robot_name = "turtlebot"+str(i)
         robot_pos = position[i]
