@@ -2,7 +2,7 @@ from launch import LaunchDescription
 from launch_ros.actions import Node
 
 def generate_launch_description():
-    num_of_robot = 4
+    num_of_robot = 3
     robot_controller_node_list = []
 
     i = 0

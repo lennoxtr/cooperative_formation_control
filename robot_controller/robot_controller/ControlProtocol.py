@@ -120,7 +120,7 @@ class ControlProtocol():
         delta_y = lookahead_y - robot_controller.current_y
 
         # check yaw angle
-        phi_r = self.current_imu_heading
+        phi_r = robot_controller.current_imu_heading
 
         x_dash = delta_x * np.cos(phi_r) + delta_y * np.sin(phi_r)
         y_dash = delta_y * np.cos(phi_r) - delta_x * np.sin(phi_r)
