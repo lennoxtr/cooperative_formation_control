@@ -104,13 +104,17 @@ class ControlProtocol():
                                       robot_controller.goal_x,
                                       robot_controller.goal_y)
         look_ahead_coord = (0, 0)
+        if robot_controller.is_leader:
+            lookahead_dist = 0.8
+        else:
+            lookahead_dist = 0.1
         for coord in path:
             x = coord[0]
             y = coord[1]
             dist = get_position_error(robot_controller.current_x,
                                       robot_controller.current_y,
                                       x, y)
-            if dist > robot_controller.lookahead_dist:
+            if dist > lookahead_dist:
                 look_ahead_coord = coord
                 break
         
