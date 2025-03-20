@@ -348,7 +348,7 @@ class RobotController(Node):
         while not self.is_started:
             return
         
-        print("Robot id: ", robot_id)
+        print("Robot id: ", self.robot_id)
         print("Tracking pos x: ", self.goal_x)
         print("Tracking pos y: ", self.goal_y)
 
