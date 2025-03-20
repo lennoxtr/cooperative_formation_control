@@ -61,7 +61,15 @@ def arrived_at_goal(current_x, current_y, goal_x, goal_y):
     distance = get_position_error(current_x, current_y, goal_x, goal_y)
     return is_equal(distance, 0, dist_tol)
 
-# TODO: implement formation creation
+def generate_straight_path(current_x, current_y, goal_x, goal_y, step_size = 0.1):
+    distance = np.hypot(goal_x - current_x, goal_y - current_y)
+    num_steps = int(distance / step_size)
+
+    x_points = np.linspace(current_x, goal_x, num_steps)
+    y_points = np.linspace(current_y, goal_y, num_steps)
+    
+    path = list(zip(x_points, y_points))
+    return path
 
 # this is essentially derived from the shape function
 def get_angle_increment(num_of_robots):

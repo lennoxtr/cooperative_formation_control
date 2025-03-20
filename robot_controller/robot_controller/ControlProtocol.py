@@ -6,12 +6,13 @@ import rclpy
 from robot_controller.GoalProcessor import get_position_error
 from robot_controller.GoalProcessor import get_yaw_error
 from robot_controller.GoalProcessor import normalize_yaw_error
+from robot_controller.GoalProcessor import generate_straight_path
 
 ANG_TOL = 0.2
 POSITION_TOL = 0.05
 
 class ControlProtocol():
-    def __init__(self, rendezvous_distance, num_of_robot=4):
+    def __init__(self, rendezvous_distance, num_of_robot=3):
         #TODO: consider changing collision threshold when rendezvous
         self.velocity_gain = 0
         self.heading_gain = 0
@@ -97,6 +98,46 @@ class ControlProtocol():
         heading_error = normalize_yaw_error(heading_error)
         return heading_error
     
+    def goal_seeking(self, robot_controller):
+        path = generate_straight_path(robot_controller.current_x,
+                                      robot_controller.current_y,
+                                      robot_controller.goal_x,
+                                      robot_controller.goal_y)
+        look_ahead_coord = (0, 0)
+        for coord in path:
+            x = coord[0]
+            y = coord[1]
+            dist = get_position_error(robot_controller.current_x,
+                                      robot_controller.current_y,
+                                      x, y)
+            if dist > robot_controller.lookahead_dist:
+                look_ahead_coord = coord
+                break
+        
+        lookahead_x = look_ahead_coord[0]
+        lookahead_y = look_ahead_coord[1]
+        delta_x = lookahead_x - robot_controller.current_x
+        delta_y = lookahead_y - robot_controller.current_y
+
+        # check yaw angle
+        phi_r = self.current_imu_heading
+
+        x_dash = delta_x * np.cos(phi_r) + delta_y * np.sin(phi_r)
+        y_dash = delta_y * np.cos(phi_r) - delta_x * np.sin(phi_r)
+
+        denom = ((x_dash * x_dash) + (y_dash * y_dash)) + 1e-6
+        curvature = (2 * y_dash) / denom
+
+        linear_vel  = robot_controller.desired_linear_vel
+        # Curvature heuristic
+        if abs(curvature) > robot_controller.curvature_thres:
+            linear_vel  *= robot_controller.curvature_thres / abs(curvature)
+
+        angular_vel = robot_controller.desired_linear_vel * curvature
+
+        return linear_vel, angular_vel
+
+
     def get_sensitivity_bubble_gain(self, angle_in_degree):
         ''' Map [-pi, +pi] to minimum and maximum gain for sensitivity bubble'''
 
@@ -322,26 +363,34 @@ class ControlProtocol():
         return total_position_error, total_yaw_error
 
     def execute_control(self, robot_controller, position_mapping, velocity_mapping, heading_mapping):
+        '''
         total_position_error, total_yaw_error = self.calculate_control(robot_controller,
                                                                     position_mapping,
                                                                     velocity_mapping,
                                                                     heading_mapping)
+        '''
 
+        linear_vel, angular_vel = self.goal_seeking(robot_controller)
+
+        '''
         # Implementing Method 1: 1 set of PID for all policies
         current_time = time.time()
 
         # Uncomment to test PID
-        '''
+        
         if (robot_controller.is_leader):
             linear_x_change = robot_controller.PID_position.compute(total_position_error, current_time)
             angular_z_change = robot_controller.PID_heading.compute(total_yaw_error, current_time)
         else:
             linear_x_change = 0.0
             angular_z_change = 0.0
-        '''
+        
 
         linear_x_change = robot_controller.PID_position.compute(total_position_error, current_time)
         angular_z_change = robot_controller.PID_heading.compute(total_yaw_error, current_time)
 
         return linear_x_change, angular_z_change
+        '''
+
+        return linear_vel, angular_vel
     

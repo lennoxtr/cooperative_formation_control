@@ -10,7 +10,8 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, TextSubstitution
 
 def gen_robot_list(number_of_robots):
-    position = [(0.0, 0.0), (5.0, 0.0), (10.0, 0.0), (15.0, 0.0)]
+    position = [(4.4, 2.5), (0.0, 0.0), (0.0, 5.0)]
+    # (0.0, 0.0), (5.0, 0.0), (10.0, 0.0), (15.0, 0.0)
     # (0.0, 0.0), (5.0, 8.0), (10.0, -5.0), (3.0, -7.0)
     # (0.0, 0.0), (5.0, 0.0), (10.0, 0.0), (15.0, 0.0)
     robots = []
@@ -43,7 +44,7 @@ def generate_launch_description():
     
 
     # Names and poses of the robots
-    robots = gen_robot_list(4)
+    robots = gen_robot_list(3)
 
     # We create the list of spawn robots commands
     spawn_robots_cmds = []

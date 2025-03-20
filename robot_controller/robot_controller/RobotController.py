@@ -92,8 +92,13 @@ class RobotController(Node):
         # Formation
         self.is_in_formation = False
 
+        # Pure pursuit settings
+        self.lookahead_dist = 0.8
+        self.curvature_thres
+        self.desired_linear_vel = MAX_LINEAR_VEL
+
         # TODO: Remove this as it is hard-coded
-        self.follower_robot_id_list = [1, 2, 3]
+        self.follower_robot_id_list = [1, 2]
 
         # Subscriptions
         self.imu_subscription = self.create_subscription(
@@ -383,23 +388,6 @@ class RobotController(Node):
 
                 tracking_position_publisher.publish(msg)
 
-            '''
-            print("-----------------------------------")
-            print("Leader Robot")
-            print("Heading: ", self.current_imu_heading)
-            print("Position x: ", self.current_x)
-            print("Position y: ", self.current_y)
-            for item in robot_formation_position_list:
-                robot_id = item[0]
-                position_tuple = item[1]
-                position_x = position_tuple[0]
-                position_y = position_tuple[1]
-
-                print("Robot id: ", robot_id)
-                print("Position x: ", position_x)
-                print("Position y: ", position_y)
-            print("-----------------------------------")
-            '''   
             if self.is_arrived() and self.is_rendezvoused:
                 arrived_msg = Bool()
                 arrived_msg.data = True
