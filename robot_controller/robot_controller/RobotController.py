@@ -349,6 +349,8 @@ class RobotController(Node):
             return
         
         print("Robot id: ", self.robot_id)
+        print("Current x: ", self.current_x)
+        print("Current y: ", self.current_y)
         print("Tracking pos x: ", self.goal_x)
         print("Tracking pos y: ", self.goal_y)
 
