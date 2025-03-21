@@ -105,7 +105,7 @@ class ControlProtocol():
                                       robot_controller.goal_y)
         look_ahead_coord = (0, 0)
         if robot_controller.is_leader:
-            lookahead_dist = 0.8
+            lookahead_dist = 1.4
         else:
             lookahead_dist = 0.05
         found_dist = 0.0
@@ -141,12 +141,13 @@ class ControlProtocol():
 
         angular_vel = robot_controller.desired_linear_vel * curvature
 
+        '''
         print("Robot id: ", robot_controller.robot_id)
         print("Angular vel: ", angular_vel)
         print("Linear vel: ", linear_vel)
         print("Curvature: ", curvature)
         print("Distance to look ahead: ", found_dist)
-
+        '''
 
         return linear_vel, angular_vel
 
@@ -389,6 +390,10 @@ class ControlProtocol():
             total_position_error, total_yaw_error = self.leader_follower(robot_controller)
             linear_vel = robot_controller.PID_position.compute(total_position_error, current_time)
             angular_vel = robot_controller.PID_heading.compute(total_yaw_error, current_time)
+
+            print("Robot id: ", robot_controller.robot_id)
+            print("Linear vel: ", linear_vel)
+            print("Angular vel: ", angular_vel)
 
         '''
         # Implementing Method 1: 1 set of PID for all policies
