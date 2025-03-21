@@ -369,7 +369,7 @@ class RobotController(Node):
                                                                         self.current_y,
                                                                         self.current_imu_heading,
                                                                         self.follower_robot_id_list,
-                                                                        adjacent_distance = 0.9)
+                                                                        adjacent_distance = 0.45)
             for item in robot_formation_position_list:
                 # Namespace of follower robot
                 robot_id = item[0]
