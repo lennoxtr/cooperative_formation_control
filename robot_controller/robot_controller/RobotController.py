@@ -261,6 +261,7 @@ class RobotController(Node):
         leader_namespace = msg.data
         if self.namespace == leader_namespace:
             self.is_leader = True
+            self.desired_linear_vel = 0.15
             print(self.namespace, " is leader")
     
     def is_started_callback(self, msg):
