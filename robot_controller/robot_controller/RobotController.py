@@ -86,7 +86,7 @@ class RobotController(Node):
         self.angular_z_velocity = 0
         
         # Kinematic PID Controller (may add more for different control policies)
-        self.PID_position = PidController(Kp=3.0, Ki=0.0, Kd=0.0)
+        self.PID_position = PidController(Kp=2.3, Ki=0.0, Kd=0.0)
         self.PID_heading = PidController(Kp=5.0, Ki=0.0, Kd=0.1)
 
         # Formation
