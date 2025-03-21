@@ -109,19 +109,17 @@ class ControlProtocol():
         else:
             lookahead_dist = 0.05
         found_dist = 0.0
-        i = 0
-        while i < len(path):
-            x = path[i][0]
-            y = path[i][1]
+        for coord in path:
+            x = coord[0]
+            y = coord[1]
             dist = get_position_error(robot_controller.current_x,
                                       robot_controller.current_y,
                                       x, y)
             if dist > lookahead_dist:
-                look_ahead_coord = path[i]
+                look_ahead_coord = coord
                 found_dist = dist
                 break
         
-
         lookahead_x = look_ahead_coord[0]
         lookahead_y = look_ahead_coord[1]
         delta_x = lookahead_x - robot_controller.current_x
