@@ -1,7 +1,6 @@
 import time
 import math
 import numpy as np
-import rclpy
 
 from robot_controller.GoalProcessor import get_position_error
 from robot_controller.GoalProcessor import get_yaw_error
@@ -391,10 +390,6 @@ class ControlProtocol():
             linear_vel = robot_controller.PID_position.compute(total_position_error, current_time)
             angular_vel = robot_controller.PID_heading.compute(total_yaw_error, current_time)
 
-            print("Robot id: ", robot_controller.robot_id)
-            print("Linear vel: ", linear_vel)
-            print("Angular vel: ", angular_vel)
-
         '''
         # Implementing Method 1: 1 set of PID for all policies
         current_time = time.time()
@@ -414,6 +409,10 @@ class ControlProtocol():
 
         return linear_x_change, angular_z_change
         '''
+
+        print("Robot ID: ", robot_controller.robot_id)
+        print("Linear Vel: ", linear_vel)
+        print("Angular Vel: ", angular_vel)
 
         return linear_vel, angular_vel
     
