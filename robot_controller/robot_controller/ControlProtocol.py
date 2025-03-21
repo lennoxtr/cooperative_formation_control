@@ -116,17 +116,14 @@ class ControlProtocol():
             dist = get_position_error(robot_controller.current_x,
                                       robot_controller.current_y,
                                       x, y)
-            if dist > lookahead_dist and robot_controller.is_leader:
+            if dist > lookahead_dist:
                 look_ahead_coord = path[i]
                 found_dist = dist
                 break
         
-        if not robot_controller.is_leader:
-            lookahead_x = robot_controller.goal_x
-            lookahead_y = robot_controller.goal_y
-        else:
-            lookahead_x = look_ahead_coord[0]
-            lookahead_y = look_ahead_coord[1]
+
+        lookahead_x = look_ahead_coord[0]
+        lookahead_y = look_ahead_coord[1]
         delta_x = lookahead_x - robot_controller.current_x
         delta_y = lookahead_y - robot_controller.current_y
 
