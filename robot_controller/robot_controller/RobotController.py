@@ -86,8 +86,8 @@ class RobotController(Node):
         self.angular_z_velocity = 0
         
         # Kinematic PID Controller (may add more for different control policies)
-        self.PID_position = PidController(Kp=3, Ki=0.0, Kd=0.0)
-        self.PID_heading = PidController(Kp=4, Ki=0.0, Kd=0.1)
+        self.PID_position = PidController(Kp=5, Ki=0.0, Kd=0.0)
+        self.PID_heading = PidController(Kp=5, Ki=0.0, Kd=0.1)
 
         # Formation
         self.is_in_formation = False
@@ -261,7 +261,7 @@ class RobotController(Node):
         leader_namespace = msg.data
         if self.namespace == leader_namespace:
             self.is_leader = True
-            self.desired_linear_vel = 0.12
+            self.desired_linear_vel = 0.1
             print(self.namespace, " is leader")
     
     def is_started_callback(self, msg):
