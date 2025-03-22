@@ -10,10 +10,9 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, TextSubstitution
 
 def gen_robot_list(number_of_robots):
-    position = [(0.43, 0.25), (0.0, 0.0), (0.0, 0.5)]
-    # (0.0, 0.0), (5.0, 0.0), (10.0, 0.0), (15.0, 0.0)
-    # (0.0, 0.0), (5.0, 8.0), (10.0, -5.0), (3.0, -7.0)
-    # (0.0, 0.0), (5.0, 0.0), (10.0, 0.0), (15.0, 0.0)
+    position = [(2.0, 4.0), (-4.0, 1.0), (4.0, -8.0)]
+    # 
+    # (0.43, 0.25), (0.0, 0.0), (0.0, 0.5)
     robots = []
     for i in range(number_of_robots):
         robot_name = "turtlebot"+str(i)

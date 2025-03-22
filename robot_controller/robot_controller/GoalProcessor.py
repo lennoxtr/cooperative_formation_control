@@ -1,5 +1,6 @@
 import numpy as np
 import math
+from scipy.optimize import minimize 
 
 def is_equal(a, b, tol=1e-2):
     return abs(a - b) <= tol
@@ -120,3 +121,25 @@ def get_all_postion_in_formation(leader_position_x, leader_position_y, leader_he
         position_in_formation_list.append((follower_robot_id, position_in_formation))
     
     return position_in_formation_list
+
+# Helper function to calculate rendezvous
+def arrival_time_error(p, positions):
+    x, y, T = p  # Unpack optimization variables
+    velocity = 0.2
+    errors = [
+        (np.sqrt((x - x_i) ** 2 + (y - y_i) ** 2) - velocity * T) ** 2
+        for (x_i, y_i) in positions
+    ]
+    return sum(errors)
+
+
+
+def get_rendezvous_pos(position_mapping):
+    x0, y0 = np.mean(position_mapping, axis=0)
+    avg_distance = np.mean([np.linalg.norm(np.array(pos) - np.array((x0, y0))) for pos in position_mapping])
+    T0 = avg_distance / 0.2
+    initial_guess = (x0, y0, T0)
+    result = minimize(arrival_time_error, initial_guess, args=(position_mapping), method='Nelder-Mead')
+    meeting_point = tuple(result.x[:2])
+
+    return meeting_point

@@ -22,7 +22,7 @@ from position_mapping_msg.msg import PositionMapping
 
 from robot_controller.PidController import PidController
 from robot_controller.ControlProtocol import ControlProtocol
-from robot_controller.GoalProcessor import arrived_at_goal, quaternion_to_euler, get_all_postion_in_formation
+from robot_controller.GoalProcessor import arrived_at_goal, quaternion_to_euler, get_all_postion_in_formation, get_rendezvous_pos
 
 
 MAX_LINEAR_VEL = 0.2
@@ -358,13 +358,9 @@ class RobotController(Node):
         '''
 
         if self.is_leader:
-            '''
-            print("-----------------------------------")
-            print("Leader Robot")
-            print("Heading: ", self.current_imu_heading)
-            print("Position x: ", self.current_x)
-            print("Position y: ", self.current_y)
-            '''
+            print("Position mapping: ", self.position_mapping)
+            rendezvous_pos = get_rendezvous_pos(self.position_mapping)
+            print("Rendezvous pos: ", rendezvous_pos)
             robot_formation_position_list = get_all_postion_in_formation(self.current_x,
                                                                         self.current_y,
                                                                         self.current_imu_heading,
@@ -380,12 +376,6 @@ class RobotController(Node):
                 position_x = position_tuple[0]
                 position_y = position_tuple[1]
 
-                '''
-                print("Robot id: ", robot_id)
-                print("Position x: ", position_x)
-                print("Position y: ", position_y)
-                '''
-
                 # Preparing tracking position message
                 msg = Goal()
                 msg.goal_x = position_x
@@ -397,7 +387,6 @@ class RobotController(Node):
                 Goal,
                 dynamic_topic,
                 10)
-
 
                 tracking_position_publisher.publish(msg)
 

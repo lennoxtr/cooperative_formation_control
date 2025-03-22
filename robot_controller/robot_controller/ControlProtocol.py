@@ -339,8 +339,6 @@ class ControlProtocol():
         # Set to 1 to test forming formation
         #flocking_gain = 0
 
-        
-
         fl_gs_position_error = (1 - flocking_gain) * lf_position_error + \
                                 flocking_gain * pm_position_error
   
@@ -402,7 +400,6 @@ class ControlProtocol():
         else:
             linear_x_change = 0.0
             angular_z_change = 0.0
-        
 
         linear_x_change = robot_controller.PID_position.compute(total_position_error, current_time)
         angular_z_change = robot_controller.PID_heading.compute(total_yaw_error, current_time)
