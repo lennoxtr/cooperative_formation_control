@@ -239,9 +239,9 @@ class ControlProtocol():
     def get_flocking_gain(self, robot_controller, position_mapping):
         # Must be called after position matching
 
-        #if self.all_rendezvoused:
-        #    flocking_gain = 0.0
-        #    return flocking_gain
+        if self.all_rendezvoused:
+            flocking_gain = 0.0
+            return flocking_gain
 
         sum_distance_to_formation_center = 0
         for (x_coord, y_coord) in position_mapping:
@@ -258,12 +258,12 @@ class ControlProtocol():
                                                 self.avg_position_y)
         
         #Check
-        '''
+        
         if avg_distance < self.rendezvous_distance:
             self.all_rendezvoused = True
         else:
             self.all_rendezvoused = False
-        '''
+        
 
         # Implement as logistic function
         # TODO: Need to tune
@@ -323,13 +323,6 @@ class ControlProtocol():
                 total_position_error = 0.0
                 total_yaw_error = 0.0
                 return total_position_error, total_yaw_error
-
-        '''
-        if robot_controller.is_rendezvoused and self.avg_flocking_gain > 0.1:
-            total_position_error = 0.0
-            total_yaw_error = 0.0
-            return total_position_error, total_yaw_error
-        '''
 
         # Set to 0 to test PID
         # Set to 1 to test forming formation

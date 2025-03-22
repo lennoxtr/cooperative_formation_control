@@ -54,7 +54,7 @@ class RobotController(Node):
         self.received_goal = False
 
         # Control Protocol
-        self.rendezvous_distance = 2
+        self.rendezvous_distance = 0.5
         self.control_protocol = ControlProtocol(self.rendezvous_distance)
         
         # Mappings for control
