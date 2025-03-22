@@ -6,6 +6,7 @@ from robot_controller.GoalProcessor import get_position_error
 from robot_controller.GoalProcessor import get_yaw_error
 from robot_controller.GoalProcessor import normalize_yaw_error
 from robot_controller.GoalProcessor import generate_straight_path
+from robot_controller.GoalProcessor import get_rendezvous_pos
 
 ANG_TOL = 0.2
 POSITION_TOL = 0.05
@@ -52,15 +53,10 @@ class ControlProtocol():
         # Position matching may have higher weight for leader
         # to ensure rendezvous before moving to goal
 
-        sum_position_x = 0
-        sum_position_y = 0
+        rendezvous_pos = get_rendezvous_pos(position_mapping)
 
-        for (x_coord, y_coord) in position_mapping:
-            sum_position_x += x_coord
-            sum_position_y += y_coord
-
-        self.avg_position_x = sum_position_x / (self.num_of_robot)
-        self.avg_position_y = sum_position_y / (self.num_of_robot)
+        self.avg_position_x = rendezvous_pos[0]
+        self.avg_position_y = rendezvous_pos[1]
 
         #if robot_controller.namespace == "turtlebot0":
         #    print(robot_controller.namespace, " tracking position (", self.avg_position_x, ", ", self.avg_position_y, ")")
@@ -374,7 +370,7 @@ class ControlProtocol():
         return total_position_error, total_yaw_error
 
     def execute_control(self, robot_controller, position_mapping, velocity_mapping, heading_mapping):
-        '''
+        
         total_position_error, total_yaw_error = self.calculate_control(robot_controller,
                                                                     position_mapping,
                                                                     velocity_mapping,
@@ -405,7 +401,7 @@ class ControlProtocol():
         angular_z_change = robot_controller.PID_heading.compute(total_yaw_error, current_time)
 
         return linear_x_change, angular_z_change
-        '''
+        
 
-        return linear_vel, angular_vel
+        #return linear_vel, angular_vel
     

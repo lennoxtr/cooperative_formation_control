@@ -140,6 +140,6 @@ def get_rendezvous_pos(position_mapping):
     T0 = avg_distance / 0.2
     initial_guess = (x0, y0, T0)
     result = minimize(arrival_time_error, initial_guess, args=(position_mapping), method='Nelder-Mead')
-    meeting_point = tuple(result.x[:2])
-
+    meeting_point = tuple(map(float, result.x[:2]))
+    
     return meeting_point
