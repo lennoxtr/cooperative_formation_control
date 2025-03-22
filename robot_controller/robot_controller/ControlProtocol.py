@@ -265,7 +265,7 @@ class ControlProtocol():
         # Implement as logistic function
         # TODO: Need to tune
         if robot_controller.is_leader:
-            k = 7
+            k = 5
         else:
             k = 0 # k is the flocking function steepness
 
