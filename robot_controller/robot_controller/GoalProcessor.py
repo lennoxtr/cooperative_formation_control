@@ -1,6 +1,7 @@
 import numpy as np
 import math
 from scipy.optimize import minimize 
+from scipy.optimize import linear_sum_assignment
 
 def is_equal(a, b, tol=1e-2):
     return abs(a - b) <= tol
@@ -141,5 +142,5 @@ def get_rendezvous_pos(position_mapping):
     initial_guess = (x0, y0, T0)
     result = minimize(arrival_time_error, initial_guess, args=(position_mapping), method='Nelder-Mead')
     meeting_point = tuple(map(float, result.x[:2]))
-    
+
     return meeting_point
