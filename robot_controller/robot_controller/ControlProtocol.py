@@ -71,8 +71,7 @@ class ControlProtocol():
                                         self.avg_position_x,
                                         self.avg_position_y,
                                         robot_controller.current_imu_heading)
-        #if robot_controller.namespace == "turtlebot0":
-        #    print("Yaw error position matching: ", yaw_error)
+        
 
         if position_error < self.rendezvous_distance:
             robot_controller.is_rendezvoused = True
@@ -258,13 +257,11 @@ class ControlProtocol():
                                                 self.avg_position_y)
         
         #Check
-        
         if avg_distance < self.rendezvous_distance:
             self.all_rendezvoused = True
         else:
             self.all_rendezvoused = False
         
-
         # Implement as logistic function
         # TODO: Need to tune
         if robot_controller.is_leader:
@@ -281,7 +278,7 @@ class ControlProtocol():
         
         if self.avg_flocking_gain < 0.0:
             self.avg_flocking_gain = 0.0
-        
+
         return flocking_gain
         
     def calculate_control(self, robot_controller, position_mapping, velocity_mapping, heading_mapping):
@@ -309,6 +306,9 @@ class ControlProtocol():
 
         # Calculate total error with weightage of flocking and goal seeking
         flocking_gain = self.get_flocking_gain(robot_controller, position_mapping)
+
+        if robot_controller.is_leader:
+            print("Flocking gain: ", flocking_gain)
 
         # Leader Follower
         lf_position_error, lf_yaw_error = self.leader_follower(robot_controller)

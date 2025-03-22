@@ -407,12 +407,6 @@ class RobotController(Node):
                                                                                 self.position_mapping,
                                                                                 self.velocity_mapping,
                                                                                 self.heading_mapping)
-        # Move to goal
-        # Uncomment to test collision avoidance
-        '''
-        if self.namespace == 'turtlebot0':
-            self.move_bot(linear_x_change, angular_z_change)
-        '''
         
         self.move_bot(linear_x_change, angular_z_change)
 
