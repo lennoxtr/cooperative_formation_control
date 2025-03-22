@@ -389,13 +389,14 @@ class ControlProtocol():
         current_time = time.time()
 
         # Uncomment to test PID
-        
+        '''
         if (robot_controller.is_leader):
             linear_x_change = robot_controller.PID_position.compute(total_position_error, current_time)
             angular_z_change = robot_controller.PID_heading.compute(total_yaw_error, current_time)
         else:
             linear_x_change = 0.0
             angular_z_change = 0.0
+        '''
 
         linear_x_change = robot_controller.PID_position.compute(total_position_error, current_time)
         angular_z_change = robot_controller.PID_heading.compute(total_yaw_error, current_time)
