@@ -19,23 +19,11 @@ from position_mapping_msg.msg import PositionMapping
 class CentralController(Node):
     def __init__(self):
         super().__init__('central_controller')
-        self.num_of_robot = 4
+        self.num_of_robot = 3
         self.received_goal = False
         self.leader_namespace = 'turtlebot0'
         self.arrived_at_goal = False
         self.robot_controller_map = {}
-
-        self.robot0_x = []
-        self.robot0_y = []
-
-        self.robot1_x = []
-        self.robot1_y = []
-
-        self.robot2_x = []
-        self.robot2_y = []
-
-        self.robot3_x = []
-        self.robot3_y = []
     
         # Position mapping
         self.position_mapping = [(0.0, 0.0)] * self.num_of_robot

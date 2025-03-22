@@ -407,9 +407,5 @@ class ControlProtocol():
         return linear_x_change, angular_z_change
         '''
 
-        print("Robot ID: ", robot_controller.robot_id)
-        print("Linear Vel: ", linear_vel)
-        print("Angular Vel: ", angular_vel)
-
         return linear_vel, angular_vel
     
