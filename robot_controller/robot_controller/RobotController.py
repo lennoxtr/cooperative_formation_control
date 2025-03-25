@@ -22,7 +22,7 @@ from position_mapping_msg.msg import PositionMapping
 
 from robot_controller.PidController import PidController
 from robot_controller.ControlProtocol import ControlProtocol
-from robot_controller.GoalProcessor import arrived_at_goal, quaternion_to_euler, get_all_postion_in_formation, get_rendezvous_pos
+from robot_controller.GoalProcessor import arrived_at_goal, quaternion_to_euler, get_all_postion_in_formation
 
 
 MAX_LINEAR_VEL = 0.2
@@ -61,9 +61,6 @@ class RobotController(Node):
         self.position_mapping = np.array([])
         self.heading_mapping = np.array([])
         self.velocity_mapping = np.array([])
-        
-        # Rendezvous flag
-        self.is_rendezvoused = False
 
         # Collision avoidance threshold
         self.max_lidar_range = MAX_LIDAR_RANGE
@@ -358,9 +355,6 @@ class RobotController(Node):
         '''
 
         if self.is_leader:
-            print("Position mapping: ", self.position_mapping)
-            rendezvous_pos = get_rendezvous_pos(self.position_mapping)
-            print("Rendezvous pos: ", rendezvous_pos)
             robot_formation_position_list = get_all_postion_in_formation(self.current_x,
                                                                         self.current_y,
                                                                         self.current_imu_heading,
@@ -404,9 +398,7 @@ class RobotController(Node):
 
         # Control Protocol output linear and angular speed change
         linear_x_change, angular_z_change = self.control_protocol.execute_control(self,
-                                                                                self.position_mapping,
-                                                                                self.velocity_mapping,
-                                                                                self.heading_mapping)
+                                                                                self.position_mapping)
         
         self.move_bot(linear_x_change, angular_z_change)
 

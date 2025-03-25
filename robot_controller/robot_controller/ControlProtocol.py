@@ -1,5 +1,6 @@
 import time
 import math
+import itertools
 import numpy as np
 
 from robot_controller.GoalProcessor import get_position_error
@@ -13,21 +14,14 @@ POSITION_TOL = 0.05
 
 class ControlProtocol():
     def __init__(self, rendezvous_distance, num_of_robot=3):
-        #TODO: consider changing collision threshold when rendezvous
-        self.velocity_gain = 0
-        self.heading_gain = 0
         self.num_of_robot = num_of_robot
         self.rendezvous_distance = rendezvous_distance
-
-        # Gains for control output
-        self.velocity_matching_gain = 1
 
         # To determine rendezvous position
         self.avg_position_x = 0
         self.avg_position_y = 0
 
         # All robots in formation flag
-        self.avg_flocking_gain = 1.0
         self.all_rendezvoused = False
 
         # Sensitivity bubble for individual robots
@@ -37,17 +31,8 @@ class ControlProtocol():
 
         # Assume current_vel = max_vel = 0.2 to reduce calculation
         current_vel = 0.2
-        delta_t = 3
+        delta_t = 2.0
         self.sensitivity_bubble = bare_sensitivity_bubble * current_vel * delta_t
-
-        # For reporting flocking gain
-        self.start_time = time.time()
-        self.last_time = time.time()
-        self.flocking_gain_list = []
-        self.collision_avoidance_list = []
-        self.total_yaw_error_list = []
-        self.flocking_goal_seeking_error = []
-        self.recorded_time = []
 
     def position_matching(self, robot_controller, position_mapping):
         # Position matching may have higher weight for leader
@@ -57,9 +42,6 @@ class ControlProtocol():
 
         self.avg_position_x = rendezvous_pos[0]
         self.avg_position_y = rendezvous_pos[1]
-
-        #if robot_controller.namespace == "turtlebot0":
-        #    print(robot_controller.namespace, " tracking position (", self.avg_position_x, ", ", self.avg_position_y, ")")
 
         position_error = get_position_error(robot_controller.current_x, 
                                         robot_controller.current_y,
@@ -71,26 +53,8 @@ class ControlProtocol():
                                         self.avg_position_x,
                                         self.avg_position_y,
                                         robot_controller.current_imu_heading)
-        
-
-        if position_error < self.rendezvous_distance:
-            robot_controller.is_rendezvoused = True
-            #print(robot_controller.namespace, " rendezvoused")
-        else:
-            robot_controller.is_rendezvoused = False
 
         return position_error, yaw_error
-    
-    def velocity_matching(self, robot_controller, velocity_mapping):
-        a_ij_val = 1
-        velocity_error = self.num_of_robot * a_ij_val * robot_controller.linear_x_velocity - \
-                            a_ij_val * sum(velocity_mapping)
-        return velocity_error
-    
-    def heading_matching(self, robot_controller, heading_mapping):
-        heading_error =  robot_controller.leader_heading - robot_controller.current_imu_heading
-        heading_error = normalize_yaw_error(heading_error)
-        return heading_error
     
     def goal_seeking(self, robot_controller):
         path = generate_straight_path(robot_controller.current_x,
@@ -99,7 +63,7 @@ class ControlProtocol():
                                       robot_controller.goal_y)
         look_ahead_coord = (0, 0)
         if robot_controller.is_leader:
-            lookahead_dist = 1.4
+            lookahead_dist = 1.2
         else:
             lookahead_dist = 0.05
         found_dist = 0.0
@@ -135,14 +99,6 @@ class ControlProtocol():
 
         angular_vel = robot_controller.desired_linear_vel * curvature
 
-        '''
-        print("Robot id: ", robot_controller.robot_id)
-        print("Angular vel: ", angular_vel)
-        print("Linear vel: ", linear_vel)
-        print("Curvature: ", curvature)
-        print("Distance to look ahead: ", found_dist)
-        '''
-
         return linear_vel, angular_vel
 
 
@@ -151,7 +107,6 @@ class ControlProtocol():
 
         min_gain = 0.2 
         max_gain = 1
-
 
         angle_in_rad = self.normalized_angle_in_rad[angle_in_degree]
 
@@ -166,9 +121,6 @@ class ControlProtocol():
         return sensitivity_bubble_gain
     
     def collision_prevention(self, robot_controller):
-        # Test using only frontal 180
-
-        # Needs to be implemented in all control algo
         # Using bubble rebound algo
         lidar_data = robot_controller.lidar_data
         
@@ -187,11 +139,7 @@ class ControlProtocol():
         distance_weights =  valid_distances - robot_controller.dangerous_radius
 
         # Calculate position error for slowing down to prevent collision
-        # TODO: tune velocity gain for collision avoidance
-        velocity_gain = 1
-
         min_distance = np.min(valid_distances)
-        #position_error =  velocity_gain * (robot_controller.dangerous_radius - min_distance) / robot_controller.dangerous_radius * 0.2
         position_error = 0.2
 
         # Calculate rebound angle
@@ -215,8 +163,6 @@ class ControlProtocol():
             else: 
                 rebound_angle = sign_of_rebound_angle * np.pi/2
 
-        #print("Rebound angle for ", robot_controller.namespace, " is: ", rebound_angle)
-
         yaw_error = rebound_angle
 
         return position_error, yaw_error
@@ -237,25 +183,24 @@ class ControlProtocol():
 
     def get_flocking_gain(self, robot_controller, position_mapping):
         # Must be called after position matching
-
         if self.all_rendezvoused:
             flocking_gain = 0.0
             return flocking_gain
 
-        sum_distance_to_formation_center = 0
-        for (x_coord, y_coord) in position_mapping:
-            sum_distance_to_formation_center += get_position_error(x_coord,
-                                                               y_coord,
-                                                               self.avg_position_x,
-                                                               self.avg_position_y)
-        
-        avg_distance = sum_distance_to_formation_center / self.num_of_robot
+        total_distance = 0
+        pair_count = 0
+        for (x1, y1), (x2, y2) in itertools.combinations(position_mapping, 2):
+            distance = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+            total_distance += distance
+            pair_count += 1
+
+        # Calculate the average distance
+        avg_distance = total_distance / pair_count if pair_count > 0 else 0
 
         dist_to_rendezvous = get_position_error(robot_controller.current_x,
                                                 robot_controller.current_y,
                                                 self.avg_position_x,
                                                 self.avg_position_y)
-        
         #Check
         if avg_distance < self.rendezvous_distance:
             self.all_rendezvoused = True
@@ -263,70 +208,55 @@ class ControlProtocol():
             self.all_rendezvoused = False
         
         # Implement as logistic function
-        # TODO: Need to tune
-        if robot_controller.is_leader:
-            k = 5
-        else:
-            k = 0 # k is the flocking function steepness
+        # k is the flocking function steepness
+        # For follower, flocking gain = 0
 
-        # TODO: check whether -self.rendezvous_distance is needed
+        if robot_controller.is_leader:
+            k = 4.0
+        else:
+            k = 0.0
+
         flocking_gain = (1 - math.e ** (-k * (dist_to_rendezvous - self.rendezvous_distance))) / (1 + math.e ** (-k * (dist_to_rendezvous - self.rendezvous_distance)))
-        self.avg_flocking_gain = (1 - math.e ** (-k * (avg_distance - self.rendezvous_distance))) / (1 + math.e ** (-k * (avg_distance - self.rendezvous_distance)))
         
         if flocking_gain < 0.0:
             flocking_gain = 0.0
         
-        if self.avg_flocking_gain < 0.0:
-            self.avg_flocking_gain = 0.0
-
         return flocking_gain
         
-    def calculate_control(self, robot_controller, position_mapping, velocity_mapping, heading_mapping):
+    def execute_control(self, robot_controller, position_mapping):
         ### Sum of all control policies
 
         # Collision Avoidance
         ca_position_error, ca_yaw_error = self.collision_prevention(robot_controller)
 
-        if ca_yaw_error != 0.0 and not self.all_rendezvoused:
+        if ca_yaw_error != 0.0 and not robot_controller.is_leader:
             total_yaw_error = ca_yaw_error
             total_position_error = ca_position_error
-            return total_position_error, total_yaw_error
+            linear_vel, angular_vel = self.calculate_vel(robot_controller, total_position_error, total_yaw_error)
+            
+            linear_vel = 0.05
+            
+            return linear_vel, angular_vel
 
-        # Position Matching 
+        # Position Matching (Rendezvous)
         pm_position_error, pm_yaw_error = self.position_matching(robot_controller,
                                                                 position_mapping)
 
-        # Velocity Matching
-        #velocity_error = self.velocity_matching(robot_controller, velocity_mapping)
-
-        # Heading Matching
-        heading_error = self.heading_matching(robot_controller, heading_mapping)
-
-        # If robot is at rendezvous position, but still waiting for other
-
         # Calculate total error with weightage of flocking and goal seeking
         flocking_gain = self.get_flocking_gain(robot_controller, position_mapping)
-
         if robot_controller.is_leader:
-            print("Flocking gain: ", flocking_gain)
+            print("flocking_gain is: ", flocking_gain)
 
-        # Leader Follower
+        # Leader Follower (followers tracking formation, leader tracking goal)
         lf_position_error, lf_yaw_error = self.leader_follower(robot_controller)
-
-        if robot_controller.is_leader:
-            if robot_controller.is_rendezvoused:
-                total_position_error = 0.0
-                total_yaw_error = 0.0
-                return total_position_error, total_yaw_error
-        else:
-            if robot_controller.is_in_formation:
-                total_position_error = 0.0
-                total_yaw_error = 0.0
-                return total_position_error, total_yaw_error
 
         # Set to 0 to test PID
         # Set to 1 to test forming formation
         #flocking_gain = 0
+
+        if robot_controller.is_leader:
+            if 0.8 > flocking_gain > 0.2 and abs(pm_yaw_error) > 1/4 * math.pi:
+                pm_yaw_error = 0.0
 
         fl_gs_position_error = (1 - flocking_gain) * lf_position_error + \
                                 flocking_gain * pm_position_error
@@ -334,40 +264,22 @@ class ControlProtocol():
         fl_gs_yaw_error = (1 - flocking_gain) * lf_yaw_error + \
                             flocking_gain * pm_yaw_error
 
-        if not self.all_rendezvoused:
-            total_yaw_error = fl_gs_yaw_error
-            total_position_error = fl_gs_position_error
+        total_yaw_error = fl_gs_yaw_error
+        total_position_error = fl_gs_position_error
+        linear_vel, angular_vel = self.calculate_vel(robot_controller, total_position_error, total_yaw_error)
 
-        else: # all rendezvoused
-            total_position_error = fl_gs_position_error
-            
+        if robot_controller.is_leader and flocking_gain < 0.5 and not self.all_rendezvoused:
+            linear_vel = 0.1
+
+        if flocking_gain == 0.0:
             if robot_controller.is_leader:
-                total_yaw_error = fl_gs_yaw_error
+                return self.goal_seeking(robot_controller)
             else:
-                total_yaw_error = heading_error
+                return linear_vel, angular_vel
         
-        '''
-        current_time = time.time()
+        return linear_vel, angular_vel
 
-        if current_time - self.last_time > 0.3:
-            #print("Flocking gain: ", flocking_gain)
-            self.flocking_gain_list.append(flocking_gain)
-            self.collision_avoidance_list.append(ca_yaw_error)
-            self.total_yaw_error_list.append(total_yaw_error)
-            self.flocking_goal_seeking_error.append(fl_gs_yaw_error)
-            self.recorded_time.append(time.time() - self.start_time)
-
-            self.last_time = current_time
-        '''
-        
-        return total_position_error, total_yaw_error
-
-    def execute_control(self, robot_controller, position_mapping, velocity_mapping, heading_mapping):
-        
-        total_position_error, total_yaw_error = self.calculate_control(robot_controller,
-                                                                    position_mapping,
-                                                                    velocity_mapping,
-                                                                    heading_mapping)
+    def calculate_vel(self, robot_controller, total_position_error, total_yaw_error):
         '''
         current_time = time.time()
         if robot_controller.is_leader:
@@ -381,21 +293,8 @@ class ControlProtocol():
         # Implementing Method 1: 1 set of PID for all policies
         current_time = time.time()
 
-        # Uncomment to test PID
-        '''
-        if (robot_controller.is_leader):
-            linear_x_change = robot_controller.PID_position.compute(total_position_error, current_time)
-            angular_z_change = robot_controller.PID_heading.compute(total_yaw_error, current_time)
-        else:
-            linear_x_change = 0.0
-            angular_z_change = 0.0
-        '''
-
         linear_x_change = robot_controller.PID_position.compute(total_position_error, current_time)
         angular_z_change = robot_controller.PID_heading.compute(total_yaw_error, current_time)
 
         return linear_x_change, angular_z_change
-        
-
-        #return linear_vel, angular_vel
     

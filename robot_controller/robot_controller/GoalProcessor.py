@@ -133,8 +133,6 @@ def arrival_time_error(p, positions):
     ]
     return sum(errors)
 
-
-
 def get_rendezvous_pos(position_mapping):
     x0, y0 = np.mean(position_mapping, axis=0)
     avg_distance = np.mean([np.linalg.norm(np.array(pos) - np.array((x0, y0))) for pos in position_mapping])
