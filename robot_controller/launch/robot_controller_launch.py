@@ -21,7 +21,7 @@ def generate_launch_description():
     usb_port = LaunchConfiguration('usb_port', default='/dev/ttyACM0')
 
     # Paths
-    tb3_param_dir = os.path.join(get_package_share_directory('turtlebot3_bringup'), 'param', f'{TURTLEBOT3_MODEL}.yaml')
+    tb3_param_dir = os.path.join(get_package_share_directory('robot_controller'), 'param', f'{TURTLEBOT3_MODEL}.yaml')
     pkg_nav2_bringup = '/opt/ros/humble/share/nav2_bringup/'  # Update this with the correct path
     rviz_file = os.path.join(pkg_nav2_bringup, 'rviz', 'nav2_default_view.rviz')  # Ensure this path is correct
 
