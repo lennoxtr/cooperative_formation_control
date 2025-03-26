@@ -12,8 +12,6 @@ from geometry_msgs.msg import Twist, PoseWithCovarianceStamped, PoseStamped
 from sensor_msgs.msg import Imu
 from sensor_msgs.msg import LaserScan
 from nav_msgs.msg import Odometry
-from heading_msg.msg import Heading
-from velocity_msg.msg import Velocity
 from robot_goal.msg import Goal
 from position_mapping_msg.msg import PositionMapping
 
@@ -56,8 +54,6 @@ class RobotController(Node):
         
         # Mappings for control
         self.position_mapping = np.array([])
-        self.heading_mapping = np.array([])
-        self.velocity_mapping = np.array([])
 
         # Collision avoidance threshold
         self.max_lidar_range = MAX_LIDAR_RANGE
@@ -196,12 +192,6 @@ class RobotController(Node):
         linear_velocity = msg.twist.twist.linear
         self.linear_x = linear_velocity.x
         self.linear_y = linear_velocity.y
-
-        # Publish linear velocity to central controller node
-        msg = Velocity()
-        msg.robot_id = self.robot_id
-        msg.linear_x = self.linear_x
-        msg.linear_y = self.linear_y
 
     def lidar_callback(self, msg):
         self.lidar_data = np.array(msg.ranges)
