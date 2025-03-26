@@ -51,9 +51,6 @@ class RobotController(Node):
         # Control Protocol
         self.rendezvous_distance = 0.5
         self.control_protocol = ControlProtocol(self.rendezvous_distance)
-        
-        # Mappings for control
-        self.position_mapping = np.array([])
 
         # Collision avoidance threshold
         self.max_lidar_range = MAX_LIDAR_RANGE
@@ -87,8 +84,9 @@ class RobotController(Node):
         else:
             self.desired_linear_vel = 1.2
 
-        # TODO: Remove this as it is hard-coded
+        # For leader
         self.follower_robot_id_list = [1, 2]
+        self.position_mapping = np.array([(0.0, 0.0), (0.0, 0.0), (0.0, 0.0)])
 
         # Subscriptions
         self.imu_subscription = self.create_subscription(

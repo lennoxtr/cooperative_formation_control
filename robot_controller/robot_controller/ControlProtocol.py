@@ -12,8 +12,7 @@ ANG_TOL = 0.2
 POSITION_TOL = 0.05
 
 class ControlProtocol():
-    def __init__(self, rendezvous_distance, num_of_robot=3):
-        self.num_of_robot = num_of_robot
+    def __init__(self, rendezvous_distance):
         self.rendezvous_distance = rendezvous_distance
 
         # To determine rendezvous position
