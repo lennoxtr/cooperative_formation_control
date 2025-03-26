@@ -3,15 +3,12 @@ import time
 import threading
 import numpy as np
 
-import pandas as pd
-
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
 
 from std_msgs.msg import String
 from std_msgs.msg import Bool
-from std_msgs.msg import Float64MultiArray
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, PoseWithCovarianceStamped, PoseStamped
 from sensor_msgs.msg import Imu
 from sensor_msgs.msg import LaserScan
 from nav_msgs.msg import Odometry
@@ -34,11 +31,7 @@ ANG_VEL_STEP_SIZE = 0.1
 MAX_LIDAR_RANGE = 3.5
 
 class RobotController(Node):
-    def __init__(self, is_leader=False):
-        
-        # TODO: implement formation projection for leader robot
-         
-
+    def __init__(self):         
         super().__init__('RobotController')
         self.declare_parameter('robot_id', 0)
         robot_id = self.get_parameter('robot_id').value
@@ -47,7 +40,11 @@ class RobotController(Node):
         # Identification
         self.robot_id = robot_id
         self.namespace = namespace
-        self.is_leader = is_leader
+
+        if self.namespace == 'turtlebot0':
+            self.is_leader = True
+        else:
+            self.is_leader = False
 
         # Start execution flag
         self.is_started = False
@@ -74,7 +71,6 @@ class RobotController(Node):
         self.goal_y = 0.0
         self.current_x = 0.0
         self.current_y = 0.0
-        self.leader_heading = 0.0
 
         # Kinematic variables
         # Yaw is +- pi from north
@@ -86,13 +82,14 @@ class RobotController(Node):
         self.PID_position = PidController(Kp=2.3, Ki=0.0, Kd=0.0)
         self.PID_heading = PidController(Kp=5.0, Ki=0.0, Kd=0.1)
 
-        # Formation
-        self.is_in_formation = False
-
         # Pure pursuit settings
         self.lookahead_dist = 0.8
         self.curvature_thres = 7.0
-        self.desired_linear_vel = MAX_LINEAR_VEL
+
+        if self.is_leader:
+            self.desired_linear_vel = MAX_LINEAR_VEL
+        else:
+            self.desired_linear_vel = 1.2
 
         # TODO: Remove this as it is hard-coded
         self.follower_robot_id_list = [1, 2]
@@ -117,15 +114,9 @@ class RobotController(Node):
             10)
         
         self.goal_subscription = self.create_subscription(
-            Goal,
-            f'/{self.namespace}/goal',
+            PoseStamped,
+            '/turtlebot0/goal_pose',
             self.goal_listener_callback,
-            10)
-        
-        self.is_leader_subscription = self.create_subscription(
-            String,
-            '/leader',
-            self.is_leader_callback,
             10)
         
         self.is_started_subscription = self.create_subscription(
@@ -140,34 +131,10 @@ class RobotController(Node):
             self.tracking_position_callback,
             10)
         
-        self.leader_heading_subscription = self.create_subscription(
-            Heading,
-            '/leader_heading',
-            self.leader_heading_callback,
-            10)
-        
-        self.current_position_subscription = self.create_subscription(
-            Goal,
-            f'/{self.namespace}/robot_position',
-            self.current_position_callback,
-            10)
-        
         self.position_mapping_subscription = self.create_subscription(
             PositionMapping,
             '/position_mapping',
             self.position_mapping_callback,
-            10)
-        
-        self.velocity_mapping_subscription = self.create_subscription(
-            Float64MultiArray,
-            '/velocity_mapping',
-            self.velocity_mapping_callback,
-            10)
-        
-        self.heading_mapping_subscription = self.create_subscription(
-            Float64MultiArray,
-            '/heading_mapping',
-            self.heading_mapping_callback,
             10)
         
         self.arrived_at_goal_subscription = self.create_subscription(
@@ -175,8 +142,19 @@ class RobotController(Node):
             '/arrived_at_goal',
             self.arrived_at_goal_callback,
             15)
+        
+        self.amcl_pose_subscription = self.create_subscription(
+            PoseWithCovarianceStamped,
+            '/amcl_pose',
+            self.amcl_pose_callback,
+            10)
 
         # Publishers
+        self.is_started_publisher = self.create_publisher(
+            Bool,
+            '/start',
+            10)
+
         self.heartbeat_publisher = self.create_publisher(
             String,
             '/heartbeat',
@@ -193,21 +171,13 @@ class RobotController(Node):
             Twist,
             f'/{self.namespace}/cmd_vel',
             10)
-        
-        self.controller_velocity_publisher = self.create_publisher(
-            Velocity,
-            '/robot_linear_vel',
-            10)
-        
-        self.heading_publisher = self.create_publisher(
-            Heading,
-            '/robot_heading',
-            10)
-        
-        self.leader_heading_publisher = self.create_publisher(
-            Heading,
-            '/leader_heading',
-            10)
+
+    def amcl_pose_callback(self, msg):
+        self.current_x = msg.pose.pose.position.x
+        self.current_y = msg.pose.pose.position.y
+        orientation_q = msg.pose.pose.orientation
+        _, _, yaw = quaternion_to_euler([orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w])
+        self.current_imu_heading = float("{:.3f}".format(yaw))
         
     def imu_callback(self, msg):
         orientation_q = msg.orientation
@@ -221,15 +191,6 @@ class RobotController(Node):
         pitch = euler[1]  # radians
         yaw = euler[2]  # radians
         self.current_imu_heading = float("{:.3f}".format(yaw))
-
-        # Publish yaw to central controller node
-        msg = Heading()
-        msg.robot_id = self.robot_id
-        msg.heading = self.current_imu_heading
-        self.heading_publisher.publish(msg)
-        if self.is_leader:
-            self.leader_heading = self.current_imu_heading
-            self.leader_heading_publisher.publish(msg)
     
     def odom_callback(self, msg):
         linear_velocity = msg.twist.twist.linear
@@ -241,7 +202,6 @@ class RobotController(Node):
         msg.robot_id = self.robot_id
         msg.linear_x = self.linear_x
         msg.linear_y = self.linear_y
-        self.controller_velocity_publisher.publish(msg)
 
     def lidar_callback(self, msg):
         self.lidar_data = np.array(msg.ranges)
@@ -249,17 +209,15 @@ class RobotController(Node):
         self.lidar_data[self.lidar_data==np.inf] = MAX_LIDAR_RANGE
 
     def goal_listener_callback(self, msg):
-        self.goal_x = float("{:.3f}".format(msg.goal_x))
-        self.goal_y = float("{:.3f}".format(msg.goal_y))
+        self.goal_x = round(msg.pose.position.x, 3)
+        self.goal_y = round(msg.pose.position.y, 3)
         print("Received Goal at ", self.goal_x, " ", self.goal_y)
+        if self.is_leader:
+            msg = Bool()
+            msg.data = True
+            self.is_started_publisher.publish(msg)
+            self.is_started = True
         self.received_goal = True
-
-    def is_leader_callback(self, msg):
-        leader_namespace = msg.data
-        if self.namespace == leader_namespace:
-            self.is_leader = True
-            self.desired_linear_vel = 0.12
-            print(self.namespace, " is leader")
     
     def is_started_callback(self, msg):
         self.is_started = msg
@@ -268,23 +226,10 @@ class RobotController(Node):
     def tracking_position_callback(self, msg):
         self.goal_x = float("{:.3f}".format(msg.goal_x))
         self.goal_y = float("{:.3f}".format(msg.goal_y))
-    
-    def leader_heading_callback(self, msg):
-        self.leader_heading = msg.heading
-    
-    def current_position_callback(self, msg):
-        self.current_x = float("{:.3f}".format(msg.goal_x))
-        self.current_y = float("{:.3f}".format(msg.goal_y))
 
     def position_mapping_callback(self, msg):
         position_list = msg.data
         self.position_mapping = np.array([(position.x, position.y) for position in position_list])
-    
-    def velocity_mapping_callback(self, msg):
-        self.velocity_mapping = np.array(msg.data)
-    
-    def heading_mapping_callback(self, msg):
-        self.heading_mapping = np.array(msg.data)
     
     def heartbeat_timer_callback(self):
         if not self.is_started:
@@ -345,14 +290,6 @@ class RobotController(Node):
     def execute(self):
         while not self.is_started:
             return
-        
-        '''
-        print("Robot id: ", self.robot_id)
-        print("Current x: ", self.current_x)
-        print("Current y: ", self.current_y)
-        print("Tracking pos x: ", self.goal_x)
-        print("Tracking pos y: ", self.goal_y)
-        '''
 
         if self.is_leader:
             robot_formation_position_list = get_all_postion_in_formation(self.current_x,
@@ -388,13 +325,6 @@ class RobotController(Node):
                 arrived_msg = Bool()
                 arrived_msg.data = True
                 self.arrive_at_goal_publisher.publish(arrived_msg)
-        
-        else:
-            if self.is_arrived():
-                self.is_in_formation = True
-            else:
-                self.is_in_formation = False
-            
 
         # Control Protocol output linear and angular speed change
         linear_x_change, angular_z_change = self.control_protocol.execute_control(self,

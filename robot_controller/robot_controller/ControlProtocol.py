@@ -5,7 +5,6 @@ import numpy as np
 
 from robot_controller.GoalProcessor import get_position_error
 from robot_controller.GoalProcessor import get_yaw_error
-from robot_controller.GoalProcessor import normalize_yaw_error
 from robot_controller.GoalProcessor import generate_straight_path
 from robot_controller.GoalProcessor import get_rendezvous_pos
 

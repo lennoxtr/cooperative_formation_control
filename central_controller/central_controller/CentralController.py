@@ -7,12 +7,9 @@ from rclpy.executors import MultiThreadedExecutor
 
 from std_msgs.msg import String
 from std_msgs.msg import Bool
-from std_msgs.msg import Float64MultiArray
 from geometry_msgs.msg import Point
 from gazebo_msgs.msg import ModelStates
 from robot_goal.msg import Goal
-from velocity_msg.msg import Velocity
-from heading_msg.msg import Heading
 from position_mapping_msg.msg import PositionMapping
 
 
@@ -46,18 +43,6 @@ class CentralController(Node):
             '/gazebo/model_states',
             self.position_listener_callback,
             15)
-        
-        self.velocity_subscription = self.create_subscription(
-            Velocity,
-            '/robot_linear_vel',
-            self.velocity_listener_callback,
-            15)
-
-        self.heading_subscription = self.create_subscription(
-            Heading,
-            '/robot_heading',
-            self.heading_listener_callback,
-            15)
 
         self.heartbeat_subscription = self.create_subscription(
             String,
@@ -80,16 +65,6 @@ class CentralController(Node):
         self.position_mapping_publisher = self.create_publisher(
             PositionMapping,
             '/position_mapping',
-            10)
-
-        self.heading_mapping_publisher = self.create_publisher(
-            Float64MultiArray,
-            '/heading_mapping',
-            10)
-
-        self.velocity_mapping_publisher = self.create_publisher(
-            Float64MultiArray,
-            '/velocity_mapping',
             10)
 
         self.leader_namespace_publisher = self.create_publisher(
@@ -148,22 +123,6 @@ class CentralController(Node):
         msg = PositionMapping()
         msg.data = [Point(x=t[0], y=t[1], z=0.0) for t in self.position_mapping]
         self.position_mapping_publisher.publish(msg)
-    
-    def velocity_listener_callback(self, msg):
-        index = msg.robot_id
-        self.velocity_mapping[index] = msg.linear_x
-        # Publish position update to all robots
-        msg = Float64MultiArray()
-        msg.data = self.velocity_mapping
-        self.velocity_mapping_publisher.publish(msg)
-    
-    def heading_listener_callback(self, msg):
-        index = msg.robot_id
-        self.heading_mapping[index] = msg.heading
-        # Publish position update to all robots
-        msg = Float64MultiArray()
-        msg.data = self.heading_mapping
-        self.heading_mapping_publisher.publish(msg)
 
     def heartbeat_callback(self, msg):
         robot_namespace = msg.data
