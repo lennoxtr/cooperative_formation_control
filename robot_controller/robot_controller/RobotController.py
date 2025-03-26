@@ -23,9 +23,6 @@ from robot_controller.GoalProcessor import arrived_at_goal, quaternion_to_euler,
 MAX_LINEAR_VEL = 0.2
 MAX_ANGLE_VEL = 1.5 #1.5
 
-LIN_VEL_STEP_SIZE = 0.01
-ANG_VEL_STEP_SIZE = 0.1
-
 MAX_LIDAR_RANGE = 3.5
 
 class RobotController(Node):
