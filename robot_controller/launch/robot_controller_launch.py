@@ -73,14 +73,5 @@ def generate_launch_description():
             output='screen',
         ),
 
-        # TF Static Transform Publisher (Ensures correct transforms)
-        Node(
-            package="tf2_ros",
-            executable="static_transform_publisher",
-            name="static_transform_publisher",
-            parameters=[],
-            remappings=[('/tf', '/turtlebot0/tf'),
-                        ('/tf_static', '/turtlebot0/tf_static')],
-            arguments=["0", "0", "0", "0", "0", "0", "/base_link", "/base_scan"],
-        ),
+    
     ])
