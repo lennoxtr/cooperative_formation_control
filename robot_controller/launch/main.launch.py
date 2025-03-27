@@ -54,6 +54,8 @@ def generate_launch_description():
             launch_arguments={'namespace': namespace}.items()
         ),
 
+        map_server,
+
         RegisterEventHandler(
             event_handler=OnProcessStart(
                 target_action=map_server,
