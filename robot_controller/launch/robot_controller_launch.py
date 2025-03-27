@@ -33,6 +33,14 @@ def generate_launch_description():
             parameters=[{'robot_id': LaunchConfiguration('robot_id')}], 
             output='screen',
         ),
+    
+        Node(
+            package='nav2_map_server',
+            executable='map_server',
+            name='map_server',
+            parameters=[{'yaml_filename': yaml_map_file}],
+            output='screen',
+        ),
 
         # AMCL for Localization
         Node(
