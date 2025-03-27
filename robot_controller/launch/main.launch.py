@@ -14,6 +14,13 @@ def generate_launch_description():
         # Namespace declaration
         DeclareLaunchArgument('namespace', default_value=namespace, description='Namespace for the robot'),
 
+        # Launch TurtleBot3 bringup
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(get_package_share_directory('turtlebot3_bringup'), 'launch', 'robot.launch.py')
+            ),
+            launch_arguments={'namespace': namespace}.items()  # Ensure namespace consistency
+        ),
 
         # Launch additional nodes (LiDAR, AMCL, Map Server, etc.)
         IncludeLaunchDescription(
