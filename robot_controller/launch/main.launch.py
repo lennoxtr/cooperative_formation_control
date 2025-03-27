@@ -7,11 +7,12 @@ import os
 
 def generate_launch_description():
     # Declare namespace
-    namespace = LaunchConfiguration('namespace', default='turtlebot0')
+    namespace = LaunchConfiguration('namespace', default= os.environ['ROBOT_NAMESPACE'])
+
 
     return LaunchDescription([
         # Namespace declaration
-        DeclareLaunchArgument('namespace', default_value='turtlebot0', description='Namespace for the robot'),
+        DeclareLaunchArgument('namespace', default_value=namespace, description='Namespace for the robot'),
 
         # Launch TurtleBot3 bringup
         IncludeLaunchDescription(
