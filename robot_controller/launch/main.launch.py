@@ -18,11 +18,11 @@ def generate_launch_description():
             PythonLaunchDescriptionSource(
                 os.path.join(get_package_share_directory('turtlebot3_bringup'), 'launch', 'robot.launch.py')
             ),
-            launch_arguments={'namespace': namespace}.items(),  # Ensure namespace consistency
-            remappings=[
-                ('/tf', [namespace, '/tf']),
-                ('/tf_static', [namespace, '/tf_static'])
-            ],
+            launch_arguments={
+                'namespace': namespace,
+                'tf': [namespace, '/tf'],
+                'tf_static': [namespace, '/tf_static']
+            }.items(),
         ),
 
         # Launch additional nodes (LiDAR, AMCL, Map Server, etc.)
