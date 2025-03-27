@@ -30,8 +30,7 @@ MAX_LIDAR_RANGE = 3.5
 # Define your QoS profile
 qos_profile = QoSProfile(
     depth=10,
-    reliability=ReliabilityPolicy.RELIABLE,
-    durability=DurabilityPolicy.VOLATILE
+    reliability=ReliabilityPolicy.BEST_EFFORT,
 )
 
 class RobotController(Node):
