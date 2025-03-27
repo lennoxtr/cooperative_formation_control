@@ -3,8 +3,7 @@
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
-from launch_ros.actions import Node
-from launch_ros.actions import PushRosNamespace
+from launch_ros.actions import Node, LifecycleNode, LogInfo
 from launch.substitutions import LaunchConfiguration, PythonExpression
 import os
 
@@ -35,12 +34,13 @@ def generate_launch_description():
             output='screen',
         ),
     
-        Node(
+        LifecycleNode(
             package='nav2_map_server',
             executable='map_server',
             name='map_server',
             parameters=[{'yaml_filename': yaml_map_file}],
             output='screen',
+            on_exit=[LogInfo('Map server lifecycle node exited')]
         ),
 
         # AMCL for Localization
