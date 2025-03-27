@@ -53,8 +53,6 @@ def generate_launch_description():
             launch_arguments={'use_sim_time': 'False'}.items(),
         ),
 
-        print("Launch turtlebot3_bringup successfully")
-
         # Robot Controller Node
         Node(
             package='robot_controller',
@@ -64,7 +62,6 @@ def generate_launch_description():
             output='screen',
         ),
 
-        print("Launch robot_controller successfully")
 
         # Localization (AMCL)
         Node(
@@ -82,17 +79,15 @@ def generate_launch_description():
             ],
         ),
 
-        print("Launch nav2_amcl successfully")
-
         # Navigation Stack (Nav2)
+        '''
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
                 os.path.join(nav2_bringup_dir, 'launch', 'bringup_launch.py')
             ),
             launch_arguments={'use_sim_time': 'False'}.items(),
-        ),
-
-        print("Launch nav2 successfully")
+        ),'
+        '''
 
         # RViz visualization
         Node(
@@ -104,6 +99,4 @@ def generate_launch_description():
             remappings=[('/goal_pose', '/turtlebot0/goal_pose')],
             output='screen'
         ),
-
-        print("Launch rviz2 successfully")
     ])
