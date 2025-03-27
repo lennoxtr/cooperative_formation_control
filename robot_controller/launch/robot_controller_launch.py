@@ -10,9 +10,7 @@ from launch.substitutions import LaunchConfiguration
 import os
 
 def generate_launch_description():
-    TURTLEBOT3_MODEL = os.environ['TURTLEBOT3_MODEL']
     LDS_MODEL = os.environ['LDS_MODEL']
-    LDS_LAUNCH_FILE = '/hlds_laser.launch.py'
 
     # Namespace and Robot ID
     namespace = LaunchConfiguration('namespace', default='turtlebot0')
@@ -45,7 +43,6 @@ def generate_launch_description():
             launch_arguments={'port': '/dev/ttyUSB0', 'frame_id': '/base_scan',
                               }.items(),
         ),
-
 
         # Robot Controller Node
         Node(
