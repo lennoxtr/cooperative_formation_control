@@ -37,11 +37,15 @@ def generate_launch_description():
         # Apply namespace to all nodes
 
         # Start LiDAR driver
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(lidar_launch_file),
-            launch_arguments={'port': '/dev/ttyUSB0', 'frame_id': [namespace, '/base_scan'],
-                              }.items(),
+        Node(
+            package='hls_lfcd_lds_driver',
+            executable='hlds_laser_driver',
+            name='hlds_laser_driver',
+            remappings=[('/scan', [namespace, '/scan'])],
+            parameters=[{'frame_id': [namespace, '/base_scan']}],
+            output='screen'
         ),
+
 
         # TurtleBot3 Bringup (Core Nodes)
         IncludeLaunchDescription(
@@ -83,7 +87,9 @@ def generate_launch_description():
                 'scan_topic': [namespace, '/scan'],
                 'tf_broadcast': True,
             }],
-            remappings=[('/amcl_pose', [namespace, '/amcl_pose'])],
+            remappings=[
+                ('/amcl_pose', [namespace, '/amcl_pose']),  # Remap amcl_pose to use namespace
+            ],
             output='screen',
         ),
 
@@ -91,8 +97,18 @@ def generate_launch_description():
         Node(
             package="tf2_ros",
             executable="static_transform_publisher",
-            arguments=["0", "0", "0", "0", "0", "0",
-                       [namespace, "/base_link"],
-                       [namespace, "/base_scan"]],
+            name="static_transform_publisher",
+            parameters=[],
+            remappings=[],
+            launch_arguments={
+                'x': '0',
+                'y': '0',
+                'z': '0',
+                'roll': '0',
+                'pitch': '0',
+                'yaw': '0',
+                'frame_id': [namespace, '/base_link'],
+                'child_frame_id': [namespace, '/base_scan'],
+            }.items()
         ),
     ])
