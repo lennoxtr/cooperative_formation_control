@@ -59,12 +59,5 @@ def generate_launch_description():
         ),
 
         # TF Static Transform Publisher (Ensures correct transforms)
-        Node(
-            package="tf2_ros",
-            executable="static_transform_publisher",
-            name="static_transform_publisher",
-            parameters=[],
-            remappings=[('/tf_static', PythonExpression(["'", LaunchConfiguration('namespace'), "' + '/tf_static'"]))],
-            arguments=["0", "0", "0", "0", "0", "0", "/base_link", "/base_scan"],
-        ),
+
     ])
