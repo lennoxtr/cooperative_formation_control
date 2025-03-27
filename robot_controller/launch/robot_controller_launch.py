@@ -52,7 +52,9 @@ def generate_launch_description():
             PythonLaunchDescriptionSource(
                 os.path.join(get_package_share_directory('turtlebot3_bringup'), 'launch', 'robot.launch.py')
             ),
-            launch_arguments={'use_sim_time': 'False'}.items(),
+            launch_arguments={'use_sim_time': 'False',
+                              'namespace': ''
+                              }.items(),
         ),
 
         # Robot Controller Node
@@ -92,7 +94,6 @@ def generate_launch_description():
             name='rviz2',
             arguments=['-d', rviz_file],  # RViz configuration file
             parameters=[{'use_sim_time': False}],
-            remappings=[('/goal_pose', '/turtlebot0/goal_pose')],
             output='screen'
         ),
     ])
