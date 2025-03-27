@@ -136,7 +136,7 @@ class RobotController(Node):
         
         self.amcl_pose_subscription = self.create_subscription(
             PoseWithCovarianceStamped,
-            '/amcl_pose',
+            f'/{self.namespace}/amcl_pose',
             self.amcl_pose_callback,
             10)
 
