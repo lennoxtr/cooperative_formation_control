@@ -5,14 +5,14 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch_ros.actions import Node
 from launch_ros.actions import PushRosNamespace
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, PythonExpression
 import os
 
 def generate_launch_description():
 
     # Namespace and Robot ID
     namespace = LaunchConfiguration('namespace')
-    robot_id = LaunchConfiguration('robot_id', default='0')
+    robot_id = PythonExpression(["'", namespace, "'[-1]"])
 
     # Paths
     robot_controller_dir = get_package_share_directory('robot_controller')
@@ -21,7 +21,7 @@ def generate_launch_description():
     return LaunchDescription([
         # Declare launch arguments
         DeclareLaunchArgument('namespace', description='Namespace for the robot'),
-        DeclareLaunchArgument('robot_id', default_value='0', description='Unique ID of the robot'),
+        DeclareLaunchArgument('robot_id', description='Unique ID of the robot'),
         DeclareLaunchArgument('usb_port', default_value='/dev/ttyACM0', description='OpenCR USB port'),
 
         # Apply namespace to all nodes
