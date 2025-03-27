@@ -22,7 +22,6 @@ def generate_launch_description():
         # Declare launch arguments
         DeclareLaunchArgument('namespace', description='Namespace for the robot'),
         DeclareLaunchArgument('robot_id', description='Unique ID of the robot'),
-        DeclareLaunchArgument('usb_port', default_value='/dev/ttyACM0', description='OpenCR USB port'),
 
         # Apply namespace to all nodes
         PushRosNamespace(namespace),
