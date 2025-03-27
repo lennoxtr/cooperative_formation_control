@@ -10,7 +10,9 @@ from launch.substitutions import LaunchConfiguration
 import os
 
 def generate_launch_description():
+    TURTLEBOT3_MODEL = os.environ['TURTLEBOT3_MODEL']
     LDS_MODEL = os.environ['LDS_MODEL']
+    LDS_LAUNCH_FILE = '/hlds_laser.launch.py'
 
     # Namespace and Robot ID
     namespace = LaunchConfiguration('namespace', default='turtlebot0')
@@ -35,7 +37,6 @@ def generate_launch_description():
         DeclareLaunchArgument('usb_port', default_value='/dev/ttyACM0', description='OpenCR USB port'),
 
         # Apply namespace to all nodes
-        PushRosNamespace(namespace),
 
         # Start LiDAR driver
         IncludeLaunchDescription(
@@ -50,7 +51,7 @@ def generate_launch_description():
                 os.path.join(get_package_share_directory('turtlebot3_bringup'), 'launch', 'robot.launch.py')
             ),
             launch_arguments={'use_sim_time': 'False',
-                              'namespace': ''
+                              'namespace': namespace
                               }.items(),
         ),
 
@@ -59,11 +60,10 @@ def generate_launch_description():
             package='robot_controller',
             executable='robot_controller',
             name='robot_controller',
-            parameters=[{'robot_id': robot_id}], 
+            parameters=[{'robot_id': LaunchConfiguration('robot_id')}], 
             output='screen',
         ),
-
-        # Map Server
+    
         Node(
             package='nav2_map_server',
             executable='map_server',
@@ -79,10 +79,11 @@ def generate_launch_description():
             name='amcl',
             parameters=[{
                 'use_sim_time': False,
+                'base_frame_id': [namespace, '/base_footprint'],
+                'global_frame_id': [namespace, '/map'],
+                'scan_topic': [namespace, '/scan'],
                 'tf_broadcast': True,
             }],
-            remappings=[('/scan', [namespace, '/scan']),  # Remap scan topic
-                        ('/amcl_pose', [namespace, '/amcl_pose'])],
             output='screen',
         ),
 
@@ -90,18 +91,8 @@ def generate_launch_description():
         Node(
             package="tf2_ros",
             executable="static_transform_publisher",
-            name="static_transform_publisher",
-            parameters=[],
-            remappings=[],
-            launch_arguments={
-                'x': '0',
-                'y': '0',
-                'z': '0',
-                'roll': '0',
-                'pitch': '0',
-                'yaw': '0',
-                'frame_id': [namespace, '/base_link'],
-                'child_frame_id': [namespace, '/base_scan'],
-            }.items()
+            arguments=["0", "0", "0", "0", "0", "0",
+                       [namespace, "/base_link"],
+                       [namespace, "/base_scan"]],
         ),
     ])
