@@ -24,7 +24,7 @@ def generate_launch_description():
         DeclareLaunchArgument('robot_id', default_value=robot_id_default, description='Unique ID of the robot'),
 
         # Apply namespace to all nodes
-        PushRosNamespace(namespace),
+        
 
         # Robot Controller Node
         Node(
