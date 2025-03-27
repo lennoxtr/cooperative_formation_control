@@ -5,6 +5,7 @@ import numpy as np
 
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
+from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy
 
 from std_msgs.msg import String
 from std_msgs.msg import Bool
@@ -24,6 +25,14 @@ MAX_LINEAR_VEL = 0.2
 MAX_ANGLE_VEL = 1.5 #1.5
 
 MAX_LIDAR_RANGE = 3.5
+
+
+# Define your QoS profile
+qos_profile = QoSProfile(
+    depth=10,
+    reliability=ReliabilityPolicy.RELIABLE,
+    durability=DurabilityPolicy.VOLATILE
+)
 
 class RobotController(Node):
     def __init__(self):         
@@ -102,7 +111,8 @@ class RobotController(Node):
             LaserScan,
             f'/{self.namespace}/scan',
             self.lidar_callback,
-            10)
+            10, 
+            qos_profile)
         
         self.goal_subscription = self.create_subscription(
             PoseStamped,
