@@ -61,7 +61,7 @@ def generate_launch_description():
             package='robot_controller',
             executable='robot_controller',
             name='robot_controller',
-            parameters=[{'robot_id': LaunchConfiguration('robot_id')}], 
+            parameters=[{'robot_id': robot_id}], 
             output='screen',
         ),
     
@@ -92,8 +92,10 @@ def generate_launch_description():
         Node(
             package="tf2_ros",
             executable="static_transform_publisher",
-            arguments=["0", "0", "0", "0", "0", "0",
-                        "/base_link",
-                        "/base_scan"],
+            name="static_transform_publisher",
+            parameters=[],
+            remappings=[('/tf', '/turtlebot0/tf'),
+                        ('/tf_static', '/turtlebot0/tf_static')],
+            arguments=["0", "0", "0", "0", "0", "0", "/base_link", "/base_scan"],
         ),
     ])
