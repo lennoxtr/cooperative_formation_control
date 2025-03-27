@@ -18,11 +18,7 @@ def generate_launch_description():
     namespace = LaunchConfiguration('namespace', default='turtlebot0')
     robot_id = LaunchConfiguration('robot_id', default='0')
 
-    # USB Port for OpenCR
-    usb_port = LaunchConfiguration('usb_port', default='/dev/ttyACM0')
-
     # Paths
-    tb3_param_dir = os.path.join(get_package_share_directory('robot_controller'), 'param', f'{TURTLEBOT3_MODEL}.yaml')
     nav2_bringup_dir = get_package_share_directory('nav2_bringup')
     rviz_file = os.path.join(nav2_bringup_dir, 'rviz', 'nav2_default_view.rviz')  # Ensure this path is correct
 
@@ -57,6 +53,8 @@ def generate_launch_description():
             launch_arguments={'use_sim_time': 'False'}.items(),
         ),
 
+        print("Launch turtlebot3_bringup successfully")
+
         # Robot Controller Node
         Node(
             package='robot_controller',
@@ -65,6 +63,8 @@ def generate_launch_description():
             parameters=[{'robot_id': LaunchConfiguration('robot_id')}], 
             output='screen',
         ),
+
+        print("Launch robot_controller successfully")
 
         # Localization (AMCL)
         Node(
@@ -82,6 +82,8 @@ def generate_launch_description():
             ],
         ),
 
+        print("Launch nav2_amcl successfully")
+
         # Navigation Stack (Nav2)
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
@@ -89,6 +91,8 @@ def generate_launch_description():
             ),
             launch_arguments={'use_sim_time': 'False'}.items(),
         ),
+
+        print("Launch nav2 successfully")
 
         # RViz visualization
         Node(
@@ -100,4 +104,6 @@ def generate_launch_description():
             remappings=[('/goal_pose', '/turtlebot0/goal_pose')],
             output='screen'
         ),
+
+        print("Launch rviz2 successfully")
     ])
