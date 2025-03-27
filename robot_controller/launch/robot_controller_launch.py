@@ -2,8 +2,6 @@
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
-from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from launch_ros.actions import PushRosNamespace
 from launch.substitutions import LaunchConfiguration
@@ -20,14 +18,6 @@ def generate_launch_description():
     robot_controller_dir = get_package_share_directory('robot_controller')
     yaml_map_file = os.path.join(robot_controller_dir, 'maps', 'my_map.yaml')
 
-    # LiDAR
-    if LDS_MODEL == 'LDS-01':
-        lidar_launch_file = os.path.join(get_package_share_directory('hls_lfcd_lds_driver'), 'launch', 'hlds_laser.launch.py')
-    elif LDS_MODEL == 'LDS-02':
-        lidar_launch_file = os.path.join(get_package_share_directory('ld08_driver'), 'launch', 'ld08.launch.py')
-    else:
-        lidar_launch_file = os.path.join(get_package_share_directory('hls_lfcd_lds_driver'), 'launch', 'hlds_laser.launch.py')
-
     return LaunchDescription([
         # Declare launch arguments
         DeclareLaunchArgument('namespace', default_value='turtlebot0', description='Namespace for the robot'),
@@ -36,13 +26,6 @@ def generate_launch_description():
 
         # Apply namespace to all nodes
         PushRosNamespace(namespace),
-
-        # Start LiDAR driver
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(lidar_launch_file),
-            launch_arguments={'port': '/dev/ttyUSB0', 'frame_id': '/base_scan',
-                              }.items(),
-        ),
 
         # Robot Controller Node
         Node(
