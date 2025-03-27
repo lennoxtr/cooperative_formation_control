@@ -110,8 +110,7 @@ class RobotController(Node):
         self.lidar_subscription = self.create_subscription(
             LaserScan,
             f'/{self.namespace}/scan',
-            self.lidar_callback,
-            10, 
+            self.lidar_callback, 
             qos_profile)
         
         self.goal_subscription = self.create_subscription(
