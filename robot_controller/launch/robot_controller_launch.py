@@ -83,6 +83,7 @@ def generate_launch_description():
                 'scan_topic': [namespace, '/scan'],
                 'tf_broadcast': True,
             }],
+            remappings=[('/amcl_pose', [namespace, '/amcl_pose'])],
             output='screen',
         ),
 
