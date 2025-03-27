@@ -73,21 +73,6 @@ def generate_launch_description():
             output='screen',
         ),
 
-        # AMCL for Localization
-        Node(
-            package='nav2_amcl',
-            executable='amcl',
-            name='amcl',
-            parameters=[{
-                'use_sim_time': False,
-                'base_frame_id': '/base_footprint',
-                'global_frame_id': '/map',
-                'scan_topic': '/scan',
-                'tf_broadcast': True,
-            }],
-            output='screen',
-        ),
-
         # TF Static Transform Publisher (Ensures correct transforms)
         Node(
             package="tf2_ros",
