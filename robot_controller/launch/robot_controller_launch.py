@@ -37,11 +37,12 @@ def generate_launch_description():
         DeclareLaunchArgument('usb_port', default_value='/dev/ttyACM0', description='OpenCR USB port'),
 
         # Apply namespace to all nodes
+        PushRosNamespace(namespace);
 
         # Start LiDAR driver
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(lidar_launch_file),
-            launch_arguments={'port': '/dev/ttyUSB0', 'frame_id': [namespace, '/base_scan'],
+            launch_arguments={'port': '/dev/ttyUSB0', 'frame_id': '/base_scan',
                               }.items(),
         ),
 
@@ -51,7 +52,7 @@ def generate_launch_description():
                 os.path.join(get_package_share_directory('turtlebot3_bringup'), 'launch', 'robot.launch.py')
             ),
             launch_arguments={'use_sim_time': 'False',
-                              'namespace': namespace
+                              'namespace': ''
                               }.items(),
         ),
 
@@ -79,9 +80,9 @@ def generate_launch_description():
             name='amcl',
             parameters=[{
                 'use_sim_time': False,
-                'base_frame_id': [namespace, '/base_footprint'],
-                'global_frame_id': [namespace, '/map'],
-                'scan_topic': [namespace, '/scan'],
+                'base_frame_id': '/base_footprint',
+                'global_frame_id': '/map',
+                'scan_topic': '/scan',
                 'tf_broadcast': True,
             }],
             output='screen',
@@ -92,7 +93,7 @@ def generate_launch_description():
             package="tf2_ros",
             executable="static_transform_publisher",
             arguments=["0", "0", "0", "0", "0", "0",
-                       [namespace, "/base_link"],
-                       [namespace, "/base_scan"]],
+                       , "/base_link",
+                        "/base_scan"],
         ),
     ])
