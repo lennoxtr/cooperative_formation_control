@@ -9,10 +9,9 @@ from launch.substitutions import LaunchConfiguration
 import os
 
 def generate_launch_description():
-    LDS_MODEL = os.environ['LDS_MODEL']
 
     # Namespace and Robot ID
-    namespace = LaunchConfiguration('namespace', default='turtlebot0')
+    namespace = LaunchConfiguration('namespace')
     robot_id = LaunchConfiguration('robot_id', default='0')
 
     # Paths
@@ -21,7 +20,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         # Declare launch arguments
-        DeclareLaunchArgument('namespace', default_value='turtlebot0', description='Namespace for the robot'),
+        DeclareLaunchArgument('namespace', description='Namespace for the robot'),
         DeclareLaunchArgument('robot_id', default_value='0', description='Unique ID of the robot'),
         DeclareLaunchArgument('usb_port', default_value='/dev/ttyACM0', description='OpenCR USB port'),
 
