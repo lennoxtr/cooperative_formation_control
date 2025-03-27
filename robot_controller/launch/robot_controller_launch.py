@@ -83,6 +83,7 @@ def generate_launch_description():
             ),
             launch_arguments={'use_sim_time': 'false',
                                 'autostart': 'true',
+                                'namespace': '',
                                 'map': yaml_map_file  
                               }.items(),
         ),
