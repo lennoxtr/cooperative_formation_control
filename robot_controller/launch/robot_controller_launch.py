@@ -37,7 +37,7 @@ def generate_launch_description():
         DeclareLaunchArgument('usb_port', default_value='/dev/ttyACM0', description='OpenCR USB port'),
 
         # Apply namespace to all nodes
-        PushRosNamespace(namespace);
+        PushRosNamespace(namespace),
 
         # Start LiDAR driver
         IncludeLaunchDescription(
