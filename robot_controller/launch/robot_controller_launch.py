@@ -20,7 +20,9 @@ def generate_launch_description():
 
     # Paths
     nav2_bringup_dir = get_package_share_directory('nav2_bringup')
+    robot_controller_dir = get_package_share_directory('robot_controller')
     rviz_file = os.path.join(nav2_bringup_dir, 'rviz', 'nav2_default_view.rviz')  # Ensure this path is correct
+    yaml_map_file = os.path.join(robot_controller_dir, 'maps', 'my_map.yaml')
 
     # LiDAR
     if LDS_MODEL == 'LDS-01':
@@ -80,14 +82,15 @@ def generate_launch_description():
         ),
 
         # Navigation Stack (Nav2)
-        '''
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
                 os.path.join(nav2_bringup_dir, 'launch', 'bringup_launch.py')
             ),
-            launch_arguments={'use_sim_time': 'False'}.items(),
-        ),'
-        '''
+            launch_arguments={'use_sim_time': 'false',
+                                'autostart': 'true',
+                                'map': yaml_map_file  
+                              }.items(),
+        ),
 
         # RViz visualization
         Node(
