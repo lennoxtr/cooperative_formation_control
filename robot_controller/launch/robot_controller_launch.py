@@ -57,7 +57,4 @@ def generate_launch_description():
             }],
             output='screen',
         ),
-
-        # TF Static Transform Publisher (Ensures correct transforms)
-
     ])
