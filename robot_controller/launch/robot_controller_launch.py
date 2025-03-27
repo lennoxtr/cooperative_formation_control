@@ -12,7 +12,7 @@ def generate_launch_description():
 
     # Namespace and Robot ID
     namespace = LaunchConfiguration('namespace')
-    robot_id = PythonExpression(["'", namespace, "'[-1]"])
+    robot_id_default = PythonExpression(["'", namespace, "'[-1]"])
 
     # Paths
     robot_controller_dir = get_package_share_directory('robot_controller')
@@ -21,7 +21,7 @@ def generate_launch_description():
     return LaunchDescription([
         # Declare launch arguments
         DeclareLaunchArgument('namespace', description='Namespace for the robot'),
-        DeclareLaunchArgument('robot_id', description='Unique ID of the robot'),
+        DeclareLaunchArgument('robot_id', default_value=robot_id_default, description='Unique ID of the robot'),
 
         # Apply namespace to all nodes
         PushRosNamespace(namespace),
@@ -31,7 +31,7 @@ def generate_launch_description():
             package='robot_controller',
             executable='robot_controller',
             name='robot_controller',
-            parameters=[{'robot_id': robot_id}], 
+            parameters=[{'robot_id': LaunchConfiguration('robot_id')}], 
             output='screen',
         ),
     
