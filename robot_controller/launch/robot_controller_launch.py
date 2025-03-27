@@ -41,4 +41,19 @@ def generate_launch_description():
             parameters=[{'yaml_filename': yaml_map_file}],
             output='screen',
         ),
+
+        # AMCL for Localization
+        Node(
+            package='nav2_amcl',
+            executable='amcl',
+            name='amcl',
+            parameters=[{
+                'use_sim_time': False,
+                'base_frame_id': '/base_footprint',
+                'global_frame_id': '/map',
+                'scan_topic': '/scan',
+                'tf_broadcast': True,
+            }],
+            output='screen',
+        ),
     ])
