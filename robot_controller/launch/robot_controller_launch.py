@@ -40,7 +40,6 @@ def generate_launch_description():
             name='map_server',
             parameters=[{'yaml_filename': yaml_map_file}],
             output='screen',
-            on_exit=[LogInfo('Map server lifecycle node exited')]
         ),
 
         # AMCL for Localization
