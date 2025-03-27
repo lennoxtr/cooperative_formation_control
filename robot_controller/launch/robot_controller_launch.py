@@ -72,13 +72,6 @@ def generate_launch_description():
             name='amcl',
             output='screen',
             parameters=[{'use_sim_time': False}],
-            remappings=[
-                ('/scan', [LaunchConfiguration('namespace'), '/scan']),
-                ('/map', [LaunchConfiguration('namespace'), '/map']),
-                ('/amcl_pose', [LaunchConfiguration('namespace'), '/amcl_pose']),
-                ('/tf', [LaunchConfiguration('namespace'), '/tf']),
-                ('/tf_static', [LaunchConfiguration('namespace'), '/tf_static'])
-            ],
         ),
 
         # Navigation Stack (Nav2)
