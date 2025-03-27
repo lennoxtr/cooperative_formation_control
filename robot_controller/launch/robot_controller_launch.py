@@ -46,15 +46,6 @@ def generate_launch_description():
                               }.items(),
         ),
 
-        # TurtleBot3 Bringup (Core Nodes)
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                os.path.join(get_package_share_directory('turtlebot3_bringup'), 'launch', 'robot.launch.py')
-            ),
-            launch_arguments={'use_sim_time': 'False',
-                              'namespace': ''
-                              }.items(),
-        ),
 
         # Robot Controller Node
         Node(
@@ -73,5 +64,29 @@ def generate_launch_description():
             output='screen',
         ),
 
-    
+        # AMCL for Localization
+        Node(
+            package='nav2_amcl',
+            executable='amcl',
+            name='amcl',
+            parameters=[{
+                'use_sim_time': False,
+                'base_frame_id': '/base_footprint',
+                'global_frame_id': '/map',
+                'scan_topic': '/scan',
+                'tf_broadcast': True,
+            }],
+            output='screen',
+        ),
+
+        # TF Static Transform Publisher (Ensures correct transforms)
+        Node(
+            package="tf2_ros",
+            executable="static_transform_publisher",
+            name="static_transform_publisher",
+            parameters=[],
+            remappings=[('/tf', '/turtlebot0/tf'),
+                        ('/tf_static', '/turtlebot0/tf_static')],
+            arguments=["0", "0", "0", "0", "0", "0", "/base_link", "/base_scan"],
+        ),
     ])
