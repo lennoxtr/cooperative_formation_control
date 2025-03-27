@@ -38,7 +38,6 @@ def generate_launch_description():
             executable='map_server',
             name='map_server',
             parameters=[{'yaml_filename': yaml_map_file}],
-            namespace=namespace,
             output='screen',
         ),
     ])
