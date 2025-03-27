@@ -78,14 +78,4 @@ def generate_launch_description():
                                 'map': yaml_map_file  
                               }.items(),
         ),
-
-        # RViz visualization
-        Node(
-            package='rviz2',
-            executable='rviz2',
-            name='rviz2',
-            arguments=['-d', rviz_file],  # RViz configuration file
-            parameters=[{'use_sim_time': False}],
-            output='screen'
-        ),
     ])
