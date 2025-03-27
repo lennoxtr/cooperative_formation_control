@@ -10,18 +10,14 @@ from launch.substitutions import LaunchConfiguration
 import os
 
 def generate_launch_description():
-    TURTLEBOT3_MODEL = os.environ['TURTLEBOT3_MODEL']
     LDS_MODEL = os.environ['LDS_MODEL']
-    LDS_LAUNCH_FILE = '/hlds_laser.launch.py'
 
     # Namespace and Robot ID
     namespace = LaunchConfiguration('namespace', default='turtlebot0')
     robot_id = LaunchConfiguration('robot_id', default='0')
 
     # Paths
-    nav2_bringup_dir = get_package_share_directory('nav2_bringup')
     robot_controller_dir = get_package_share_directory('robot_controller')
-    rviz_file = os.path.join(nav2_bringup_dir, 'rviz', 'nav2_default_view.rviz')  # Ensure this path is correct
     yaml_map_file = os.path.join(robot_controller_dir, 'maps', 'my_map.yaml')
 
     # LiDAR
@@ -39,12 +35,11 @@ def generate_launch_description():
         DeclareLaunchArgument('usb_port', default_value='/dev/ttyACM0', description='OpenCR USB port'),
 
         # Apply namespace to all nodes
-        PushRosNamespace(namespace),
 
         # Start LiDAR driver
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(lidar_launch_file),
-            launch_arguments={'port': '/dev/ttyUSB0', 'frame_id': 'base_scan',
+            launch_arguments={'port': '/dev/ttyUSB0', 'frame_id': [namespace, '/base_scan'],
                               }.items(),
         ),
 
@@ -54,7 +49,7 @@ def generate_launch_description():
                 os.path.join(get_package_share_directory('turtlebot3_bringup'), 'launch', 'robot.launch.py')
             ),
             launch_arguments={'use_sim_time': 'False',
-                              'namespace': ''
+                              'namespace': namespace
                               }.items(),
         ),
 
@@ -63,19 +58,40 @@ def generate_launch_description():
             package='robot_controller',
             executable='robot_controller',
             name='robot_controller',
-            parameters=[{'robot_id': LaunchConfiguration('robot_id')}], 
+            parameters=[{'robot_id': robot_id}], 
             output='screen',
         ),
 
-        # Navigation Stack (Nav2)
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                os.path.join(nav2_bringup_dir, 'launch', 'bringup_launch.py')
-            ),
-            launch_arguments={'use_sim_time': 'false',
-                                'autostart': 'true',
-                                'namespace': '',
-                                'map': yaml_map_file  
-                              }.items(),
+        # Map Server
+        Node(
+            package='nav2_map_server',
+            executable='map_server',
+            name='map_server',
+            parameters=[{'yaml_filename': yaml_map_file}],
+            output='screen',
+        ),
+
+        # AMCL for Localization
+        Node(
+            package='nav2_amcl',
+            executable='amcl',
+            name='amcl',
+            parameters=[{
+                'use_sim_time': False,
+                'base_frame_id': [namespace, '/base_footprint'],
+                'global_frame_id': [namespace, '/map'],
+                'scan_topic': [namespace, '/scan'],
+                'tf_broadcast': True,
+            }],
+            output='screen',
+        ),
+
+        # TF Static Transform Publisher (Ensures correct transforms)
+        Node(
+            package="tf2_ros",
+            executable="static_transform_publisher",
+            arguments=["0", "0", "0", "0", "0", "0",
+                       [namespace, "/base_link"],
+                       [namespace, "/base_scan"]],
         ),
     ])
