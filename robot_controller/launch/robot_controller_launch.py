@@ -35,17 +35,14 @@ def generate_launch_description():
         DeclareLaunchArgument('usb_port', default_value='/dev/ttyACM0', description='OpenCR USB port'),
 
         # Apply namespace to all nodes
+        PushRosNamespace(namespace),
 
         # Start LiDAR driver
-        Node(
-            package='hls_lfcd_lds_driver',
-            executable='hlds_laser_driver',
-            name='hlds_laser_driver',
-            remappings=[('/scan', [namespace, '/scan'])],
-            parameters=[{'frame_id': [namespace, '/base_scan']}],
-            output='screen'
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(lidar_launch_file),
+            launch_arguments={'port': '/dev/ttyUSB0', 'frame_id': [namespace, '/base_scan'],
+                              }.items(),
         ),
-
 
         # TurtleBot3 Bringup (Core Nodes)
         IncludeLaunchDescription(
@@ -53,7 +50,7 @@ def generate_launch_description():
                 os.path.join(get_package_share_directory('turtlebot3_bringup'), 'launch', 'robot.launch.py')
             ),
             launch_arguments={'use_sim_time': 'False',
-                              'namespace': namespace
+                              'namespace': ''
                               }.items(),
         ),
 
@@ -82,14 +79,10 @@ def generate_launch_description():
             name='amcl',
             parameters=[{
                 'use_sim_time': False,
-                'base_frame_id': [namespace, '/base_footprint'],
-                'global_frame_id': [namespace, '/map'],
-                'scan_topic': [namespace, '/scan'],
                 'tf_broadcast': True,
             }],
-            remappings=[
-                ('/amcl_pose', [namespace, '/amcl_pose']),  # Remap amcl_pose to use namespace
-            ],
+            remappings=[('/scan', [namespace, '/scan']),  # Remap scan topic
+                        ('/amcl_pose', [namespace, '/amcl_pose'])],
             output='screen',
         ),
 
