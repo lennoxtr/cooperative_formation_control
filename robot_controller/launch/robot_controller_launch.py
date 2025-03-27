@@ -23,8 +23,8 @@ def generate_launch_description():
 
     # Paths
     tb3_param_dir = os.path.join(get_package_share_directory('robot_controller'), 'param', f'{TURTLEBOT3_MODEL}.yaml')
-    pkg_nav2_bringup = '/opt/ros/humble/share/nav2_bringup/'  # Update this with the correct path
-    rviz_file = os.path.join(pkg_nav2_bringup, 'rviz', 'nav2_default_view.rviz')  # Ensure this path is correct
+    nav2_bringup_dir = get_package_share_directory('nav2_bringup')
+    rviz_file = os.path.join(nav2_bringup_dir, 'rviz', 'nav2_default_view.rviz')  # Ensure this path is correct
 
     # LiDAR
     if LDS_MODEL == 'LDS-01':
@@ -50,21 +50,11 @@ def generate_launch_description():
         ),
 
         # TurtleBot3 Bringup (Core Nodes)
-        Node(
-            package='turtlebot3_bringup',
-            executable='turtlebot3_robot',
-            name='turtlebot3_robot',
-            output='screen',
-            parameters=[tb3_param_dir, {'use_sim_time': False}],
-            remappings=[
-                ('/cmd_vel', [LaunchConfiguration('namespace'), '/cmd_vel']),
-                ('/scan', [LaunchConfiguration('namespace'), '/scan']),
-                ('/odom', [LaunchConfiguration('namespace'), '/odom']),
-                ('/tf', [LaunchConfiguration('namespace'), '/tf']),
-                ('/tf_static', [LaunchConfiguration('namespace'), '/tf_static']),
-                ('/joint_states', [LaunchConfiguration('namespace'), '/joint_states']),
-                ('/imu', [LaunchConfiguration('namespace'), '/imu'])
-            ],
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(get_package_share_directory('turtlebot3_bringup'), 'launch', 'robot.launch.py')
+            ),
+            launch_arguments={'use_sim_time': 'False'}.items(),
         ),
 
         # Robot Controller Node
@@ -93,19 +83,11 @@ def generate_launch_description():
         ),
 
         # Navigation Stack (Nav2)
-        Node(
-            package='nav2_bringup',
-            executable='nav2_bringup',
-            name='nav2_bringup',
-            output='screen',
-            parameters=[{'use_sim_time': False}],
-            remappings=[
-                ('/goal_pose', [LaunchConfiguration('namespace'), '/goal_pose']),
-                ('/cmd_vel', [LaunchConfiguration('namespace'), '/cmd_vel']),
-                ('/tf', [LaunchConfiguration('namespace'), '/tf']),
-                ('/tf_static', [LaunchConfiguration('namespace'), '/tf_static']),
-                ('/map', [LaunchConfiguration('namespace'), '/map'])
-            ],
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(nav2_bringup_dir, 'launch', 'bringup_launch.py')
+            ),
+            launch_arguments={'use_sim_time': 'False'}.items(),
         ),
 
         # RViz visualization
