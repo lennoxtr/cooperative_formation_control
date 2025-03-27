@@ -13,10 +13,16 @@ def generate_launch_description():
     namespace = LaunchConfiguration('namespace')
     robot_id_default = PythonExpression(["'", namespace, "'[-1]"])
 
+    # Paths
+    robot_controller_dir = get_package_share_directory('robot_controller')
+    yaml_map_file = os.path.join(robot_controller_dir, 'maps', 'my_map.yaml')
+
     return LaunchDescription([
         # Declare launch arguments
         DeclareLaunchArgument('namespace', description='Namespace for the robot'),
         DeclareLaunchArgument('robot_id', default_value=robot_id_default, description='Unique ID of the robot'),
+
+        # Apply namespace to all nodes
         
 
         # Robot Controller Node
