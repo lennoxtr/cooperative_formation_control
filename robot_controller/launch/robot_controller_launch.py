@@ -44,7 +44,8 @@ def generate_launch_description():
         # Start LiDAR driver
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(lidar_launch_file),
-            launch_arguments={'port': '/dev/ttyUSB0', 'frame_id': 'base_scan'}.items(),
+            launch_arguments={'port': '/dev/ttyUSB0', 'frame_id': 'base_scan',
+                              }.items(),
         ),
 
         # TurtleBot3 Bringup (Core Nodes)
@@ -64,16 +65,6 @@ def generate_launch_description():
             name='robot_controller',
             parameters=[{'robot_id': LaunchConfiguration('robot_id')}], 
             output='screen',
-        ),
-
-
-        # Localization (AMCL)
-        Node(
-            package='nav2_amcl',
-            executable='amcl',
-            name='amcl',
-            output='screen',
-            parameters=[{'use_sim_time': False}],
         ),
 
         # Navigation Stack (Nav2)
