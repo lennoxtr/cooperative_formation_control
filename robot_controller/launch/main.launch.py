@@ -24,13 +24,13 @@ def generate_launch_description():
     )
 
     configure_map_server = ExecuteProcess(
-        cmd=['ros2', 'lifecycle', 'set', [namespace, '/map_server'], 'configure'],
+        cmd=['ros2', 'lifecycle', 'set', '/map_server', 'configure'],
         output='screen'
     )
 
     # Activate lifecycle transition for map_server (with namespace)
     activate_map_server = ExecuteProcess(
-        cmd=['ros2', 'lifecycle', 'set', [namespace, '/map_server'], 'activate'],
+        cmd=['ros2', 'lifecycle', 'set', '/map_server', 'activate'],
         output='screen'
     )
 
