@@ -12,6 +12,7 @@ def generate_launch_description():
     # Namespace and Robot ID
     namespace = LaunchConfiguration('namespace')
     robot_id_default = PythonExpression(["'", namespace, "'[-1]"])
+    frame_id = PythonExpression(["'", namespace, "/map'"])
 
     # Paths
     robot_controller_dir = get_package_share_directory('robot_controller')
@@ -21,6 +22,7 @@ def generate_launch_description():
         # Declare launch arguments
         DeclareLaunchArgument('namespace', description='Namespace for the robot'),
         DeclareLaunchArgument('robot_id', default_value=robot_id_default, description='Unique ID of the robot'),
+        DeclareLaunchArgument('frame_id', default_value=frame_id, description='Frame ID for the map'),
 
         # Apply namespace to all nodes
         
@@ -38,7 +40,8 @@ def generate_launch_description():
             package='nav2_map_server',
             executable='map_server',
             name='map_server',
-            parameters=[{'yaml_filename': yaml_map_file}],
+            parameters=[{'yaml_filename': yaml_map_file,
+                         'frame_id': frame_id}],
             output='screen',
         ),
 
