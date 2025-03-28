@@ -15,5 +15,9 @@ def generate_launch_description():
             executable='rviz2',
             name='rviz2',
             output='screen',
+            remappings=[
+                ('/tf', '/turtlebot0/tf'),
+                ('/tf_static', '/turtlebot0/tf_static')
+            ]
         )
     ])
