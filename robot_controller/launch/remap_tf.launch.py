@@ -7,7 +7,7 @@ import os
 
 def generate_launch_description():
     robot_controller_dir = get_package_share_directory('robot_controller')
-    rviz_path = os.path.join(robot_controller_dir, 'rviz', 'turtlebot2.rviz')
+    rviz_path = os.path.join(robot_controller_dir, 'rviz', 'turtlebot0.rviz')
 
     return LaunchDescription([
         Node(
@@ -19,8 +19,8 @@ def generate_launch_description():
             parameters=[{'use_sim_time': False,
                         }],
             remappings=[
-                ('/tf', '/turtlebot2/tf'),
-                ('/tf_static', '/turtlebot2/tf_static')
+                ('/tf', '/turtlebot0/tf'),
+                ('/tf_static', '/turtlebot0/tf_static')
             ]
         )
     ])
