@@ -5,6 +5,8 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch_ros.actions import Node
 from launch.substitutions import LaunchConfiguration, PythonExpression
+from launch.actions import LogInfo, TimerAction
+
 import os
 
 def generate_launch_description():
@@ -23,8 +25,6 @@ def generate_launch_description():
         DeclareLaunchArgument('namespace', description='Namespace for the robot'),
         DeclareLaunchArgument('robot_id', default_value=robot_id_default, description='Unique ID of the robot'),
         DeclareLaunchArgument('frame_id', default_value=frame_id, description='Frame ID for the map'),
-
-        # Apply namespace to all nodes
         
 
         # Robot Controller Node
@@ -43,6 +43,15 @@ def generate_launch_description():
             parameters=[{'yaml_filename': yaml_map_file,
                          'frame_id': frame_id}],
             output='screen',
+            lifecycle={'managed': True},
+        ),
+
+        Node(
+            package='robot_controller',
+            executable='lifecycle_manager',
+            name='lifecycle_manager',
+            output='screen',
+            parameters=[{'managed_nodes': [LaunchConfiguration('namespace') + '/map_server']}],
         ),
 
         # AMCL for Localization
