@@ -16,7 +16,6 @@ def generate_launch_description():
     frame_id = PythonExpression(["'", namespace, "/map'"])
     base_frame_id = PythonExpression(["'", namespace, "/base_footprint'"])
     odom_frame_id = PythonExpression(["'", namespace, "/odom'"])
-    scan_topic = PythonExpression(["'", namespace, "/scan'"])
 
     # Paths
     robot_controller_dir = get_package_share_directory('robot_controller')
@@ -94,7 +93,7 @@ def generate_launch_description():
                 "z_max": 0.05,
                 "z_rand": 0.5,
                 "z_short": 0.05,
-                "scan_topic": scan_topic,
+                "scan_topic": [LaunchConfiguration("namespace"), "/scan"],
             }],
             remappings=[
                 ("/amcl_pose", [namespace, "/amcl_pose"]),
