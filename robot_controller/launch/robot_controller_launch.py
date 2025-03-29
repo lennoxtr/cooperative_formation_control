@@ -44,18 +44,6 @@ def generate_launch_description():
             output='screen',
         ),
 
-        Node(
-            package='robot_controller',
-            executable='lifecycle_manager',
-            name='lifecycle_manager',
-            output='screen',
-            parameters=[{
-                'managed_nodes': [
-                    PathJoinSubstitution([LaunchConfiguration('namespace'), 'map_server'])
-                ]
-            }],
-        ),
-
         # AMCL for Localization
         Node(
             package='nav2_amcl',
