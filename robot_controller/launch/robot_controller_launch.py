@@ -98,6 +98,7 @@ def generate_launch_description():
             }],
             remappings=[
                 ("/amcl_pose", [namespace, "/amcl_pose"]),
+                ("/scan", "scan"),
                 ("/particlecloud", [namespace, "/particlecloud"]),
                 ("/tf", "tf"),
                 ("/tf_static", "tf_static"),
