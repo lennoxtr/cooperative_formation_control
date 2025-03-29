@@ -43,7 +43,6 @@ def generate_launch_description():
             parameters=[{'yaml_filename': yaml_map_file,
                          'frame_id': frame_id}],
             output='screen',
-            lifecycle={'managed': True},
         ),
 
         Node(
