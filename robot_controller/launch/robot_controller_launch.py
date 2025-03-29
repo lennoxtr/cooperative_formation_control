@@ -97,9 +97,10 @@ def generate_launch_description():
                 "scan_topic": scan_topic,
             }],
             remappings=[
-                ("/scan", [namespace, "/scan"]),  # Dynamically remap based on namespace
                 ("/amcl_pose", [namespace, "/amcl_pose"]),
                 ("/particlecloud", [namespace, "/particlecloud"]),
+                ("/tf", [namespace, "/tf"]),
+                ("/tf_static", [namespace, "/tf_static"]),
             ],
             output='screen',
         ),
