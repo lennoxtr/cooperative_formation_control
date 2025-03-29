@@ -4,8 +4,7 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch_ros.actions import Node
-from launch.substitutions import LaunchConfiguration, PythonExpression
-from launch.actions import LogInfo, TimerAction
+from launch.substitutions import LaunchConfiguration, PythonExpression, PathJoinSubstitution
 
 import os
 
@@ -50,7 +49,11 @@ def generate_launch_description():
             executable='lifecycle_manager',
             name='lifecycle_manager',
             output='screen',
-            parameters=[{'managed_nodes': [LaunchConfiguration('namespace') + '/map_server']}],
+            parameters=[{
+                'managed_nodes': [
+                    PathJoinSubstitution([LaunchConfiguration('namespace'), 'map_server'])
+                ]
+            }],
         ),
 
         # AMCL for Localization
@@ -60,9 +63,9 @@ def generate_launch_description():
             name='amcl',
             parameters=[{
                 'use_sim_time': False,
-                'base_frame_id': '/base_footprint',
-                'global_frame_id': '/map',
-                'scan_topic': '/scan',
+                'base_frame_id': 'base_footprint',
+                'global_frame_id': 'map',
+                'scan_topic': 'scan',
                 'tf_broadcast': True,
             }],
             output='screen',
