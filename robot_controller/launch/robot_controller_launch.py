@@ -93,11 +93,12 @@ def generate_launch_description():
                 "z_max": 0.05,
                 "z_rand": 0.5,
                 "z_short": 0.05,
-                "scan_topic": [LaunchConfiguration("namespace"), "/scan"],
+                "scan_topic": "scan",
             }],
             remappings=[
                 ("/amcl_pose", [namespace, "/amcl_pose"]),
                 ("/particlecloud", [namespace, "/particlecloud"]),
+                ("/scan", [namespace, "/scan"]),
                 ("/tf", "tf"),
                 ("/tf_static", "tf_static"),
             ],
