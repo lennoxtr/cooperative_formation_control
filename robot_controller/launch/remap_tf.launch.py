@@ -16,6 +16,8 @@ def generate_launch_description():
             name='rviz2',
             output='screen',
             arguments=['-d', rviz_path],
+            parameters=[{'use_sim_time': False,
+                        }],
             remappings=[
                 ('/tf', '/turtlebot2/tf'),
                 ('/tf_static', '/turtlebot2/tf_static')

@@ -28,7 +28,12 @@ MAX_LIDAR_RANGE = 3.5
 
 
 # Define your QoS profile
-qos_profile = QoSProfile(
+qos_profile_lidar = QoSProfile(
+    depth=10,
+    reliability=ReliabilityPolicy.BEST_EFFORT,
+)
+
+qos_profile_amcl = QoSProfile(
     depth=10,
     reliability=ReliabilityPolicy.BEST_EFFORT,
 )
@@ -110,7 +115,7 @@ class RobotController(Node):
             LaserScan,
             f'/{self.namespace}/scan',
             self.lidar_callback, 
-            qos_profile)
+            qos_profile_lidar)
         
         self.goal_subscription = self.create_subscription(
             PoseStamped,
