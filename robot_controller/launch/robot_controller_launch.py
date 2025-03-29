@@ -99,8 +99,8 @@ def generate_launch_description():
             remappings=[
                 ("/amcl_pose", [namespace, "/amcl_pose"]),
                 ("/particlecloud", [namespace, "/particlecloud"]),
-                ("/tf", [namespace, "/tf"]),
-                ("/tf_static", [namespace, "/tf_static"]),
+                ("/tf", "tf"),
+                ("/tf_static", "tf_static"),
             ],
             output='screen',
         ),
