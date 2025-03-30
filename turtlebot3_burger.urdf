@@ -4,7 +4,7 @@
   <!-- <xacro:include filename="$(find turtlebot3_description)/urdf/common_properties.urdf"/> -->
 
   <!-- Add namespace argument -->
-  <xacro:property name="robot_namespace" value=""/>
+  <xacro:property name="robot_namespace" value="turtlebot0"/>
 
   <!-- Init colour -->
   <material name="black">
