@@ -16,7 +16,6 @@ def generate_launch_description():
     frame_id = PythonExpression(["'", namespace, "/map'"])
     base_frame_id = PythonExpression(["'", namespace, "/base_footprint'"])
     odom_frame_id = PythonExpression(["'", namespace, "/odom'"])
-    scan_topic = PythonExpression(["'", namespace, "/scan'"])
 
     # Paths
     robot_controller_dir = get_package_share_directory('robot_controller')
@@ -76,7 +75,7 @@ def generate_launch_description():
                 "laser_model_type": "likelihood_field",
                 "max_beams": 60,
                 "max_particles": 2000,
-                "min_particles": 500,
+                "min_particles": 100,
                 "odom_frame_id": odom_frame_id,
                 "pf_err": 0.05,
                 "pf_z": 0.99,
@@ -88,18 +87,18 @@ def generate_launch_description():
                 "sigma_hit": 0.2,
                 "tf_broadcast": True,
                 "transform_tolerance": 1.0,
-                "update_min_a": 0.2,
-                "update_min_d": 0.25,
+                "update_min_a": 0.1,
+                "update_min_d": 0.1,
                 "z_hit": 0.5,
                 "z_max": 0.05,
                 "z_rand": 0.5,
                 "z_short": 0.05,
-                "scan_topic": scan_topic,
+                "scan_topic": "scan",
             }],
             remappings=[
                 ("/amcl_pose", [namespace, "/amcl_pose"]),
-                ("/scan", "scan"),
                 ("/particlecloud", [namespace, "/particlecloud"]),
+                ("/scan", [namespace, "/scan"]),
                 ("/tf", "tf"),
                 ("/tf_static", "tf_static"),
             ],
