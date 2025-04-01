@@ -7,7 +7,9 @@ import os
 
 def generate_launch_description():
     robot_controller_dir = get_package_share_directory('robot_controller')
-    rviz_path = os.path.join(robot_controller_dir, 'rviz', 'turtlebot0.rviz')
+    rviz_path_1 = os.path.join(robot_controller_dir, 'rviz', 'turtlebot0.rviz')
+    rviz_path_2 = os.path.join(robot_controller_dir, 'rviz', 'turtlebot1.rviz')
+    rviz_path_3 = os.path.join(robot_controller_dir, 'rviz', 'turtlebot2.rviz')
 
     return LaunchDescription([
         Node(
@@ -15,12 +17,40 @@ def generate_launch_description():
             executable='rviz2',
             name='rviz2',
             output='screen',
-            arguments=['-d', rviz_path],
+            arguments=['-d', rviz_path_1],
             parameters=[{'use_sim_time': False,
                         }],
             remappings=[
                 ('/tf', '/turtlebot0/tf'),
                 ('/tf_static', '/turtlebot0/tf_static')
             ]
-        )
+        ),
+
+        Node(
+            package='rviz2',
+            executable='rviz2',
+            name='rviz2',
+            output='screen',
+            arguments=['-d', rviz_path_2],
+            parameters=[{'use_sim_time': False,
+                        }],
+            remappings=[
+                ('/tf', '/turtlebot1/tf'),
+                ('/tf_static', '/turtlebot1/tf_static')
+            ]
+        ),
+
+        Node(
+            package='rviz2',
+            executable='rviz2',
+            name='rviz2',
+            output='screen',
+            arguments=['-d', rviz_path_3],
+            parameters=[{'use_sim_time': False,
+                        }],
+            remappings=[
+                ('/tf', '/turtlebot2/tf'),
+                ('/tf_static', '/turtlebot2/tf_static')
+            ]
+        ),
     ])
