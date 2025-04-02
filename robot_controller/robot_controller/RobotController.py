@@ -217,7 +217,7 @@ class RobotController(Node):
     def tracking_position_callback(self, msg):
         self.goal_x = float("{:.3f}".format(msg.goal_x))
         self.goal_y = float("{:.3f}".format(msg.goal_y))
-        self.get_logger().info(f"Rendezvous position: ({self.goal_x}, {self.goal_y})")
+        self.get_logger().info(f"Tracking position: ({self.goal_x}, {self.goal_y})")
 
     def position_mapping_callback(self, msg):
         position_list = msg.data

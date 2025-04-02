@@ -247,8 +247,6 @@ class ControlProtocol():
 
         # Calculate total error with weightage of flocking and goal seeking
         flocking_gain = self.get_flocking_gain(robot_controller, position_mapping)
-        if robot_controller.is_leader:
-            print("flocking_gain is: ", flocking_gain)
 
         # Leader Follower (followers tracking formation, leader tracking goal)
         lf_position_error, lf_yaw_error = self.leader_follower(robot_controller)
