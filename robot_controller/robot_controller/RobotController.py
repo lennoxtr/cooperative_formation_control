@@ -181,7 +181,7 @@ class RobotController(Node):
         self.current_x = msg.pose.pose.position.x
         self.current_y = msg.pose.pose.position.y
         orientation_q = msg.pose.pose.orientation
-        print("Current position from AMCL: (", self.current_x, ", ", self.current_y, ")")
+        self.get_logger().info(f"Current position from AMCL: ({self.current_x}, {self.current_y})")
         _, _, yaw = quaternion_to_euler([orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w])
         self.current_imu_heading = float("{:.3f}".format(yaw))
         
@@ -209,7 +209,7 @@ class RobotController(Node):
     def goal_listener_callback(self, msg):
         self.goal_x = round(msg.pose.position.x, 3)
         self.goal_y = round(msg.pose.position.y, 3)
-        print("Received Goal at ", self.goal_x, " ", self.goal_y)
+        self.get_logger().info(f"Received Goal at ({self.goal_x}, {self.goal_y})")
         if self.is_leader:
             msg = Bool()
             msg.data = True

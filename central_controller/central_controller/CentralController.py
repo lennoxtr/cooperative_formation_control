@@ -44,6 +44,7 @@ class CentralController(Node):
     def update_position(self, index, msg):
         with self.lock:
             self.position_mapping[index] = (msg.pose.pose.position.x, msg.pose.pose.position.y)
+            self.get_logger().info(f"Current Position Mapping: {self.position_mapping}")
         
         # Publish position update to all robots
         self.publish_position_mapping()
