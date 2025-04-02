@@ -160,13 +160,6 @@ class RobotController(Node):
             '/start',
             10)
 
-        self.heartbeat_publisher = self.create_publisher(
-            String,
-            '/heartbeat',
-            10)
-        
-        self.heartbeat_timer = self.create_timer(1, self.heartbeat_timer_callback)
-
         self.arrive_at_goal_publisher = self.create_publisher(
             Bool,
             '/arrived_at_goal',
@@ -224,16 +217,13 @@ class RobotController(Node):
     def tracking_position_callback(self, msg):
         self.goal_x = float("{:.3f}".format(msg.goal_x))
         self.goal_y = float("{:.3f}".format(msg.goal_y))
+        self.get_logger().info(f"Rendezvous position: ({self.goal_x}, {self.goal_y})")
 
     def position_mapping_callback(self, msg):
         position_list = msg.data
         self.position_mapping = np.array([(position.x, position.y) for position in position_list])
-    
-    def heartbeat_timer_callback(self):
-        if not self.is_started:
-            msg = String()
-            msg.data = self.namespace
-            self.heartbeat_publisher.publish(msg)
+        self.get_logger().info(f"Current Position Mapping: {self.position_mapping}")
+
     
     def arrived_at_goal_callback(self, msg):
         self.arrived_at_goal = msg.data

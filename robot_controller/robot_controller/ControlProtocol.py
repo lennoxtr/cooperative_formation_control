@@ -42,6 +42,9 @@ class ControlProtocol():
         self.avg_position_x = rendezvous_pos[0]
         self.avg_position_y = rendezvous_pos[1]
 
+        self.get_logger().info(f"Rendezvous position: ({self.avg_position_x}, {self.avg_position_y})")
+
+
         position_error = get_position_error(robot_controller.current_x, 
                                         robot_controller.current_y,
                                         self.avg_position_x,
@@ -226,7 +229,8 @@ class ControlProtocol():
         ### Sum of all control policies
 
         # Collision Avoidance
-        ca_position_error, ca_yaw_error = self.collision_prevention(robot_controller)
+        #ca_position_error, ca_yaw_error = self.collision_prevention(robot_controller)
+        ca_position_error, ca_yaw_error = 0.0, 0.0
 
         if ca_yaw_error != 0.0 and not robot_controller.is_leader:
             total_yaw_error = ca_yaw_error
