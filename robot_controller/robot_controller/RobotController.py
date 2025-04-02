@@ -188,6 +188,7 @@ class RobotController(Node):
         euler = quaternion_to_euler(quaternion)
         yaw = euler[2]  # radians
         self.current_imu_heading = float("{:.3f}".format(yaw))
+        self.get_logger().info(f"Current IMU Heading: {self.current_imu_heading}")
     
     def odom_callback(self, msg):
         linear_velocity = msg.twist.twist.linear
