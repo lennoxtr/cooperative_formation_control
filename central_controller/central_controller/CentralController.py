@@ -31,9 +31,9 @@ class CentralController(Node):
         self.lock = threading.Lock()  
 
         # Subscription
-        self.create_subscription(PoseWithCovarianceStamped, '/turtlebot0/amcl_pose', lambda msg: self.update_position(0, msg), qos_profile_amcl)
-        self.create_subscription(PoseWithCovarianceStamped, '/turtlebot1/amcl_pose', lambda msg: self.update_position(1, msg), qos_profile_amcl)
-        self.create_subscription(PoseWithCovarianceStamped, '/turtlebot2/amcl_pose', lambda msg: self.update_position(2, msg), qos_profile_amcl)
+        self.create_subscription(PoseWithCovarianceStamped, '/turtlebot0/amcl_pose', self.amcl_callback_0, qos_profile_amcl)
+        self.create_subscription(PoseWithCovarianceStamped, '/turtlebot1/amcl_pose', self.amcl_callback_1, qos_profile_amcl)
+        self.create_subscription(PoseWithCovarianceStamped, '/turtlebot2/amcl_pose', self.amcl_callback_2, qos_profile_amcl)
 
         # Publisher
         self.position_mapping_publisher = self.create_publisher(
@@ -41,9 +41,25 @@ class CentralController(Node):
             '/position_mapping',
             10)
 
-    def update_position(self, index, msg):
+    def amcl_callback_0(self, msg):
         with self.lock:
-            self.position_mapping[index] = (msg.pose.pose.position.x, msg.pose.pose.position.y)
+            self.position_mapping[0] = (msg.pose.pose.position.x, msg.pose.pose.position.y)
+            self.get_logger().info(f"Current Position Mapping: {self.position_mapping}")
+        
+        # Publish position update to all robots
+        self.publish_position_mapping()
+
+    def amcl_callback_1(self, msg):
+        with self.lock:
+            self.position_mapping[1] = (msg.pose.pose.position.x, msg.pose.pose.position.y)
+            self.get_logger().info(f"Current Position Mapping: {self.position_mapping}")
+        
+        # Publish position update to all robots
+        self.publish_position_mapping()
+    
+    def amcl_callback_2(self, msg):
+        with self.lock:
+            self.position_mapping[2] = (msg.pose.pose.position.x, msg.pose.pose.position.y)
             self.get_logger().info(f"Current Position Mapping: {self.position_mapping}")
         
         # Publish position update to all robots
