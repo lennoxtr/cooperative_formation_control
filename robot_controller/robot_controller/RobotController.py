@@ -5,7 +5,7 @@ import numpy as np
 
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
-from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy
+from rclpy.qos import QoSProfile, ReliabilityPolicy
 
 from std_msgs.msg import String
 from std_msgs.msg import Bool
@@ -180,6 +180,7 @@ class RobotController(Node):
         self.current_x = msg.pose.pose.position.x
         self.current_y = msg.pose.pose.position.y
         orientation_q = msg.pose.pose.orientation
+        print("Current position from AMCL: (", self.current_x, ", ", self.current_y, ")")
         _, _, yaw = quaternion_to_euler([orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w])
         self.current_imu_heading = float("{:.3f}".format(yaw))
         
@@ -191,8 +192,6 @@ class RobotController(Node):
                       orientation_q.w]
         
         euler = quaternion_to_euler(quaternion)
-        roll = euler[0]  # radians
-        pitch = euler[1]  # radians
         yaw = euler[2]  # radians
         self.current_imu_heading = float("{:.3f}".format(yaw))
     
@@ -334,6 +333,7 @@ class RobotController(Node):
 def main(args=None):
     rclpy.init(args=args)
     robot_controller = RobotController()
+    print("Am I leader: ", robot_controller.is_leader)
     rclpy.spin_once(robot_controller)
     time.sleep(1)
 
