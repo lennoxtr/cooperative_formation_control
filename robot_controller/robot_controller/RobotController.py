@@ -5,7 +5,7 @@ import numpy as np
 
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
-from rclpy.qos import QoSProfile, ReliabilityPolicy
+from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy
 
 from std_msgs.msg import String
 from std_msgs.msg import Bool
@@ -35,7 +35,8 @@ qos_profile_lidar = QoSProfile(
 
 qos_profile_amcl = QoSProfile(
     depth=10,
-    reliability=ReliabilityPolicy.BEST_EFFORT,
+    reliability=ReliabilityPolicy.RELIABLE,
+    durability=DurabilityPolicy.TRANSIENT_LOCAL
 )
 
 class RobotController(Node):
@@ -151,7 +152,7 @@ class RobotController(Node):
             PoseWithCovarianceStamped,
             f'/{self.namespace}/amcl_pose',
             self.amcl_pose_callback,
-            10)
+            qos_profile_amcl)
 
         # Publishers
         self.is_started_publisher = self.create_publisher(

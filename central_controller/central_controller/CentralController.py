@@ -5,9 +5,16 @@ import threading
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
 from geometry_msgs.msg import PoseWithCovarianceStamped
+from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy
 
 from geometry_msgs.msg import Point
 from position_mapping_msg.msg import PositionMapping
+
+qos_profile_amcl = QoSProfile(
+    depth=10,
+    reliability=ReliabilityPolicy.RELIABLE,
+    durability=DurabilityPolicy.TRANSIENT_LOCAL
+)
 
 
 class CentralController(Node):
@@ -24,9 +31,9 @@ class CentralController(Node):
         self.lock = threading.Lock()  
 
         # Subscription
-        self.create_subscription(PoseWithCovarianceStamped, '/turtlebot0/amcl_pose', lambda msg: self.update_position(0, msg), 10)
-        self.create_subscription(PoseWithCovarianceStamped, '/turtlebot1/amcl_pose', lambda msg: self.update_position(1, msg), 10)
-        self.create_subscription(PoseWithCovarianceStamped, '/turtlebot2/amcl_pose', lambda msg: self.update_position(2, msg), 10)
+        self.create_subscription(PoseWithCovarianceStamped, '/turtlebot0/amcl_pose', lambda msg: self.update_position(0, msg), qos_profile_amcl)
+        self.create_subscription(PoseWithCovarianceStamped, '/turtlebot1/amcl_pose', lambda msg: self.update_position(1, msg), qos_profile_amcl)
+        self.create_subscription(PoseWithCovarianceStamped, '/turtlebot2/amcl_pose', lambda msg: self.update_position(2, msg), qos_profile_amcl)
 
         # Publisher
         self.position_mapping_publisher = self.create_publisher(
