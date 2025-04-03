@@ -429,10 +429,12 @@ def main(args=None):
             robot_controller.execute()
         except KeyboardInterrupt:
             df = pd.DataFrame(data={"Flocking_gain": robot_controller.control_protocol.flocking_gain_list,
-                                    "x_pos": robot_controller.position_x_list,
-                                    "y_pos": robot_controller.position_y_list,
                                      "Time": robot_controller.control_protocol.recorded_time})
-            df.to_csv(f'./{robot_controller.namespace}.csv', sep=',',index=False)
+
+            df2 = pd.DataFrame(data={"x_pos": robot_controller.position_x_list,
+                                     "y_pos": robot_controller.position_y_list})
+            df.to_csv(f'./{robot_controller.namespace}.gain.csv', sep=',',index=False)
+            df2.to_csv(f'./{robot_controller.namespace}.pos.csv', sep=',',index=False)
     
     robot_controller.destroy_node()
     rclpy.shutdown()
