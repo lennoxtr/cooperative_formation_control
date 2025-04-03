@@ -34,6 +34,12 @@ class ControlProtocol():
         delta_t = 2.0
         self.sensitivity_bubble = bare_sensitivity_bubble * current_vel * delta_t
 
+        # For reporting flocking gain
+        self.start_time = time.time()
+        self.last_time = time.time()
+        self.flocking_gain_list = []
+        self.recorded_time = []
+
     def position_matching(self, robot_controller, position_mapping):
         # Position matching may have higher weight for leader
         # to ensure rendezvous before moving to goal
@@ -247,6 +253,12 @@ class ControlProtocol():
         if robot_controller.is_leader:
             print("flocking_gain is: ", flocking_gain)
 
+        current_time = time.time()
+        if current_time - self.last_time > 0.3:
+            self.flocking_gain_list.append(flocking_gain)
+            self.recorded_time.append(time.time() - self.start_time)
+            self.last_time = current_time
+
         # Leader Follower (followers tracking formation, leader tracking goal)
         lf_position_error, lf_yaw_error = self.leader_follower(robot_controller)
 
@@ -266,6 +278,7 @@ class ControlProtocol():
 
         total_yaw_error = fl_gs_yaw_error
         total_position_error = fl_gs_position_error
+
         linear_vel, angular_vel = self.calculate_vel(robot_controller, total_position_error, total_yaw_error)
 
         if robot_controller.is_leader and flocking_gain < 0.5 and not self.all_rendezvoused:

@@ -76,6 +76,11 @@ class RobotController(Node):
         self.current_y = 0.0
         self.leader_heading = 0.0
 
+        self.start_time = time.time()
+        self.last_time = time.time()
+        self.position_x_list = []
+        self.position_y_list = []
+
         # Kinematic variables
         # Yaw is +- pi from north
         self.current_imu_heading = 0
@@ -275,6 +280,8 @@ class RobotController(Node):
     def current_position_callback(self, msg):
         self.current_x = float("{:.3f}".format(msg.goal_x))
         self.current_y = float("{:.3f}".format(msg.goal_y))
+        self.position_x_list.append(self.current_x)
+        self.position_y_list.append(self.current_y)
 
     def position_mapping_callback(self, msg):
         position_list = msg.data
@@ -421,14 +428,11 @@ def main(args=None):
             rclpy.spin_once(robot_controller)
             robot_controller.execute()
         except KeyboardInterrupt:
-            '''
             df = pd.DataFrame(data={"Flocking_gain": robot_controller.control_protocol.flocking_gain_list,
-                                    "Total_Yaw_Error": robot_controller.control_protocol.total_yaw_error_list,
-                                    "Collision_Avoidance": robot_controller.control_protocol.collision_avoidance_list,
-                                    "Goal_seeking_Error": robot_controller.control_protocol.flocking_goal_seeking_error,
+                                    "x_pos": robot_controller.position_x_list,
+                                    "y_pos": robot_controller.position_y_list,
                                      "Time": robot_controller.control_protocol.recorded_time})
             df.to_csv(f'./{robot_controller.namespace}.csv', sep=',',index=False)
-            '''
     
     robot_controller.destroy_node()
     rclpy.shutdown()
