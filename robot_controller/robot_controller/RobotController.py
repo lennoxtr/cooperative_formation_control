@@ -26,7 +26,7 @@ MAX_ANGLE_VEL = 1.5 #1.5
 
 MAX_LIDAR_RANGE = 3.5
 
-IMU_OFFSET = 0.0
+IMU_OFFSET = 0.2
 
 
 # Define your QoS profile
