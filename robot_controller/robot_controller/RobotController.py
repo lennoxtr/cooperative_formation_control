@@ -176,7 +176,9 @@ class RobotController(Node):
         orientation_q = msg.pose.pose.orientation
         self.get_logger().info(f"Current position from AMCL: ({self.current_x}, {self.current_y})")
         _, _, yaw = quaternion_to_euler([orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w])
-        self.current_imu_heading = float("{:.3f}".format(yaw))
+        #self.current_imu_heading = float("{:.3f}".format(yaw))
+        self.get_logger().info(f"Current yaw from AMCL: {yaw}")
+
         
     def imu_callback(self, msg):
         orientation_q = msg.orientation
