@@ -191,7 +191,7 @@ class RobotController(Node):
         
         euler = quaternion_to_euler(quaternion)
         yaw = euler[2]  # radians
-        self.get_logger().info(f"IMU Heading Before: {yaw}")
+        #self.get_logger().info(f"IMU Heading Before: {yaw}")
         yaw = yaw + IMU_OFFSET
         yaw = normalize_yaw_error(yaw)
         self.current_imu_heading = float("{:.3f}".format(yaw))
