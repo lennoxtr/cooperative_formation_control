@@ -18,13 +18,15 @@ from position_mapping_msg.msg import PositionMapping
 
 from robot_controller.PidController import PidController
 from robot_controller.ControlProtocol import ControlProtocol
-from robot_controller.GoalProcessor import arrived_at_goal, quaternion_to_euler, get_all_postion_in_formation
+from robot_controller.GoalProcessor import arrived_at_goal, quaternion_to_euler, get_all_postion_in_formation, normalize_yaw_error
 
 
 MAX_LINEAR_VEL = 0.2
 MAX_ANGLE_VEL = 1.5 #1.5
 
 MAX_LIDAR_RANGE = 3.5
+
+IMU_OFFSET = 0.969
 
 
 # Define your QoS profile
@@ -189,6 +191,8 @@ class RobotController(Node):
         
         euler = quaternion_to_euler(quaternion)
         yaw = euler[2]  # radians
+        yaw = yaw + IMU_OFFSET
+        yaw = normalize_yaw_error(yaw)
         self.current_imu_heading = float("{:.3f}".format(yaw))
         self.get_logger().info(f"Current IMU Heading: {self.current_imu_heading}")
     
