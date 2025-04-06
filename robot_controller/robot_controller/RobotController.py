@@ -26,7 +26,7 @@ MAX_ANGLE_VEL = 1.5 #1.5
 
 MAX_LIDAR_RANGE = 3.5
 
-IMU_OFFSET = -0.449
+IMU_OFFSET = -0.419
 
 
 # Define your QoS profile
@@ -191,7 +191,7 @@ class RobotController(Node):
         
         euler = quaternion_to_euler(quaternion)
         yaw = euler[2]  # radians
-        #self.get_logger().info(f"IMU Heading Before: {yaw}")
+        self.get_logger().info(f"IMU Heading Before: {yaw}")
         yaw = yaw + IMU_OFFSET
         self.current_imu_heading = normalize_yaw_error(yaw)
         self.get_logger().info(f"Current IMU Heading: {self.current_imu_heading}")
