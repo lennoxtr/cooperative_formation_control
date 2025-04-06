@@ -193,8 +193,7 @@ class RobotController(Node):
         yaw = euler[2]  # radians
         #self.get_logger().info(f"IMU Heading Before: {yaw}")
         yaw = yaw + IMU_OFFSET
-        yaw = normalize_yaw_error(yaw)
-        self.current_imu_heading = float("{:.3f}".format(yaw))
+        self.current_imu_heading = normalize_yaw_error(yaw)
         self.get_logger().info(f"Current IMU Heading: {self.current_imu_heading}")
     
     def odom_callback(self, msg):
