@@ -21,7 +21,7 @@ from robot_controller.ControlProtocol import ControlProtocol
 from robot_controller.GoalProcessor import arrived_at_goal, quaternion_to_euler, get_all_postion_in_formation, normalize_yaw_error
 
 
-MAX_LINEAR_VEL = 0.2
+MAX_LINEAR_VEL = 0.1
 MAX_ANGLE_VEL = 1.5 #1.5
 
 MAX_LIDAR_RANGE = 3.5
@@ -98,7 +98,7 @@ class RobotController(Node):
         if self.is_leader:
             self.desired_linear_vel = MAX_LINEAR_VEL
         else:
-            self.desired_linear_vel = 1.2
+            self.desired_linear_vel = 0.08
 
         # For leader
         self.follower_robot_id_list = [1, 2]
@@ -258,13 +258,13 @@ class RobotController(Node):
         else:
             target_linear_velocity = linear_x_change
         
-        target_linear_velocity = 0.0
+        #target_linear_velocity = 0.0
 
         self.linear_x_velocity = target_linear_velocity
         self.angular_z_velocity = target_angular_velocity
 
         #self.get_logger().info(f"Linear Vel: {target_linear_velocity}")
-        self.get_logger().info(f"Angular Vel: {target_angular_velocity}")
+        #self.get_logger().info(f"Angular Vel: {target_angular_velocity}")
 
         twist = Twist()
         twist.linear.x = target_linear_velocity
