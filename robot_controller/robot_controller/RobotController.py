@@ -48,6 +48,9 @@ class RobotController(Node):
         robot_id = self.get_parameter('robot_id').value
         namespace = "turtlebot" + str(robot_id)
 
+        self.initialized_imu = False
+        self.imu_offset = 0.0
+
         # Identification
         self.robot_id = robot_id
         self.namespace = namespace
@@ -191,8 +194,14 @@ class RobotController(Node):
         
         euler = quaternion_to_euler(quaternion)
         yaw = euler[2]  # radians
+        if not self.initialized_imu:
+            self.imu_offset = normalize_yaw_error(-np.pi - yaw)
+            self.initialized_imu = True
+            return
+
         self.get_logger().info(f"Normal IMU Heading: {yaw}")
-        yaw = yaw + IMU_OFFSET
+        self.get_logger().info(f"IMU Offset: {self.imu_offset}")
+        yaw = yaw + self.imu_offset
         self.current_imu_heading = normalize_yaw_error(yaw)
         self.get_logger().info(f"Map IMU Heading: {self.current_imu_heading}")
     
