@@ -89,7 +89,7 @@ class RobotController(Node):
         
         # Kinematic PID Controller (may add more for different control policies)
         self.PID_position = PidController(Kp=0.0, Ki=0.0, Kd=0.0)
-        self.PID_heading = PidController(Kp=0.9, Ki=0.0, Kd=0.1)
+        self.PID_heading = PidController(Kp=0.9, Ki=0.0, Kd=0.05)
 
         # Pure pursuit settings
         self.lookahead_dist = 0.8
@@ -195,7 +195,7 @@ class RobotController(Node):
         euler = quaternion_to_euler(quaternion)
         yaw = euler[2]  # radians
         if not self.initialized_imu:
-            self.imu_offset = normalize_yaw_error(-np.pi - yaw)
+            self.imu_offset = normalize_yaw_error(-np.pi + 0.01 - yaw)
             self.initialized_imu = True
             return
 
@@ -263,8 +263,8 @@ class RobotController(Node):
         self.linear_x_velocity = target_linear_velocity
         self.angular_z_velocity = target_angular_velocity
 
-        self.get_logger().info(f"Linear Vel: {target_linear_velocity}")
-        #self.get_logger().info(f"Angular Vel: {target_angular_velocity}")
+        #self.get_logger().info(f"Linear Vel: {target_linear_velocity}")
+        self.get_logger().info(f"Angular Vel: {target_angular_velocity}")
 
         twist = Twist()
         twist.linear.x = target_linear_velocity
