@@ -353,6 +353,7 @@ def main(args=None):
 
     while True:
         try:
+            rclpy.spin_once(robot_controller)
             robot_controller.execute()
         except KeyboardInterrupt:
             '''
