@@ -226,7 +226,6 @@ class ControlProtocol():
         return flocking_gain
         
     def execute_control(self, robot_controller, position_mapping):
-        ### Sum of all control policies
 
         # Collision Avoidance
         #ca_position_error, ca_yaw_error = self.collision_prevention(robot_controller)
@@ -245,6 +244,7 @@ class ControlProtocol():
         pm_position_error, pm_yaw_error = self.position_matching(robot_controller,
                                                                 position_mapping)
 
+        robot_controller.get_logger().info(f"PM yaw error: {pm_yaw_error}")
         # Calculate total error with weightage of flocking and goal seeking
         flocking_gain = self.get_flocking_gain(robot_controller, position_mapping)
 

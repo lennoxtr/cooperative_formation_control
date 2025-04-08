@@ -182,7 +182,7 @@ class RobotController(Node):
         self.get_logger().info(f"Current position from AMCL: ({self.current_x}, {self.current_y})")
         _, _, yaw = quaternion_to_euler([orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w])
         #self.current_imu_heading = float("{:.3f}".format(yaw))
-        self.get_logger().info(f"Current yaw from AMCL: {yaw}")
+        #self.get_logger().info(f"Current yaw from AMCL: {yaw}")
 
         
     def imu_callback(self, msg):
@@ -203,7 +203,7 @@ class RobotController(Node):
         #self.get_logger().info(f"IMU Offset: {self.imu_offset}")
         yaw = yaw + self.imu_offset
         self.current_imu_heading = normalize_yaw_error(yaw)
-        #self.get_logger().info(f"Map IMU Heading: {self.current_imu_heading}")
+        self.get_logger().info(f"Map IMU Heading: {self.current_imu_heading}")
     
     def odom_callback(self, msg):
         linear_velocity = msg.twist.twist.linear
@@ -292,7 +292,7 @@ class RobotController(Node):
                                self.goal_y)
     
     def execute(self):
-        while not self.is_started:
+        while not self.is_started or not self.is_leader:
             return
 
         if self.is_leader:
