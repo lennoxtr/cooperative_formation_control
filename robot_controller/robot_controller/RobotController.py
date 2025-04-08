@@ -292,7 +292,7 @@ class RobotController(Node):
                                self.goal_y)
     
     def execute(self):
-        while not self.is_started or not self.is_leader:
+        while not self.is_started:
             return
 
         if self.is_leader:
