@@ -42,7 +42,7 @@ class ControlProtocol():
         self.avg_position_x = rendezvous_pos[0]
         self.avg_position_y = rendezvous_pos[1]
 
-        robot_controller.get_logger().info(f"Rendezvous position: ({self.avg_position_x}, {self.avg_position_y})")
+        #robot_controller.get_logger().info(f"Rendezvous position: ({self.avg_position_x}, {self.avg_position_y})")
 
 
         position_error = get_position_error(robot_controller.current_x, 
@@ -244,7 +244,7 @@ class ControlProtocol():
         pm_position_error, pm_yaw_error = self.position_matching(robot_controller,
                                                                 position_mapping)
 
-        robot_controller.get_logger().info(f"PM yaw error: {pm_yaw_error}")
+        #robot_controller.get_logger().info(f"PM yaw error: {pm_yaw_error}")
         # Calculate total error with weightage of flocking and goal seeking
         flocking_gain = self.get_flocking_gain(robot_controller, position_mapping)
 
@@ -266,8 +266,8 @@ class ControlProtocol():
                             flocking_gain * pm_yaw_error
 
         total_yaw_error = fl_gs_yaw_error
-        robot_controller.get_logger().info(f"Total yaw error: {total_yaw_error}")
-        robot_controller.get_logger().info(f"Flocking Gain: {flocking_gain}")
+        #robot_controller.get_logger().info(f"Total yaw error: {total_yaw_error}")
+        #robot_controller.get_logger().info(f"Flocking Gain: {flocking_gain}")
         total_position_error = fl_gs_position_error
         linear_vel, angular_vel = self.calculate_vel(robot_controller, total_position_error, total_yaw_error)
 

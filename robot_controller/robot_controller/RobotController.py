@@ -89,7 +89,7 @@ class RobotController(Node):
         
         # Kinematic PID Controller (may add more for different control policies)
         self.PID_position = PidController(Kp=0.0, Ki=0.0, Kd=0.0)
-        self.PID_heading = PidController(Kp=1.0, Ki=0.0, Kd=0.0)
+        self.PID_heading = PidController(Kp=0.9, Ki=0.0, Kd=0.1)
 
         # Pure pursuit settings
         self.lookahead_dist = 0.8
@@ -179,7 +179,7 @@ class RobotController(Node):
         self.current_x = msg.pose.pose.position.x
         self.current_y = msg.pose.pose.position.y
         orientation_q = msg.pose.pose.orientation
-        self.get_logger().info(f"Current position from AMCL: ({self.current_x}, {self.current_y})")
+        #self.get_logger().info(f"Current position from AMCL: ({self.current_x}, {self.current_y})")
         _, _, yaw = quaternion_to_euler([orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w])
         #self.current_imu_heading = float("{:.3f}".format(yaw))
         #self.get_logger().info(f"Current yaw from AMCL: {yaw}")
@@ -258,6 +258,8 @@ class RobotController(Node):
         else:
             target_linear_velocity = linear_x_change
         
+        target_linear_velocity = 0.0
+
         self.linear_x_velocity = target_linear_velocity
         self.angular_z_velocity = target_angular_velocity
 
