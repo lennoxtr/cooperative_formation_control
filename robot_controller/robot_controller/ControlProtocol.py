@@ -280,8 +280,8 @@ class ControlProtocol():
             else:
                 return linear_vel, angular_vel
         
-        robot_controller.get_logger().info(f"Linear Vel: {linear_vel}")
-        robot_controller.get_logger().info(f"Angular Vel: {angular_vel}")
+        #robot_controller.get_logger().info(f"Linear Vel: {linear_vel}")
+        #robot_controller.get_logger().info(f"Angular Vel: {angular_vel}")
         return linear_vel, angular_vel
 
     def calculate_vel(self, robot_controller, total_position_error, total_yaw_error):

@@ -88,7 +88,7 @@ class RobotController(Node):
         self.angular_z_velocity = 0
         
         # Kinematic PID Controller (may add more for different control policies)
-        self.PID_position = PidController(Kp=1.0, Ki=0.0, Kd=0.0)
+        self.PID_position = PidController(Kp=0.0, Ki=0.0, Kd=0.0)
         self.PID_heading = PidController(Kp=6.0, Ki=0.0, Kd=0.1)
 
         # Pure pursuit settings
@@ -260,6 +260,9 @@ class RobotController(Node):
         
         self.linear_x_velocity = target_linear_velocity
         self.angular_z_velocity = target_angular_velocity
+
+        self.get_logger().info(f"Linear Vel: {target_linear_velocity}")
+        self.get_logger().info(f"Angular Vel: {target_angular_velocity}")
 
         twist = Twist()
         twist.linear.x = target_linear_velocity
