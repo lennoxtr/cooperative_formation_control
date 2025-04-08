@@ -199,11 +199,11 @@ class RobotController(Node):
             self.initialized_imu = True
             return
 
-        self.get_logger().info(f"Normal IMU Heading: {yaw}")
-        self.get_logger().info(f"IMU Offset: {self.imu_offset}")
+        #self.get_logger().info(f"Normal IMU Heading: {yaw}")
+        #self.get_logger().info(f"IMU Offset: {self.imu_offset}")
         yaw = yaw + self.imu_offset
         self.current_imu_heading = normalize_yaw_error(yaw)
-        self.get_logger().info(f"Map IMU Heading: {self.current_imu_heading}")
+        #self.get_logger().info(f"Map IMU Heading: {self.current_imu_heading}")
     
     def odom_callback(self, msg):
         linear_velocity = msg.twist.twist.linear
@@ -233,12 +233,12 @@ class RobotController(Node):
     def tracking_position_callback(self, msg):
         self.goal_x = float("{:.3f}".format(msg.goal_x))
         self.goal_y = float("{:.3f}".format(msg.goal_y))
-        self.get_logger().info(f"Tracking position: ({self.goal_x}, {self.goal_y})")
+        #self.get_logger().info(f"Tracking position: ({self.goal_x}, {self.goal_y})")
 
     def position_mapping_callback(self, msg):
         position_list = msg.data
         self.position_mapping = np.array([(position.x, position.y) for position in position_list])
-        self.get_logger().info(f"Current Position Mapping: {self.position_mapping}")
+        #self.get_logger().info(f"Current Position Mapping: {self.position_mapping}")
 
     
     def arrived_at_goal_callback(self, msg):
