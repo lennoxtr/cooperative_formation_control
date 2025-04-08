@@ -89,7 +89,7 @@ class RobotController(Node):
         
         # Kinematic PID Controller (may add more for different control policies)
         self.PID_position = PidController(Kp=0.0, Ki=0.0, Kd=0.0)
-        self.PID_heading = PidController(Kp=0.9, Ki=0.0, Kd=0.05)
+        self.PID_heading = PidController(Kp=1.0, Ki=0.0, Kd=0.08)
 
         # Pure pursuit settings
         self.lookahead_dist = 0.8
