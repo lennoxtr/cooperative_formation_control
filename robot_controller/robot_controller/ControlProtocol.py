@@ -255,9 +255,9 @@ class ControlProtocol():
         # Set to 1 to test forming formation
         #flocking_gain = 0
 
-        if robot_controller.is_leader:
-            if 0.8 > flocking_gain > 0.2 and abs(pm_yaw_error) > 1/4 * math.pi:
-                pm_yaw_error = 0.0
+        #if robot_controller.is_leader:
+        #    if 0.8 > flocking_gain > 0.2 and abs(pm_yaw_error) > 1/4 * math.pi:
+        #        pm_yaw_error = 0.0
 
         fl_gs_position_error = (1 - flocking_gain) * lf_position_error + \
                                 flocking_gain * pm_position_error

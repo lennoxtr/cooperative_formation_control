@@ -88,8 +88,8 @@ class RobotController(Node):
         self.angular_z_velocity = 0
         
         # Kinematic PID Controller (may add more for different control policies)
-        self.PID_position = PidController(Kp=2.3, Ki=0.0, Kd=0.0)
-        self.PID_heading = PidController(Kp=5.0, Ki=0.0, Kd=0.1)
+        self.PID_position = PidController(Kp=1.0, Ki=0.0, Kd=0.0)
+        self.PID_heading = PidController(Kp=6.0, Ki=0.0, Kd=0.1)
 
         # Pure pursuit settings
         self.lookahead_dist = 0.8
@@ -203,7 +203,7 @@ class RobotController(Node):
         #self.get_logger().info(f"IMU Offset: {self.imu_offset}")
         yaw = yaw + self.imu_offset
         self.current_imu_heading = normalize_yaw_error(yaw)
-        self.get_logger().info(f"Map IMU Heading: {self.current_imu_heading}")
+        #self.get_logger().info(f"Map IMU Heading: {self.current_imu_heading}")
     
     def odom_callback(self, msg):
         linear_velocity = msg.twist.twist.linear
