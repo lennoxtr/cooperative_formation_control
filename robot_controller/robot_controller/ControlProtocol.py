@@ -266,6 +266,8 @@ class ControlProtocol():
                             flocking_gain * pm_yaw_error
 
         total_yaw_error = fl_gs_yaw_error
+        robot_controller.get_logger().info(f"Total yaw error: {total_yaw_error}")
+        robot_controller.get_logger().info(f"Flocking Gain: {flocking_gain}")
         total_position_error = fl_gs_position_error
         linear_vel, angular_vel = self.calculate_vel(robot_controller, total_position_error, total_yaw_error)
 
@@ -278,19 +280,11 @@ class ControlProtocol():
             else:
                 return linear_vel, angular_vel
         
+        robot_controller.get_logger().info(f"Linear Vel: {linear_vel}")
+        robot_controller.get_logger().info(f"Angular Vel: {angular_vel}")
         return linear_vel, angular_vel
 
     def calculate_vel(self, robot_controller, total_position_error, total_yaw_error):
-        '''
-        current_time = time.time()
-        if robot_controller.is_leader:
-            linear_vel, angular_vel = self.goal_seeking(robot_controller)
-        else:
-            total_position_error, total_yaw_error = self.leader_follower(robot_controller)
-            linear_vel = robot_controller.PID_position.compute(total_position_error, current_time)
-            angular_vel = robot_controller.PID_heading.compute(total_yaw_error, current_time)
-
-        '''
         # Implementing Method 1: 1 set of PID for all policies
         current_time = time.time()
 
