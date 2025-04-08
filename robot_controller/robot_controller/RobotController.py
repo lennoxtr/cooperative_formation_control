@@ -284,6 +284,7 @@ class RobotController(Node):
     
     def execute(self):
         while not self.is_started or not self.is_leader:
+            rclpy.spin_once(self)
             return
 
         if self.is_leader:
