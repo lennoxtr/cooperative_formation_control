@@ -266,7 +266,7 @@ class ControlProtocol():
                             flocking_gain * pm_yaw_error
 
         total_yaw_error = fl_gs_yaw_error
-        #robot_controller.get_logger().info(f"Total yaw error: {total_yaw_error}")
+        robot_controller.get_logger().info(f"Total yaw error: {total_yaw_error}")
         #robot_controller.get_logger().info(f"Flocking Gain: {flocking_gain}")
         total_position_error = fl_gs_position_error
         linear_vel, angular_vel = self.calculate_vel(robot_controller, total_position_error, total_yaw_error)
