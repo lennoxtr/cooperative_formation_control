@@ -1,6 +1,5 @@
 import time
 import math
-import itertools
 import numpy as np
 
 from robot_controller.GoalProcessor import get_position_error
@@ -192,7 +191,7 @@ class ControlProtocol():
         self.all_rendezvoused = avg_distance < self.rendezvous_distance
 
         if robot_controller.is_leader:
-            k = 5.0
+            k = 6.0
         else:
             k = 0.0
 
