@@ -5,7 +5,6 @@ import numpy as np
 
 from robot_controller.GoalProcessor import get_position_error
 from robot_controller.GoalProcessor import get_yaw_error
-from robot_controller.GoalProcessor import generate_straight_path
 from robot_controller.GoalProcessor import get_rendezvous_pos
 
 ANG_TOL = 0.2
@@ -59,26 +58,25 @@ class ControlProtocol():
         return position_error, yaw_error
     
     def goal_seeking(self, robot_controller):
-        path = generate_straight_path(robot_controller.current_x,
-                                      robot_controller.current_y,
-                                      robot_controller.goal_x,
-                                      robot_controller.goal_y)
-        look_ahead_coord = (0, 0)
         if robot_controller.is_leader:
             lookahead_dist = 1.2
         else:
             lookahead_dist = 0.05
-        found_dist = 0.0
-        for coord in path:
-            x = coord[0]
-            y = coord[1]
-            dist = get_position_error(robot_controller.current_x,
-                                      robot_controller.current_y,
-                                      x, y)
-            if dist > lookahead_dist:
-                look_ahead_coord = coord
-                found_dist = dist
-                break
+
+        dx = robot_controller.goal_x - robot_controller.current_x
+        dy = robot_controller.goal_y - robot_controller.current_y
+        dist = math.hypot(dx, dy)
+
+
+
+        if dist > lookahead_dist:
+            look_ahead_coord = (
+                robot_controller.current_x + lookahead_dist * dx / dist,
+                robot_controller.current_y + lookahead_dist * dy / dist
+            )
+        else:
+            look_ahead_coord = (robot_controller.goal_x, robot_controller.goal_y)
+
         
         lookahead_x = look_ahead_coord[0]
         lookahead_y = look_ahead_coord[1]
