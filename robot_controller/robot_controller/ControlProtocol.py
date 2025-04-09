@@ -175,6 +175,8 @@ class ControlProtocol():
         if self.all_rendezvoused:
             flocking_gain = 0.0
             return flocking_gain
+        
+        n = len(position_mapping)
 
         diffs = position_mapping[:, np.newaxis, :] - position_mapping[np.newaxis, :, :]
         dists = np.linalg.norm(diffs, axis=2)
