@@ -258,6 +258,7 @@ class ControlProtocol():
                 return self.goal_seeking(robot_controller)
             else:
                 return linear_vel, angular_vel
+        robot_controller.get_logger().info(f"Flocking gain: {flocking_gain}")
         robot_controller.get_logger().info(f"All rendezvoused: {self.all_rendezvoused}")
         #robot_controller.get_logger().info(f"Linear Vel: {linear_vel}")
         #robot_controller.get_logger().info(f"Angular Vel: {angular_vel}")

@@ -20,7 +20,7 @@ from robot_controller.ControlProtocol import ControlProtocol
 from robot_controller.GoalProcessor import arrived_at_goal, quaternion_to_euler, get_all_postion_in_formation, normalize_yaw_error
 
 
-MAX_LINEAR_VEL = 0.1
+MAX_LINEAR_VEL = 0.06
 MAX_ANGLE_VEL = 1.5 #1.5
 
 MAX_LIDAR_RANGE = 3.5
@@ -92,7 +92,7 @@ class RobotController(Node):
         if not self.is_leader:
             self.desired_linear_vel = MAX_LINEAR_VEL
         else:
-            self.desired_linear_vel = 0.1
+            self.desired_linear_vel = 0.06
         
         # For leader
         self.follower_robot_id_list = [1, 2]
