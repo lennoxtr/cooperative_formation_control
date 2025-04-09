@@ -136,12 +136,6 @@ class RobotController(Node):
             self.position_mapping_callback,
             10)
         
-        self.arrived_at_goal_subscription = self.create_subscription(
-            Bool,
-            '/arrived_at_goal',
-            self.arrived_at_goal_callback,
-            15)
-        
         self.amcl_pose_subscription = self.create_subscription(
             PoseWithCovarianceStamped,
             f'/{self.namespace}/amcl_pose',
