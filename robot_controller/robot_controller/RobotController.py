@@ -7,12 +7,10 @@ from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy
 
-from std_msgs.msg import String
 from std_msgs.msg import Bool
 from geometry_msgs.msg import Twist, PoseWithCovarianceStamped, PoseStamped
 from sensor_msgs.msg import Imu
 from sensor_msgs.msg import LaserScan
-from nav_msgs.msg import Odometry
 from robot_goal.msg import Goal
 from position_mapping_msg.msg import PositionMapping
 
@@ -25,9 +23,6 @@ MAX_LINEAR_VEL = 0.1
 MAX_ANGLE_VEL = 1.5 #1.5
 
 MAX_LIDAR_RANGE = 3.5
-
-IMU_OFFSET = 0.2
-
 
 # Define your QoS profile
 qos_profile_lidar = QoSProfile(
@@ -65,7 +60,7 @@ class RobotController(Node):
         self.received_goal = False
 
         # Control Protocol
-        self.rendezvous_distance = 0.5
+        self.rendezvous_distance = 0.4
         self.control_protocol = ControlProtocol(self.rendezvous_distance)
 
         # Collision avoidance threshold
@@ -84,8 +79,6 @@ class RobotController(Node):
         # Kinematic variables
         # Yaw is +- pi from north
         self.current_imu_heading = 0
-        self.linear_x_velocity = 0
-        self.angular_z_velocity = 0
         
         # Kinematic PID Controller (may add more for different control policies)
         self.PID_position = PidController(Kp=1.0, Ki=0.0, Kd=0.0)
@@ -109,12 +102,6 @@ class RobotController(Node):
             Imu,
             f'/{self.namespace}/imu',
             self.imu_callback,
-            10)
-        
-        self.odom_subscription = self.create_subscription(
-            Odometry,
-            f'/{self.namespace}/odom',
-            self.odom_callback,
             10)
         
         self.lidar_subscription = self.create_subscription(
@@ -164,16 +151,21 @@ class RobotController(Node):
             Bool,
             '/start',
             10)
+        
+        if self.is_leader:
+            self.tracking_publishers = {}
+            for robot_id in self.follower_robot_id_list:
+                namespace = 'turtlebot' + str(robot_id)
+                topic = f'/{namespace}/tracking_position'
+                self.tracking_publishers[robot_id] = self.create_publisher(Goal, topic, 10)
 
-        self.arrive_at_goal_publisher = self.create_publisher(
-            Bool,
-            '/arrived_at_goal',
-            10)
 
         self.self_twist_publisher = self.create_publisher(
             Twist,
             f'/{self.namespace}/cmd_vel',
             10)
+        
+        self.control_timer = self.create_timer(0.1, self.execute)
 
     def amcl_pose_callback(self, msg):
         self.current_x = msg.pose.pose.position.x
@@ -204,11 +196,6 @@ class RobotController(Node):
         yaw = yaw + self.imu_offset
         self.current_imu_heading = normalize_yaw_error(yaw)
         #self.get_logger().info(f"Map IMU Heading: {self.current_imu_heading}")
-    
-    def odom_callback(self, msg):
-        linear_velocity = msg.twist.twist.linear
-        self.linear_x = linear_velocity.x
-        self.linear_y = linear_velocity.y
 
     def lidar_callback(self, msg):
         self.lidar_data = np.array(msg.ranges)
@@ -239,13 +226,6 @@ class RobotController(Node):
         position_list = msg.data
         self.position_mapping = np.array([(position.x, position.y) for position in position_list])
         #self.get_logger().info(f"Current Position Mapping: {self.position_mapping}")
-
-    
-    def arrived_at_goal_callback(self, msg):
-        self.arrived_at_goal = msg.data
-        if self.arrived_at_goal:
-            self.stop_bot()
-            print(self.namespace, " arrived")
     
     def move_bot(self, linear_x_change, angular_z_change):
         if abs(angular_z_change) > MAX_ANGLE_VEL:
@@ -260,11 +240,8 @@ class RobotController(Node):
         
         #target_linear_velocity = 0.0
 
-        self.linear_x_velocity = target_linear_velocity
-        self.angular_z_velocity = target_angular_velocity
-
-        self.get_logger().info(f"Linear Vel: {target_linear_velocity}")
-        self.get_logger().info(f"Angular Vel: {target_angular_velocity}")
+        #self.get_logger().info(f"Linear Vel: {target_linear_velocity}")
+        #self.get_logger().info(f"Angular Vel: {target_angular_velocity}")
 
         twist = Twist()
         twist.linear.x = target_linear_velocity
@@ -297,7 +274,7 @@ class RobotController(Node):
                                self.goal_y)
     
     def execute(self):
-        while not self.is_started:
+        if not self.is_started:
             return
 
         if self.is_leader:
@@ -305,11 +282,10 @@ class RobotController(Node):
                                                                         self.current_y,
                                                                         self.current_imu_heading,
                                                                         self.follower_robot_id_list,
-                                                                        adjacent_distance = 0.45)
+                                                                        adjacent_distance = 0.35)
             for item in robot_formation_position_list:
                 # Namespace of follower robot
                 robot_id = item[0]
-                namespace = 'turtlebot' + str(robot_id)
 
                 # Tracking position for follower robot
                 position_tuple = item[1]
@@ -321,19 +297,7 @@ class RobotController(Node):
                 msg.goal_x = position_x
                 msg.goal_y = position_y
 
-                # Dynamic publisher
-                dynamic_topic = f'/{namespace}/tracking_position'
-                tracking_position_publisher = self.create_publisher(
-                Goal,
-                dynamic_topic,
-                10)
-
-                tracking_position_publisher.publish(msg)
-
-            if self.is_arrived() and self.is_rendezvoused:
-                arrived_msg = Bool()
-                arrived_msg.data = True
-                self.arrive_at_goal_publisher.publish(arrived_msg)
+                self.tracking_publishers[robot_id].publish(msg)
 
         # Control Protocol output linear and angular speed change
         linear_x_change, angular_z_change = self.control_protocol.execute_control(self,
@@ -345,9 +309,7 @@ class RobotController(Node):
 def main(args=None):
     rclpy.init(args=args)
     robot_controller = RobotController()
-    print("Am I leader: ", robot_controller.is_leader)
-    rclpy.spin_once(robot_controller)
-    time.sleep(1)
+    robot_controller.get_logger().info(f"Am I Leader: {robot_controller.is_leader}")
 
     # Allow simultaneous processing of callbacks
     executor = MultiThreadedExecutor()
@@ -356,21 +318,15 @@ def main(args=None):
     executor_thread.start()
     robot_controller.get_logger().info(robot_controller.namespace + " initialized")
 
-    while True:
-        try:
-            robot_controller.execute()
-        except KeyboardInterrupt:
-            '''
-            df = pd.DataFrame(data={"Flocking_gain": robot_controller.control_protocol.flocking_gain_list,
-                                    "Total_Yaw_Error": robot_controller.control_protocol.total_yaw_error_list,
-                                    "Collision_Avoidance": robot_controller.control_protocol.collision_avoidance_list,
-                                    "Goal_seeking_Error": robot_controller.control_protocol.flocking_goal_seeking_error,
-                                     "Time": robot_controller.control_protocol.recorded_time})
-            df.to_csv(f'./{robot_controller.namespace}.csv', sep=',',index=False)
-            '''
-    
-    robot_controller.destroy_node()
-    rclpy.shutdown()
+    try:
+        # Keep the main thread alive — logic now handled by timer + executor
+        while rclpy.ok():
+            time.sleep(1)
+    except KeyboardInterrupt:
+        robot_controller.get_logger().info("Shutting down robot controller...")
+    finally:
+        robot_controller.destroy_node()
+        rclpy.shutdown()
 
 if __name__ == '__main__':
     main()

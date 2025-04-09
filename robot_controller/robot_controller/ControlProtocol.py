@@ -141,7 +141,6 @@ class ControlProtocol():
         distance_weights =  valid_distances - robot_controller.dangerous_radius
 
         # Calculate position error for slowing down to prevent collision
-        min_distance = np.min(valid_distances)
         position_error = 0.2
 
         # Calculate rebound angle
@@ -192,7 +191,7 @@ class ControlProtocol():
         total_distance = 0
         pair_count = 0
         for (x1, y1), (x2, y2) in itertools.combinations(position_mapping, 2):
-            distance = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+            distance = math.hypot(x2 - x1, y2 - y1)
             total_distance += distance
             pair_count += 1
 
@@ -204,10 +203,7 @@ class ControlProtocol():
                                                 self.avg_position_x,
                                                 self.avg_position_y)
         #Check
-        if avg_distance < self.rendezvous_distance:
-            self.all_rendezvoused = True
-        else:
-            self.all_rendezvoused = False
+        self.all_rendezvoused = avg_distance < self.rendezvous_distance
         
         # Implement as logistic function
         # k is the flocking function steepness
@@ -266,7 +262,7 @@ class ControlProtocol():
                             flocking_gain * pm_yaw_error
 
         total_yaw_error = fl_gs_yaw_error
-        robot_controller.get_logger().info(f"Total yaw error: {total_yaw_error}")
+        #robot_controller.get_logger().info(f"Total yaw error: {total_yaw_error}")
         #robot_controller.get_logger().info(f"Flocking Gain: {flocking_gain}")
         total_position_error = fl_gs_position_error
         linear_vel, angular_vel = self.calculate_vel(robot_controller, total_position_error, total_yaw_error)
