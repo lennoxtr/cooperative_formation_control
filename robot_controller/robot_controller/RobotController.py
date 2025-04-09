@@ -232,7 +232,7 @@ class RobotController(Node):
         else:
             target_linear_velocity = linear_x_change
         
-        #target_linear_velocity = 0.0
+        target_linear_velocity = 0.0
 
         #self.get_logger().info(f"Linear Vel: {target_linear_velocity}")
         #self.get_logger().info(f"Angular Vel: {target_angular_velocity}")
