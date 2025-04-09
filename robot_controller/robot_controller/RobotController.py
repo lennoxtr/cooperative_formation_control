@@ -92,7 +92,7 @@ class RobotController(Node):
         if not self.is_leader:
             self.desired_linear_vel = MAX_LINEAR_VEL
         else:
-            self.desired_linear_vel = 0.05
+            self.desired_linear_vel = 0.06
         
         # For leader
         self.follower_robot_id_list = [1, 2]

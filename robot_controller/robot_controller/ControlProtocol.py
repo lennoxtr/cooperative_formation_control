@@ -192,7 +192,7 @@ class ControlProtocol():
         self.all_rendezvoused = avg_distance < self.rendezvous_distance
 
         if robot_controller.is_leader:
-            k = 4.0
+            k = 5.0
         else:
             k = 0.0
 
@@ -252,7 +252,7 @@ class ControlProtocol():
         linear_vel, angular_vel = self.calculate_vel(robot_controller, total_position_error, total_yaw_error)
 
         if robot_controller.is_leader and flocking_gain < 0.5 and not self.all_rendezvoused:
-            linear_vel = 0.04
+            linear_vel = 0.02
 
         if flocking_gain == 0.0:
             if robot_controller.is_leader:
