@@ -108,18 +108,27 @@ def get_all_postion_in_formation(leader_position_x, leader_position_y, leader_he
     return position_in_formation_list
 
 # Helper function to calculate rendezvous
-def arrival_time_error(p, positions):
-    x, y, T = p  # Unpack optimization variables
-    velocity = 0.2
+def arrival_time_error(p, positions, velocity=0.2):
+    x, y, T = p
     dists = np.linalg.norm(positions - np.array([x, y]), axis=1)
     return np.sum((dists - velocity * T) ** 2)
 
-def get_rendezvous_pos(position_mapping):
-    x0, y0 = np.mean(position_mapping, axis=0)
-    avg_distance = np.mean([np.linalg.norm(np.array(pos) - np.array((x0, y0))) for pos in position_mapping])
-    T0 = avg_distance / 0.2
+def get_rendezvous_pos(position_mapping, velocity=0.2):
+    positions = np.array(position_mapping)
+    x0, y0 = np.mean(positions, axis=0)
+    avg_dist = np.mean(np.linalg.norm(positions - np.array([x0, y0]), axis=1))
+    T0 = avg_dist / velocity
     initial_guess = (x0, y0, T0)
-    result = minimize(arrival_time_error, initial_guess, args=(position_mapping), method='Nelder-Mead')
-    meeting_point = tuple(map(float, result.x[:2]))
 
-    return meeting_point
+    # Optional: Bounds on x, y, T (helps if positions are in a known map)
+    bounds = [(None, None), (None, None), (0.01, None)]  # T must be positive
+
+    result = minimize(
+        arrival_time_error,
+        initial_guess,
+        args=(positions, velocity),
+        method='L-BFGS-B',
+        bounds=bounds
+    )
+
+    return tuple(result.x[:2])
