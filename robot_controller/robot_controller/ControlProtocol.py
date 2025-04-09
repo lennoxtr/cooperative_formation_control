@@ -28,7 +28,7 @@ class ControlProtocol():
         bare_sensitivity_bubble = np.array([self.get_sensitivity_bubble_gain(i) for i in range(360)])
 
         # Assume current_vel = max_vel = 0.2 to reduce calculation
-        current_vel = 0.13
+        current_vel = 0.1
         delta_t = 2.0
         self.sensitivity_bubble = bare_sensitivity_bubble * current_vel * delta_t
 
@@ -249,9 +249,9 @@ class ControlProtocol():
         # Set to 1 to test forming formation
         #flocking_gain = 0
 
-        #if robot_controller.is_leader:
-        #    if 0.8 > flocking_gain > 0.2 and abs(pm_yaw_error) > 1/4 * math.pi:
-        #        pm_yaw_error = 0.0
+        if robot_controller.is_leader:
+            if 0.8 > flocking_gain > 0.2 and abs(pm_yaw_error) > 1/4 * math.pi:
+                pm_yaw_error = 0.0
 
         fl_gs_position_error = (1 - flocking_gain) * lf_position_error + \
                                 flocking_gain * pm_position_error
@@ -261,7 +261,7 @@ class ControlProtocol():
 
         total_yaw_error = fl_gs_yaw_error
         #robot_controller.get_logger().info(f"Total yaw error: {total_yaw_error}")
-        #robot_controller.get_logger().info(f"Flocking Gain: {flocking_gain}")
+        robot_controller.get_logger().info(f"Flocking Gain: {flocking_gain}")
         total_position_error = fl_gs_position_error
         linear_vel, angular_vel = self.calculate_vel(robot_controller, total_position_error, total_yaw_error)
 

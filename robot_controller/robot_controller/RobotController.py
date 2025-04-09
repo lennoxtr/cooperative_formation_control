@@ -65,7 +65,7 @@ class RobotController(Node):
 
         # Collision avoidance threshold
         self.max_lidar_range = MAX_LIDAR_RANGE
-        self.dangerous_radius = 0.6
+        self.dangerous_radius = 0.2
 
         # Lidar data for collision avoidance
         self.lidar_data = np.zeros(360)
@@ -161,14 +161,12 @@ class RobotController(Node):
             f'/{self.namespace}/cmd_vel',
             10)
         
-        self.control_timer = self.create_timer(0.06, self.execute)
+        self.control_timer = self.create_timer(0.04, self.execute)
 
     def amcl_pose_callback(self, msg):
         self.current_x = msg.pose.pose.position.x
         self.current_y = msg.pose.pose.position.y
-        orientation_q = msg.pose.pose.orientation
         #self.get_logger().info(f"Current position from AMCL: ({self.current_x}, {self.current_y})")
-        _, _, yaw = quaternion_to_euler([orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w])
         #self.current_imu_heading = float("{:.3f}".format(yaw))
         #self.get_logger().info(f"Current yaw from AMCL: {yaw}")
 

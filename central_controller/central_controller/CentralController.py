@@ -41,7 +41,7 @@ class CentralController(Node):
             '/position_mapping',
             10)
         
-        self.create_timer(0.06, self.publish_position_mapping)
+        self.create_timer(0.04, self.publish_position_mapping)
 
     def amcl_callback_0(self, msg):
         with self.lock:
