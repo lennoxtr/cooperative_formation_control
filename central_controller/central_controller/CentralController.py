@@ -40,30 +40,23 @@ class CentralController(Node):
             PositionMapping,
             '/position_mapping',
             10)
+        
+        self.create_timer(0.1, self.publish_position_mapping)
 
     def amcl_callback_0(self, msg):
         with self.lock:
             self.position_mapping[0] = (msg.pose.pose.position.x, msg.pose.pose.position.y)
             self.get_logger().info(f"Current Position Mapping: {self.position_mapping}")
-        
-        # Publish position update to all robots
-        self.publish_position_mapping()
 
     def amcl_callback_1(self, msg):
         with self.lock:
             self.position_mapping[1] = (msg.pose.pose.position.x, msg.pose.pose.position.y)
             self.get_logger().info(f"Current Position Mapping: {self.position_mapping}")
-        
-        # Publish position update to all robots
-        self.publish_position_mapping()
     
     def amcl_callback_2(self, msg):
         with self.lock:
             self.position_mapping[2] = (msg.pose.pose.position.x, msg.pose.pose.position.y)
             self.get_logger().info(f"Current Position Mapping: {self.position_mapping}")
-        
-        # Publish position update to all robots
-        self.publish_position_mapping()
 
 
     def publish_position_mapping(self):
@@ -71,30 +64,21 @@ class CentralController(Node):
         msg.data = [Point(x=t[0], y=t[1], z=0.0) for t in self.position_mapping]
         self.position_mapping_publisher.publish(msg)
 
-    def execute(self):
-        # Have not received goal
-        rclpy.spin_once(self)
-
-        # Executing while leader robot has not reached goal
-        while not self.arrived_at_goal:
-            rclpy.spin_once(self, timeout_sec=0.1)
-
 def main(args=None):
     rclpy.init(args=args)
     central_controller = CentralController()
-    rclpy.spin_once(central_controller)
-    time.sleep(1)
 
     executor = MultiThreadedExecutor()
     executor.add_node(central_controller)
     executor_thread = threading.Thread(target=executor.spin, daemon=True)
     executor_thread.start()
 
-    while True:
-        try:
-            central_controller.execute()
-        except KeyboardInterrupt:
-            break
+    try:
+        # Keep the main thread alive — logic now handled by timer + executor
+        while rclpy.ok():
+            time.sleep(1)
+    except KeyboardInterrupt:
+        central_controller.get_logger().info("Shutting down central controller...")
     
     central_controller.destroy_node()
     rclpy.shutdown()
