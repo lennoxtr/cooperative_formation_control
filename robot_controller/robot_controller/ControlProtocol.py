@@ -29,7 +29,7 @@ class ControlProtocol():
         bare_sensitivity_bubble = np.array([self.get_sensitivity_bubble_gain(i) for i in range(360)])
 
         # Assume current_vel = max_vel = 0.2 to reduce calculation
-        current_vel = 0.2
+        current_vel = 0.13
         delta_t = 2.0
         self.sensitivity_bubble = bare_sensitivity_bubble * current_vel * delta_t
 
@@ -224,15 +224,15 @@ class ControlProtocol():
     def execute_control(self, robot_controller, position_mapping):
 
         # Collision Avoidance
-        #ca_position_error, ca_yaw_error = self.collision_prevention(robot_controller)
-        ca_position_error, ca_yaw_error = 0.0, 0.0
+        ca_position_error, ca_yaw_error = self.collision_prevention(robot_controller)
+        #ca_position_error, ca_yaw_error = 0.0, 0.0
 
         if ca_yaw_error != 0.0 and not robot_controller.is_leader:
             total_yaw_error = ca_yaw_error
             total_position_error = ca_position_error
             linear_vel, angular_vel = self.calculate_vel(robot_controller, total_position_error, total_yaw_error)
             
-            linear_vel = 0.05
+            linear_vel = 0.04
             
             return linear_vel, angular_vel
 
