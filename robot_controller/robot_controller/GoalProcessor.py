@@ -1,7 +1,6 @@
 import numpy as np
 import math
 from scipy.optimize import minimize 
-from scipy.optimize import linear_sum_assignment
 
 def is_equal(a, b, tol=1e-2):
     return abs(a - b) <= tol
@@ -27,19 +26,11 @@ def quaternion_to_euler(q):
     return roll, pitch, yaw
 
 def get_position_error(current_x, current_y, goal_x, goal_y):
-    delta_x = goal_x - current_x
-    delta_y = goal_y - current_y
-    distance_squared = delta_x**2 + delta_y**2
-    distance = distance_squared**0.5
-    return distance
+    return np.hypot(goal_x - current_x, goal_y - current_y)
 
 def get_target_yaw(current_x, current_y, goal_x, goal_y):
     # Target yaw is relative to true north
-    delta_x = goal_x - current_x
-    delta_y = goal_y - current_y
-    target_heading = np.arctan2(delta_y, delta_x)
-    target_yaw = float("{:.3f}".format(target_heading))
-    return target_yaw
+    return np.arctan2(goal_y - current_y, goal_x - current_x)
 
 def normalize_yaw_error(yaw_error):
     # Normalize yaw_error to [-π, π]
@@ -95,7 +86,6 @@ def get_single_position_in_formation(leader_position_x, leader_position_y, leade
     initial_angle = (np.pi - interior_angle) / 2
 
     # This is because index 0 is leader
-    # TODO: make this more generalized
     relative_angle_from_leader = angle_increment * (follower_robot_id - 1) + initial_angle
 
     global_frame_angle = normalized_leader_heading - (np.pi / 2 + relative_angle_from_leader)
@@ -127,11 +117,8 @@ def get_all_postion_in_formation(leader_position_x, leader_position_y, leader_he
 def arrival_time_error(p, positions):
     x, y, T = p  # Unpack optimization variables
     velocity = 0.2
-    errors = [
-        (np.sqrt((x - x_i) ** 2 + (y - y_i) ** 2) - velocity * T) ** 2
-        for (x_i, y_i) in positions
-    ]
-    return sum(errors)
+    dists = np.linalg.norm(positions - np.array([x, y]), axis=1)
+    return np.sum((dists - velocity * T) ** 2)
 
 def get_rendezvous_pos(position_mapping):
     x0, y0 = np.mean(position_mapping, axis=0)

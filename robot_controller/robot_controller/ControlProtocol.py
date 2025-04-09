@@ -266,7 +266,7 @@ class ControlProtocol():
         linear_vel, angular_vel = self.calculate_vel(robot_controller, total_position_error, total_yaw_error)
 
         if robot_controller.is_leader and flocking_gain < 0.5 and not self.all_rendezvoused:
-            linear_vel = 0.06
+            linear_vel = 0.04
 
         if flocking_gain == 0.0:
             if robot_controller.is_leader:
