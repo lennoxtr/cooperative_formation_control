@@ -33,13 +33,7 @@ def get_target_yaw(current_x, current_y, goal_x, goal_y):
     return np.arctan2(goal_y - current_y, goal_x - current_x)
 
 def normalize_yaw_error(yaw_error):
-    # Normalize yaw_error to [-π, π]
-    if yaw_error > np.pi:
-        yaw_error -= 2 * np.pi
-    elif yaw_error < -np.pi:
-        yaw_error += 2 * np.pi
-    
-    return yaw_error
+    return (yaw_error + np.pi) % (2 * np.pi) - np.pi
 
 def get_yaw_error(current_x, current_y, goal_x, goal_y, current_imu_heading):
     target_yaw = get_target_yaw(current_x, current_y, goal_x, goal_y)

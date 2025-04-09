@@ -123,48 +123,38 @@ class ControlProtocol():
     def collision_prevention(self, robot_controller):
         # Using bubble rebound algo
         lidar_data = robot_controller.lidar_data
+
+        mask = (lidar_data > 0.0) & (lidar_data < self.sensitivity_bubble)
+        collision_indices = np.flatnonzero(mask)
+
+        if collision_indices.size == 0:
+            return 0.0, 0.0
         
-        possible_collision_angle = np.where((lidar_data > 0.0) & (lidar_data < self.sensitivity_bubble))[0]
+        front_mask = (collision_indices <= 180) | (collision_indices >= 270)
+        collision_indices = collision_indices[front_mask]
 
-        valid_angles = (possible_collision_angle >= 270) | (possible_collision_angle <= 180)
-        possible_collision_angle = possible_collision_angle[valid_angles]
+        if collision_indices.size == 0:
+            return 0.0, 0.0
+
+        distances = lidar_data[collision_indices]
+        angles = self.normalized_angle_in_rad[collision_indices]
+
+        weights = distances - robot_controller.dangerous_radius
+        weighted_sum = np.sum(angles * weights)
+
+        sum_weight = robot_controller.dangerous_radius * len(collision_indices) - np.sum(distances)
+        rebound_angle = weighted_sum / (sum_weight + 1e-6)
         
-        if possible_collision_angle.size == 0:
-            position_error = 0.0
-            yaw_error = 0.0
-            return position_error, yaw_error
 
-        valid_distances = lidar_data[possible_collision_angle]
-        valid_collision_angles_in_rad = self.normalized_angle_in_rad[possible_collision_angle]
-        distance_weights =  valid_distances - robot_controller.dangerous_radius
+        if abs(rebound_angle) < ANG_TOL:
+            mean_left = np.mean(lidar_data[45:100])
+            sign = np.sign(rebound_angle) or 1
+            if mean_left < robot_controller.max_lidar_range:
+                rebound_angle = sign * (np.pi - ANG_TOL)
+            else:
+                rebound_angle = sign * (np.pi / 2)
 
-        # Calculate position error for slowing down to prevent collision
-        position_error = 0.2
-
-        # Calculate rebound angle
-        weighted_sum_of_distance = np.sum(valid_collision_angles_in_rad * distance_weights)
-        sum_of_distance = robot_controller.dangerous_radius * possible_collision_angle.size - np.sum(valid_distances)
-
-        # There is a chance collision angle all > 90 and < 270 causing sum_of_distance to be 0
-        rebound_angle = weighted_sum_of_distance / sum_of_distance
-        
-        left_lidar_data = lidar_data[45:100]
-        mean_distance_left_side = np.mean(left_lidar_data)
-
-        if rebound_angle == 0.0:
-            rebound_angle += ANG_TOL
-
-        if -ANG_TOL < rebound_angle < ANG_TOL:
-            sign_of_rebound_angle = rebound_angle / abs(rebound_angle)
-            if mean_distance_left_side < robot_controller.max_lidar_range:
-                # Left and right side has obstacles turn 180
-                rebound_angle = sign_of_rebound_angle * np.pi - sign_of_rebound_angle * ANG_TOL
-            else: 
-                rebound_angle = sign_of_rebound_angle * np.pi/2
-
-        yaw_error = rebound_angle
-
-        return position_error, yaw_error
+        return 0.2, rebound_angle
     
     def leader_follower(self, robot_controller):
         position_error = get_position_error(robot_controller.current_x,
@@ -186,15 +176,11 @@ class ControlProtocol():
             flocking_gain = 0.0
             return flocking_gain
 
-        total_distance = 0
-        pair_count = 0
-        for (x1, y1), (x2, y2) in itertools.combinations(position_mapping, 2):
-            distance = math.hypot(x2 - x1, y2 - y1)
-            total_distance += distance
-            pair_count += 1
+        diffs = position_mapping[:, np.newaxis, :] - position_mapping[np.newaxis, :, :]
+        dists = np.linalg.norm(diffs, axis=2)
+        upper_tri_indices = np.triu_indices(n, k=1)
+        avg_distance = np.mean(dists[upper_tri_indices])
 
-        # Calculate the average distance
-        avg_distance = total_distance / pair_count if pair_count > 0 else 0
 
         dist_to_rendezvous = get_position_error(robot_controller.current_x,
                                                 robot_controller.current_y,
@@ -202,17 +188,15 @@ class ControlProtocol():
                                                 self.avg_position_y)
         #Check
         self.all_rendezvoused = avg_distance < self.rendezvous_distance
-        
-        # Implement as logistic function
-        # k is the flocking function steepness
-        # For follower, flocking gain = 0
 
         if robot_controller.is_leader:
             k = 4.0
         else:
             k = 0.0
 
-        flocking_gain = (1 - math.e ** (-k * (dist_to_rendezvous - self.rendezvous_distance))) / (1 + math.e ** (-k * (dist_to_rendezvous - self.rendezvous_distance)))
+        k = 4.0 if robot_controller.is_leader else 0.0
+        x = dist_to_rendezvous - self.rendezvous_distance
+        flocking_gain = (1 - math.exp(-k * x)) / (1 + math.exp(-k * x)) if k != 0 else 0.0
         
         if flocking_gain < 0.0:
             flocking_gain = 0.0

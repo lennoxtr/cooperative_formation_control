@@ -2,6 +2,7 @@ import rclpy
 import time
 import threading
 import numpy as np
+import math
 
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
@@ -87,14 +88,12 @@ class RobotController(Node):
         # Pure pursuit settings
         self.lookahead_dist = 0.8
         self.curvature_thres = 7.0
-
         
         if not self.is_leader:
             self.desired_linear_vel = MAX_LINEAR_VEL
         else:
             self.desired_linear_vel = 0.05
         
-
         # For leader
         self.follower_robot_id_list = [1, 2]
         self.position_mapping = np.array([(0.0, 0.0), (0.0, 0.0), (0.0, 0.0)])
@@ -181,7 +180,7 @@ class RobotController(Node):
         euler = quaternion_to_euler(quaternion)
         yaw = euler[2]  # radians
         if not self.initialized_imu:
-            self.imu_offset = normalize_yaw_error(-np.pi + 0.01 - yaw)
+            self.imu_offset = normalize_yaw_error(-np.pi - yaw)
             self.initialized_imu = True
             return
 
@@ -222,26 +221,25 @@ class RobotController(Node):
         #self.get_logger().info(f"Current Position Mapping: {self.position_mapping}")
     
     def move_bot(self, linear_x_change, angular_z_change):
-        if abs(angular_z_change) > MAX_ANGLE_VEL:
-            target_angular_velocity = angular_z_change / abs(angular_z_change) * MAX_ANGLE_VEL
-        else:
-            target_angular_velocity = angular_z_change
+        target_angular_velocity = (
+            math.copysign(MAX_ANGLE_VEL, angular_z_change)
+            if abs(angular_z_change) > MAX_ANGLE_VEL
+            else angular_z_change
+        )
 
-        if abs(linear_x_change) > MAX_LINEAR_VEL:
-            target_linear_velocity = linear_x_change / abs(linear_x_change) * MAX_LINEAR_VEL
-        else:
-            target_linear_velocity = linear_x_change
+        target_linear_velocity = (
+            math.copysign(MAX_LINEAR_VEL, linear_x_change)
+            if abs(linear_x_change) > MAX_LINEAR_VEL
+            else linear_x_change
+        )
+
+        target_linear_velocity = 0.0
         
         #self.get_logger().info(f"Linear Vel: {target_linear_velocity}")
         #self.get_logger().info(f"Angular Vel: {target_angular_velocity}")
 
         twist = Twist()
         twist.linear.x = target_linear_velocity
-        twist.linear.y = 0.0
-        twist.linear.z = 0.0
-
-        twist.angular.x = 0.0
-        twist.angular.y = 0.0
         twist.angular.z = target_angular_velocity
 
         self.self_twist_publisher.publish(twist)
@@ -249,11 +247,6 @@ class RobotController(Node):
     def stop_bot(self):
         twist = Twist()
         twist.linear.x = 0.0
-        twist.linear.y = 0.0
-        twist.linear.z = 0.0
-
-        twist.angular.x = 0.0
-        twist.angular.y = 0.0
         twist.angular.z = 0.0
 
         self.self_twist_publisher.publish(twist)
