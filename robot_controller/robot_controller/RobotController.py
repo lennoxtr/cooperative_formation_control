@@ -88,12 +88,12 @@ class RobotController(Node):
         self.lookahead_dist = 0.8
         self.curvature_thres = 7.0
 
-        '''
-        if self.is_leader:
+        
+        if not self.is_leader:
             self.desired_linear_vel = MAX_LINEAR_VEL
         else:
             self.desired_linear_vel = 0.06
-        '''
+        
 
         # For leader
         self.follower_robot_id_list = [1, 2]
@@ -161,7 +161,7 @@ class RobotController(Node):
             f'/{self.namespace}/cmd_vel',
             10)
         
-        self.control_timer = self.create_timer(0.05, self.execute)
+        self.control_timer = self.create_timer(0.045, self.execute)
 
     def amcl_pose_callback(self, msg):
         self.current_x = msg.pose.pose.position.x
