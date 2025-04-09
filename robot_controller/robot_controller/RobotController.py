@@ -232,8 +232,6 @@ class RobotController(Node):
             if abs(linear_x_change) > MAX_LINEAR_VEL
             else linear_x_change
         )
-
-        target_linear_velocity = 0.0
         
         #self.get_logger().info(f"Linear Vel: {target_linear_velocity}")
         #self.get_logger().info(f"Angular Vel: {target_angular_velocity}")
