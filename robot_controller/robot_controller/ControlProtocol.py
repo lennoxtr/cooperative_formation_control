@@ -191,7 +191,7 @@ class ControlProtocol():
         self.all_rendezvoused = avg_distance < self.rendezvous_distance
 
         if robot_controller.is_leader:
-            k = 5.0
+            k = 4.0
         else:
             k = 0.0
 
@@ -259,7 +259,7 @@ class ControlProtocol():
             else:
                 return linear_vel, angular_vel
         robot_controller.get_logger().info(f"Flocking gain: {flocking_gain}")
-        robot_controller.get_logger().info(f"All rendezvoused: {self.all_rendezvoused}")
+        #robot_controller.get_logger().info(f"All rendezvoused: {self.all_rendezvoused}")
         #robot_controller.get_logger().info(f"Linear Vel: {linear_vel}")
         #robot_controller.get_logger().info(f"Angular Vel: {angular_vel}")
         return linear_vel, angular_vel
