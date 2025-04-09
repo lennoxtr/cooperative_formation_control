@@ -41,22 +41,19 @@ class CentralController(Node):
             '/position_mapping',
             10)
         
-        self.create_timer(0.045, self.publish_position_mapping)
+        self.create_timer(0.025, self.publish_position_mapping)
 
     def amcl_callback_0(self, msg):
         with self.lock:
             self.position_mapping[0] = (msg.pose.pose.position.x, msg.pose.pose.position.y)
-            self.get_logger().info(f"Current Position Mapping: {self.position_mapping}")
 
     def amcl_callback_1(self, msg):
         with self.lock:
             self.position_mapping[1] = (msg.pose.pose.position.x, msg.pose.pose.position.y)
-            self.get_logger().info(f"Current Position Mapping: {self.position_mapping}")
     
     def amcl_callback_2(self, msg):
         with self.lock:
             self.position_mapping[2] = (msg.pose.pose.position.x, msg.pose.pose.position.y)
-            self.get_logger().info(f"Current Position Mapping: {self.position_mapping}")
 
 
     def publish_position_mapping(self):
