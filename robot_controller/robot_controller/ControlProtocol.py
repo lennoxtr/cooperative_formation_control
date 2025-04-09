@@ -191,7 +191,7 @@ class ControlProtocol():
         self.all_rendezvoused = avg_distance < self.rendezvous_distance
 
         if robot_controller.is_leader:
-            k = 6.0
+            k = 5.0
         else:
             k = 0.0
 
