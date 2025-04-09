@@ -161,7 +161,7 @@ class RobotController(Node):
             f'/{self.namespace}/cmd_vel',
             10)
         
-        self.control_timer = self.create_timer(0.1, self.execute)
+        self.control_timer = self.create_timer(0.05, self.execute)
 
     def amcl_pose_callback(self, msg):
         self.current_x = msg.pose.pose.position.x
