@@ -265,7 +265,7 @@ class RobotController(Node):
         
         #self.get_logger().info(f"Linear Vel: {target_linear_velocity}")
         #self.get_logger().info(f"Angular Vel: {target_angular_velocity}")
-        target_linear_velocity = 0.0
+        #target_linear_velocity = 0.0
 
         twist = Twist()
         twist.linear.x = target_linear_velocity
