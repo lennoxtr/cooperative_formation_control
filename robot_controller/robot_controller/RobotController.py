@@ -216,7 +216,7 @@ class RobotController(Node):
     def goal_listener_callback(self, msg):
         self.goal_x = round(msg.pose.position.x, 3)
         self.goal_y = round(msg.pose.position.y, 3)
-        self.get_logger().info(f"Received Goal at ({self.goal_x}, {self.goal_y})")
+        #self.get_logger().info(f"Received Goal at ({self.goal_x}, {self.goal_y})")
 
         if self.is_leader:
             self.rfm69.send(bytes("TO:255|START", "utf-8"))
@@ -249,7 +249,7 @@ class RobotController(Node):
                                 x_str, y_str = coords.split(",")
                                 self.goal_x = float(x_str)
                                 self.goal_y = float(y_str)
-                                self.get_logger().info(f"Radio: TRACK x={self.goal_x}, y={self.goal_y}")
+                                #self.get_logger().info(f"Radio: TRACK x={self.goal_x}, y={self.goal_y}")
                 except Exception as e:
                     self.get_logger().warn(f"Radio message error: {e}")
             time.sleep(0.1)
@@ -269,7 +269,7 @@ class RobotController(Node):
         
         #self.get_logger().info(f"Linear Vel: {target_linear_velocity}")
         #self.get_logger().info(f"Angular Vel: {target_angular_velocity}")
-        target_linear_velocity = 0.0
+        #target_linear_velocity = 0.0
 
         twist = Twist()
         twist.linear.x = target_linear_velocity
