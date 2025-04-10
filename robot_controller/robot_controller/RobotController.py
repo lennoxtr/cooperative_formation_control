@@ -12,6 +12,12 @@ from std_msgs.msg import Bool
 from geometry_msgs.msg import Twist, PoseWithCovarianceStamped, PoseStamped
 from sensor_msgs.msg import Imu
 from sensor_msgs.msg import LaserScan
+
+import board
+import busio
+from digitalio import DigitalInOut
+import adafruit_rfm69
+
 from robot_goal.msg import Goal
 from position_mapping_msg.msg import PositionMapping
 
@@ -46,6 +52,12 @@ class RobotController(Node):
 
         self.initialized_imu = False
         self.imu_offset = 0.0
+
+        #Radio
+        CS = DigitalInOut(board.CE1)
+        RESET = DigitalInOut(board.D25)
+        spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
+        self.rfm69 = adafruit_rfm69.RFM69(spi, CS, RESET, 915.0)
 
         # Identification
         self.robot_id = robot_id
@@ -122,18 +134,6 @@ class RobotController(Node):
             self.goal_listener_callback,
             2)
         
-        self.is_started_subscription = self.create_subscription(
-            Bool,
-            '/start',
-            self.is_started_callback,
-            2)
-        
-        self.tracking_position_subscription = self.create_subscription(
-            Goal,
-            f'/{self.namespace}/tracking_position',
-            self.tracking_position_callback,
-            10)
-        
         self.position_mapping_subscription = self.create_subscription(
             PositionMapping,
             '/position_mapping',
@@ -159,22 +159,10 @@ class RobotController(Node):
             10)
 
         # Publishers
-        self.is_started_publisher = self.create_publisher(
-            Bool,
-            '/start',
-            10)
-        
         self.rendezvoused_publisher = self.create_publisher(
             Bool,
             f'/{namespace}',
             10)
-        
-        if self.is_leader:
-            self.tracking_publishers = {}
-            for robot_id in self.follower_robot_id_list:
-                namespace = 'turtlebot' + str(robot_id)
-                topic = f'/{namespace}/tracking_position'
-                self.tracking_publishers[robot_id] = self.create_publisher(Goal, topic, 10)
 
         self.self_twist_publisher = self.create_publisher(
             Twist,
@@ -182,6 +170,9 @@ class RobotController(Node):
             10)
         
         self.control_timer = self.create_timer(0.05, self.execute)
+
+        if not self.is_leader:
+            threading.Thread(target=self.radio_receive_thread, daemon=True).start()
 
     def t1_rendezvous_callback(self, msg):
         self.t1_rendezvoused = msg.data
@@ -226,21 +217,11 @@ class RobotController(Node):
         self.goal_x = round(msg.pose.position.x, 3)
         self.goal_y = round(msg.pose.position.y, 3)
         self.get_logger().info(f"Received Goal at ({self.goal_x}, {self.goal_y})")
+
         if self.is_leader:
-            msg = Bool()
-            msg.data = True
-            self.is_started_publisher.publish(msg)
+            self.rfm69.send(bytes("TO:255|START", "utf-8"))
             self.is_started = True
         self.received_goal = True
-    
-    def is_started_callback(self, msg):
-        self.is_started = msg.data
-        self.get_logger().info("Received start signal. Executing")
-    
-    def tracking_position_callback(self, msg):
-        self.goal_x = float("{:.3f}".format(msg.goal_x))
-        self.goal_y = float("{:.3f}".format(msg.goal_y))
-        #self.get_logger().info(f"Tracking position: ({self.goal_x}, {self.goal_y})")
 
     def position_mapping_callback(self, msg):
         position_list = msg.data
@@ -249,6 +230,29 @@ class RobotController(Node):
         self.meeting_x = meeting_point[0]
         self.meeting_y = meeting_point[1]
         #self.get_logger().info(f"Current Position Mapping: {self.position_mapping}")
+
+    def radio_receive_thread(self):
+        while True:
+            packet = self.rfm69.receive()
+            if packet:
+                try:
+                    msg = str(packet, "utf-8").strip()
+                    if msg.startswith("TO:"):
+                        target_str, command = msg.split("|", 1)
+                        target_id = int(target_str[3:])
+                        if target_id == self.robot_id or target_id == 255:
+                            if command == "START":
+                                self.get_logger().info("Radio: START received")
+                                self.is_started = True
+                            elif command.startswith("TRACK:"):
+                                coords = command.split("TRACK:")[1]
+                                x_str, y_str = coords.split(",")
+                                self.goal_x = float(x_str)
+                                self.goal_y = float(y_str)
+                                self.get_logger().info(f"Radio: TRACK x={self.goal_x}, y={self.goal_y}")
+                except Exception as e:
+                    self.get_logger().warn(f"Radio message error: {e}")
+            time.sleep(0.1)
     
     def move_bot(self, linear_x_change, angular_z_change):
         target_angular_velocity = (
@@ -265,7 +269,7 @@ class RobotController(Node):
         
         #self.get_logger().info(f"Linear Vel: {target_linear_velocity}")
         #self.get_logger().info(f"Angular Vel: {target_angular_velocity}")
-        #target_linear_velocity = 0.0
+        target_linear_velocity = 0.0
 
         twist = Twist()
         twist.linear.x = target_linear_velocity
@@ -303,15 +307,11 @@ class RobotController(Node):
 
                 # Tracking position for follower robot
                 position_tuple = item[1]
-                position_x = position_tuple[0]
-                position_y = position_tuple[1]
+                x, y = position_tuple
 
-                # Preparing tracking position message
-                msg = Goal()
-                msg.goal_x = position_x
-                msg.goal_y = position_y
+                message = f"TO:{robot_id}|TRACK:{x:.2f},{y:.2f}"
+                self.rfm69.send(bytes(message, "utf-8"))
 
-                self.tracking_publishers[robot_id].publish(msg)
         else:
             if self.is_arrived():
                 msg = Bool()
