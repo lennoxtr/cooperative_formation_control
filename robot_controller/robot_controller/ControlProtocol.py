@@ -4,10 +4,8 @@ import numpy as np
 
 from robot_controller.GoalProcessor import get_position_error
 from robot_controller.GoalProcessor import get_yaw_error
-from robot_controller.GoalProcessor import get_rendezvous_pos
 
 ANG_TOL = 0.2
-POSITION_TOL = 0.05
 
 class ControlProtocol():
     def __init__(self, rendezvous_distance, num_of_robot=3):
@@ -31,27 +29,22 @@ class ControlProtocol():
         delta_t = 2.0
         self.sensitivity_bubble = bare_sensitivity_bubble * current_vel * delta_t
 
-    def position_matching(self, robot_controller, position_mapping):
+    def position_matching(self, robot_controller):
         # Position matching may have higher weight for leader
         # to ensure rendezvous before moving to goal
-
-        rendezvous_pos = get_rendezvous_pos(position_mapping)
-
-        self.avg_position_x = rendezvous_pos[0]
-        self.avg_position_y = rendezvous_pos[1]
 
         #robot_controller.get_logger().info(f"Rendezvous position: ({self.avg_position_x}, {self.avg_position_y})")
 
 
         position_error = get_position_error(robot_controller.current_x, 
                                         robot_controller.current_y,
-                                        self.avg_position_x,
-                                        self.avg_position_y)
+                                        robot_controller.meeting_x,
+                                        robot_controller.meeting_y)
         
         yaw_error = get_yaw_error(robot_controller.current_x, 
                                         robot_controller.current_y,
-                                        self.avg_position_x,
-                                        self.avg_position_y,
+                                        robot_controller.meeting_x,
+                                        robot_controller.meeting_y,
                                         robot_controller.current_imu_heading)
 
         return position_error, yaw_error
@@ -169,31 +162,21 @@ class ControlProtocol():
 
         return position_error, yaw_error
 
-    def get_flocking_gain(self, robot_controller, position_mapping):
+    def get_flocking_gain(self, robot_controller):
         # Must be called after position matching
+
+        if not robot_controller.is_leader:
+            return 0.0
+
         if self.all_rendezvoused:
-            flocking_gain = 0.0
-            return flocking_gain
-        
-        n = len(position_mapping)
-
-        diffs = position_mapping[:, np.newaxis, :] - position_mapping[np.newaxis, :, :]
-        dists = np.linalg.norm(diffs, axis=2)
-        upper_tri_indices = np.triu_indices(n, k=1)
-        avg_distance = np.mean(dists[upper_tri_indices])
-
+            return 0.0
 
         dist_to_rendezvous = get_position_error(robot_controller.current_x,
                                                 robot_controller.current_y,
-                                                self.avg_position_x,
-                                                self.avg_position_y)
+                                                robot_controller.meeting_x,
+                                                robot_controller.meeting_y)
         #Check
-        self.all_rendezvoused = avg_distance < self.rendezvous_distance
-
-        if robot_controller.is_leader:
-            k = 4.0
-        else:
-            k = 0.0
+        self.all_rendezvoused = robot_controller.t1_rendezvoused and robot_controller.t2_rendezvoused
 
         k = 4.0 if robot_controller.is_leader else 0.0
         x = dist_to_rendezvous - self.rendezvous_distance
@@ -204,7 +187,7 @@ class ControlProtocol():
         
         return flocking_gain
         
-    def execute_control(self, robot_controller, position_mapping):
+    def execute_control(self, robot_controller):
 
         # Collision Avoidance
         ca_position_error, ca_yaw_error = self.collision_prevention(robot_controller)
@@ -220,12 +203,14 @@ class ControlProtocol():
             return linear_vel, angular_vel
 
         # Position Matching (Rendezvous)
-        pm_position_error, pm_yaw_error = self.position_matching(robot_controller,
-                                                                position_mapping)
+        if robot_controller.is_leader:
+            pm_position_error, pm_yaw_error = self.position_matching(robot_controller)
+        else:
+            pm_position_error, pm_yaw_error = 0.0, 0.0
 
         #robot_controller.get_logger().info(f"PM yaw error: {pm_yaw_error}")
         # Calculate total error with weightage of flocking and goal seeking
-        flocking_gain = self.get_flocking_gain(robot_controller, position_mapping)
+        flocking_gain = self.get_flocking_gain(robot_controller)
 
         # Leader Follower (followers tracking formation, leader tracking goal)
         lf_position_error, lf_yaw_error = self.leader_follower(robot_controller)

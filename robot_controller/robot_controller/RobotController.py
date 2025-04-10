@@ -17,7 +17,7 @@ from position_mapping_msg.msg import PositionMapping
 
 from robot_controller.PidController import PidController
 from robot_controller.ControlProtocol import ControlProtocol
-from robot_controller.GoalProcessor import arrived_at_goal, quaternion_to_euler, get_all_postion_in_formation, normalize_yaw_error
+from robot_controller.GoalProcessor import arrived_at_goal, quaternion_to_euler, get_all_postion_in_formation, normalize_yaw_error, get_rendezvous_pos
 
 
 MAX_LINEAR_VEL = 0.06
@@ -76,6 +76,8 @@ class RobotController(Node):
         self.goal_y = 0.0
         self.current_x = 0.0
         self.current_y = 0.0
+        self.meeting_x = 0.0
+        self.meeting_y = 0.0
 
         # Kinematic variables
         # Yaw is +- pi from north
@@ -98,12 +100,15 @@ class RobotController(Node):
         self.follower_robot_id_list = [1, 2]
         self.position_mapping = np.array([(0.0, 0.0), (0.0, 0.0), (0.0, 0.0)])
 
+        self.t1_rendezvoused = False
+        self.t2_rendezvoused = False
+
         # Subscriptions
         self.imu_subscription = self.create_subscription(
             Imu,
             f'/{self.namespace}/imu',
             self.imu_callback,
-            10)
+            2)
         
         self.lidar_subscription = self.create_subscription(
             LaserScan,
@@ -115,13 +120,13 @@ class RobotController(Node):
             PoseStamped,
             '/turtlebot0/goal_pose',
             self.goal_listener_callback,
-            10)
+            2)
         
         self.is_started_subscription = self.create_subscription(
             Bool,
             '/start',
             self.is_started_callback,
-            10)
+            2)
         
         self.tracking_position_subscription = self.create_subscription(
             Goal,
@@ -140,11 +145,28 @@ class RobotController(Node):
             f'/{self.namespace}/amcl_pose',
             self.amcl_pose_callback,
             qos_profile_amcl)
+        
+        self.t1_rendezvous_subscription = self.create_subscription(
+            Bool,
+            '/turtlebot1',
+            self.t1_rendezvous_callback,
+            10)
+
+        self.t2_rendezvous_subscription = self.create_subscription(
+            Bool,
+            '/turtlebot2',
+            self.t2_rendezvous_callback,
+            10)
 
         # Publishers
         self.is_started_publisher = self.create_publisher(
             Bool,
             '/start',
+            10)
+        
+        self.rendezvoused_publisher = self.create_publisher(
+            Bool,
+            f'/{namespace}',
             10)
         
         if self.is_leader:
@@ -160,6 +182,12 @@ class RobotController(Node):
             10)
         
         self.control_timer = self.create_timer(0.075, self.execute)
+
+    def t1_rendezvous_callback(self, msg):
+        self.t1_rendezvoused = msg.data
+    
+    def t2_rendezvous_callback(self, msg):
+        self.t2_rendezvoused = msg.data
 
     def amcl_pose_callback(self, msg):
         self.current_x = msg.pose.pose.position.x
@@ -217,6 +245,9 @@ class RobotController(Node):
     def position_mapping_callback(self, msg):
         position_list = msg.data
         self.position_mapping = np.array([(position.x, position.y) for position in position_list])
+        meeting_point = get_rendezvous_pos(self.position_mapping)
+        self.meeting_x = meeting_point[0]
+        self.meeting_y = meeting_point[1]
         #self.get_logger().info(f"Current Position Mapping: {self.position_mapping}")
     
     def move_bot(self, linear_x_change, angular_z_change):
@@ -234,6 +265,7 @@ class RobotController(Node):
         
         #self.get_logger().info(f"Linear Vel: {target_linear_velocity}")
         #self.get_logger().info(f"Angular Vel: {target_angular_velocity}")
+        target_linear_velocity = 0.0
 
         twist = Twist()
         twist.linear.x = target_linear_velocity
@@ -280,10 +312,14 @@ class RobotController(Node):
                 msg.goal_y = position_y
 
                 self.tracking_publishers[robot_id].publish(msg)
+        else:
+            if self.is_arrived():
+                msg = Bool()
+                msg.data = True
+                self.rendezvoused_publisher.publish(msg)
 
         # Control Protocol output linear and angular speed change
-        linear_x_change, angular_z_change = self.control_protocol.execute_control(self,
-                                                                                self.position_mapping)
+        linear_x_change, angular_z_change = self.control_protocol.execute_control(self)
         
         self.move_bot(linear_x_change, angular_z_change)
 

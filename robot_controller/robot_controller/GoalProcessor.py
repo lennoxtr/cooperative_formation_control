@@ -1,8 +1,7 @@
 import numpy as np
 import math
-from scipy.optimize import minimize 
 
-def is_equal(a, b, tol=1e-2):
+def is_equal(a, b, tol=1e-1):
     return abs(a - b) <= tol
 
 def quaternion_to_euler(q):
