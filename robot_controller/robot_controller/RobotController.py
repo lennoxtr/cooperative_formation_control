@@ -181,7 +181,7 @@ class RobotController(Node):
             f'/{self.namespace}/cmd_vel',
             10)
         
-        self.control_timer = self.create_timer(0.075, self.execute)
+        self.control_timer = self.create_timer(0.05, self.execute)
 
     def t1_rendezvous_callback(self, msg):
         self.t1_rendezvoused = msg.data
