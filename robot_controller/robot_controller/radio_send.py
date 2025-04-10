@@ -5,9 +5,9 @@ import board
 import adafruit_rfm69
 
 # --- Buttons Setup ---
-btnA = DigitalInOut(board.D5)  # Start (broadcast)
-btnB = DigitalInOut(board.D6)  # Rendezvous (broadcast or per node if needed)
-btnC = DigitalInOut(board.D12) # Tracking position (per robot)
+btnA = DigitalInOut(board.D5)  # START (broadcast)
+btnB = DigitalInOut(board.D6)  # RENDEZVOUS (broadcast)
+btnC = DigitalInOut(board.D12) # TRACK (per robot)
 btnA.direction = Direction.INPUT
 btnB.direction = Direction.INPUT
 btnC.direction = Direction.INPUT
@@ -19,31 +19,31 @@ RESET = DigitalInOut(board.D25)
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
 rfm69 = adafruit_rfm69.RFM69(spi, CS, RESET, 915.0)
 
-rfm69.node = 100
+def send_command(message: str):
+    print(f"[TX] {message}")
+    rfm69.send(bytes(message, 'utf-8'))
+    time.sleep(0.5)
 
-def send_to(destination, msg: str):
-    rfm69.destination = destination
-    print(f"[TX → {destination}] {msg}")
-    rfm69.send(bytes(msg, 'utf-8'))
-    time.sleep(0.2)
+print("RFM69 sender ready...")
 
 while True:
     if not btnA.value:
-        # Broadcast START to all nodes (destination 255 = broadcast)
-        send_to(255, "START")
+        # Broadcast START to all robots
+        send_command("TO:255|START")
 
     elif not btnB.value:
-        # You can broadcast or target rendezvous if needed
-        send_to(255, "RENDEZVOUS")
+        # Broadcast RENDEZVOUS to all
+        send_command("TO:255|RENDEZVOUS")
 
     elif not btnC.value:
-        # Send different TRACK coordinates to robots 1 and 2
-        track_data = {
+        # Send different TRACK goals to each robot
+        targets = {
             1: (1.23, 4.56),
             2: (2.34, 5.67),
         }
 
-        for robot_id, (x, y) in track_data.items():
-            send_to(robot_id, f"TRACK:{x:.2f},{y:.2f}")
+        for robot_id, (x, y) in targets.items():
+            message = f"TO:{robot_id}|TRACK:{x:.2f},{y:.2f}"
+            send_command(message)
 
     time.sleep(0.1)
