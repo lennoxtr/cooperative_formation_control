@@ -154,7 +154,6 @@ class RobotController(Node):
                 topic = f'/{namespace}/tracking_position'
                 self.tracking_publishers[robot_id] = self.create_publisher(Goal, topic, 10)
 
-
         self.self_twist_publisher = self.create_publisher(
             Twist,
             f'/{self.namespace}/cmd_vel',
@@ -207,7 +206,7 @@ class RobotController(Node):
         self.received_goal = True
     
     def is_started_callback(self, msg):
-        self.is_started = msg
+        self.is_started = msg.data
         self.get_logger().info("Received start signal. Executing")
     
     def tracking_position_callback(self, msg):

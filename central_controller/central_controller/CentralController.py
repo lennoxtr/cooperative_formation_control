@@ -2,6 +2,7 @@ import rclpy
 import time
 import threading
 
+from std_msgs.msg import Bool
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
 from geometry_msgs.msg import PoseWithCovarianceStamped
@@ -25,7 +26,7 @@ class CentralController(Node):
         # Position mapping
         self.position_mapping = [(0.0, 0.0)] * self.num_of_robot
 
-        self.arrived_at_goal = False
+        self.is_started = False
 
         # Mutex lock
         self.lock = threading.Lock()  
@@ -34,6 +35,12 @@ class CentralController(Node):
         self.create_subscription(PoseWithCovarianceStamped, '/turtlebot0/amcl_pose', self.amcl_callback_0, qos_profile_amcl)
         self.create_subscription(PoseWithCovarianceStamped, '/turtlebot1/amcl_pose', self.amcl_callback_1, qos_profile_amcl)
         self.create_subscription(PoseWithCovarianceStamped, '/turtlebot2/amcl_pose', self.amcl_callback_2, qos_profile_amcl)
+
+        self.is_started_subscription = self.create_subscription(
+            Bool,
+            '/start',
+            self.is_started_callback,
+            10)
 
         # Publisher
         self.position_mapping_publisher = self.create_publisher(
@@ -55,8 +62,12 @@ class CentralController(Node):
         with self.lock:
             self.position_mapping[2] = (msg.pose.pose.position.x, msg.pose.pose.position.y)
 
+    def is_started_callback(self, msg):
+        self.is_started = msg.data
 
     def publish_position_mapping(self):
+        if self.is_started:
+            return
         msg = PositionMapping()
         msg.data = [Point(x=t[0], y=t[1], z=0.0) for t in self.position_mapping]
         self.position_mapping_publisher.publish(msg)
