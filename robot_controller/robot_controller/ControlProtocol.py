@@ -163,8 +163,6 @@ class ControlProtocol():
         return position_error, yaw_error
 
     def get_flocking_gain(self, robot_controller):
-        # Must be called after position matching
-
         if not robot_controller.is_leader:
             return 0.0
 
@@ -178,7 +176,7 @@ class ControlProtocol():
         #Check
         self.all_rendezvoused = robot_controller.t1_rendezvoused and robot_controller.t2_rendezvoused
 
-        k = 4.0 if robot_controller.is_leader else 0.0
+        k = 4.0
         x = dist_to_rendezvous - self.rendezvous_distance
         flocking_gain = (1 - math.exp(-k * x)) / (1 + math.exp(-k * x)) if k != 0 else 0.0
         
