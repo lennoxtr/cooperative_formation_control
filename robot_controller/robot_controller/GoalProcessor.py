@@ -43,7 +43,7 @@ def get_yaw_error(current_x, current_y, goal_x, goal_y, current_imu_heading):
     return yaw_error
 
 def arrived_at_goal(current_x, current_y, goal_x, goal_y):
-    dist_tol = 1e-1
+    dist_tol = 3e-1
     distance = get_position_error(current_x, current_y, goal_x, goal_y)
     return is_equal(distance, 0, dist_tol)
 
